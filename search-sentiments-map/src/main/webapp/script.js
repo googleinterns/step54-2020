@@ -11,3 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+/** Creates the world map. */
+function createWorldMap() {
+  map = new google.maps.Map(
+      document.getElementById('map'),
+      {center: {lat: 35.00119, lng: -40.11475}, zoom: 3});
+}
