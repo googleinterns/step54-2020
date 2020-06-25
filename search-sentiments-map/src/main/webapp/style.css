@@ -1,6 +1,14 @@
+body {
+  margin: auto;
+}
+
+#title {
+  text-align: center;
+  margin: 30px;
+}
+
 #map {
-  height: 70vh;
-  width: 70vw;
+  height: 80vh;
 }
 
 .shown {

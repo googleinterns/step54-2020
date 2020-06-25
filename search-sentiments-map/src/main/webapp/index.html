@@ -12,14 +12,15 @@
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
     <script src="script.js"></script>
+    <script src="script-trends.js"></script>
   </head>
-  <body onload="createWorldMap()">
-    <h1>Sentiment Map for Google Search</h1>
+  <body onload="createWorldMap(); getTrends();">
+    <h1 id="title">Sentiment Map for Google Search</h1>
     <div class="row">
-      <div class="col-sm-8">
+      <div class="col-sm-9">
         <div id="map"></div>
       </div>
-      <div class="col-sm-4">
+      <div class="col-sm-3">
         <div>
           <h3>Trending Google Search Topics</h3>
           <ul>
@@ -27,12 +28,14 @@
             <li>Lorem Ipsum</li>
             <li>Lorem Ipsum</li>
             <li>Lorem Ipsum</li>
-            <li id="see-more">See More</li>
           </ul>
+          <span id="see-more">See More</span>
         </div>
-        <form class="" action="">
-          <input type="text" placeholder="Search" name="search">
-          <button type="submit"><i class="fa fa-search"></i></button>
+        <form class="input-group" action="">
+          <input type="text" class = "form-control" placeholder="Search" name="search">
+          <div class="input-group-append">
+            <button type="submit"><i class="fa fa-search"></i></button>
+          </div>
         </form>
       </div>
     </div>
