@@ -2,3 +2,11 @@
   height: 70vh;
   width: 70vw;
 }
+
+.shown {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
