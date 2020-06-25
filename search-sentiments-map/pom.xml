@@ -46,7 +46,7 @@
         <configuration>
           <deploy.projectId>trending-search-sentiments</deploy.projectId>
           <deploy.version>1</deploy.version>
-          <port>3000</port>
+          <port>8080</port>
         </configuration>
       </plugin>
     </plugins>

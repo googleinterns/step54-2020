@@ -2,3 +2,41 @@
   height: 70vh;
   width: 70vw;
 }
+
+html, body { 
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+#data-box {
+  background: rgb(255,255,255);
+  background: linear-gradient(to bottom,rgba(255,255,255,1) 0%,rgba(245,245,245,1) 100%);
+  box-shadow: 0 4px 6px -4px #333;
+  border: rgb(229, 229, 229) 1px solid;
+  display: none;
+  font: 13px/45px "Roboto", "Arial", sans-serif;
+  height: 45px;
+  left: 500px;
+  padding: 5px 10px;
+  position: absolute;
+  text-align: center;
+  top: 10px;
+  z-index: 5;
+}
+
+#data-value {
+  font-size: 2.0em; 
+  font-weight: bold;
+}
+
+#data-label {
+  font-size: 2.0em;
+  font-weight: normal;
+  padding-right: 10px;
+}
+
+#data-label:after {
+  content: ':';
+}

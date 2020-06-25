@@ -12,9 +12,126 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/** Creates the world map. */
-function createWorldMap() {
-  map = new google.maps.Map(
-      document.getElementById('map'),
-      {center: {lat: 38.46049, lng: -5.428423}, zoom: 3});
+let mapStyle = [{
+  'stylers': [{'visibility': 'off'}]
+}, {
+  'featureType': 'landscape',
+  'elementType': 'geometry',
+  'stylers': [{'visibility': 'on'}, {'color': '#fcfcfc'}]
+}, {
+  'featureType': 'water',
+  'elementType': 'geometry',
+  'stylers': [{'visibility': 'on'}, {'color': '#bfd4ff'}]
+}];
+let map;
+let dataMin = Number.MAX_VALUE;
+let dataMax = -Number.MAX_VALUE;
+
+
+/** Loads the map with country polygons when page loads. */
+function initMap() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: 29.246630, lng: 29.678410},
+    zoom: 3,
+    styles: mapStyle
+  });
+
+  // Set up the style rules and events for google.maps.Data.
+  map.data.setStyle(styleFeature);
+  map.data.addListener('mouseover', mouseInToRegion);
+  map.data.addListener('mouseout', mouseOutOfRegion);
+
+  loadMapShapes();
+}
+
+/** Loads the country boundary polygons from a GeoJSON source. */
+function loadMapShapes() {
+  // Load country outline polygons from a GeoJson file.
+  map.data.loadGeoJson('countries.geojson');
+
+  // Load country data whenever a new feature(country) is added.
+  google.maps.event.addListener(map.data, 'addfeature', function() {
+    loadCountryData();
+  });
+}
+
+/** Loads the country data by randomly generating an int below 100. */
+function loadCountryData() {
+  map.data.forEach(function(row) {
+    // Currently a random value, will be changed to call sentiment value.
+    const dataVariable = Math.floor(Math.random() * Math.floor(100));
+
+    // Keep track of min and max values as we read in the value.
+    if (dataVariable < dataMin) {
+      dataMin = dataVariable;
+    }
+    if (dataVariable > dataMax) {
+      dataMax = dataVariable;
+    }
+
+    row.setProperty('country_data', dataVariable);
+  });
+}
+
+/**
+  * Applies a gradient style based on the 'country_data' column.
+  * This is the callback passed to data.setStyle() and is called for each row in
+  * the data set.
+  *
+  * @param {google.maps.Data.Feature} feature
+  */
+function styleFeature(feature) {
+  let low = [5, 69, 54];  // Color of smallest datum.
+  let high = [151, 83, 34];   // Color of largest datum.
+
+  // Delta represents where the value sits between the min and max.
+  let delta = (feature.getProperty('country_data') - dataMin) /
+      (dataMax - dataMin);
+
+  let color = [];
+  for (let i = 0; i < 3; i++) {
+    // Calculate an integer color based on the delta.
+    color[i] = (high[i] - low[i]) * delta + low[i];
+  }
+
+  let outlineWeight = 0.5, zIndex = 1;
+  if (feature.getProperty('country') === 'hover') {
+    outlineWeight = zIndex = 2;
+  }
+
+  return {
+    strokeWeight: outlineWeight,
+    strokeColor: '#fff',
+    zIndex: zIndex,
+    fillColor: 'hsl(' + color[0] + ',' + color[1] + '%,' + color[2] + '%)',
+    fillOpacity: 0.75,
+    visible: true
+  };
+}
+
+/**
+  * Responds to the mouse-in event on a map shape (country).
+  *
+  * @param {?google.maps.MouseEvent} e
+  */
+function mouseInToRegion(e) {
+  // Set the hover country so the setStyle function can change the border.
+  e.feature.setProperty('country', 'hover');
+
+  // Update the label. TODO: make this a hover box carmenbenitez@
+  document.getElementById('data-label').textContent =
+      e.feature.getProperty('name');
+  document.getElementById('data-value').textContent =
+      e.feature.getProperty('country_data').toLocaleString();
+  document.getElementById('data-box').style.display = 'block';
+}
+
+/**
+  * Responds to the mouse-out event on a map shape (country).
+  *
+  * @param {?google.maps.MouseEvent} e
+  */
+function mouseOutOfRegion(e) {
+  // Reset the hover country, returning the border to normal.
+  e.feature.setProperty('country', 'normal');
 }
