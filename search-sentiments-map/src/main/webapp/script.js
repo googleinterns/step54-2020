@@ -13,19 +13,20 @@
 // limitations under the License.
 
 let mapStyle = [{
-  'stylers': [{'visibility': 'off'}]
+  'stylers': [{'visibility': 'off'}],
 }, {
   'featureType': 'landscape',
   'elementType': 'geometry',
-  'stylers': [{'visibility': 'on'}, {'color': '#fcfcfc'}]
+  'stylers': [{'visibility': 'on'}, {'color': '#fcfcfc'}],
 }, {
   'featureType': 'water',
   'elementType': 'geometry',
-  'stylers': [{'visibility': 'on'}, {'color': '#bfd4ff'}]
+  'stylers': [{'visibility': 'on'}, {'color': '#bfd4ff'}],
 }];
 let map;
 let dataMin = Number.MAX_VALUE;
 let dataMax = -Number.MAX_VALUE;
+let infowindow;
 
 
 /** Loads the map with country polygons when page loads. */
@@ -35,6 +36,8 @@ function initMap() {
     zoom: 3,
     styles: mapStyle
   });
+
+  infowindow = new google.maps.InfoWindow({});
 
   // Set up the style rules and events for google.maps.Data.
   map.data.setStyle(styleFeature);
@@ -70,6 +73,12 @@ function loadCountryData() {
     }
 
     row.setProperty('country_data', dataVariable);
+
+    // update and display the legend
+    document.getElementById('data-min').textContent =
+        dataMin.toLocaleString();
+    document.getElementById('data-max').textContent =
+        dataMax.toLocaleString();
   });
 }
 
@@ -79,6 +88,7 @@ function loadCountryData() {
   * the data set.
   *
   * @param {google.maps.Data.Feature} feature
+  * @returns {googe.maps.Data.StyleOptions} styling information for feature
   */
 function styleFeature(feature) {
   let low = [5, 69, 54];  // Color of smallest datum.
@@ -105,7 +115,7 @@ function styleFeature(feature) {
     zIndex: zIndex,
     fillColor: 'hsl(' + color[0] + ',' + color[1] + '%,' + color[2] + '%)',
     fillOpacity: 0.75,
-    visible: true
+    visible: true,
   };
 }
 
@@ -118,12 +128,13 @@ function mouseInToRegion(e) {
   // Set the hover country so the setStyle function can change the border.
   e.feature.setProperty('country', 'hover');
 
-  // Update the label. TODO: make this a hover box carmenbenitez@
-  document.getElementById('data-label').textContent =
-      e.feature.getProperty('name');
-  document.getElementById('data-value').textContent =
-      e.feature.getProperty('country_data').toLocaleString();
-  document.getElementById('data-box').style.display = 'block';
+  // Add popup info window with country info.
+  const countryInfo =
+      e.feature.getProperty('name') + ': ' +
+          e.feature.getProperty('country_data').toLocaleString();
+  infowindow.setContent(countryInfo);
+  infowindow.setPosition(e.latLng);
+  infowindow.open(map);
 }
 
 /**
@@ -132,6 +143,7 @@ function mouseInToRegion(e) {
   * @param {?google.maps.MouseEvent} e
   */
 function mouseOutOfRegion(e) {
-  // Reset the hover country, returning the border to normal.
+  // Reset the hover country, returning the border to normal. Close infowindow.
   e.feature.setProperty('country', 'normal');
+  infowindow.close();
 }

@@ -10,33 +10,29 @@ html, body {
   padding: 0;
 }
 
-#data-box {
-  background: rgb(255,255,255);
-  background: linear-gradient(to bottom,rgba(255,255,255,1) 0%,rgba(245,245,245,1) 100%);
-  box-shadow: 0 4px 6px -4px #333;
-  border: rgb(229, 229, 229) 1px solid;
-  display: none;
-  font: 13px/45px "Roboto", "Arial", sans-serif;
+#legend { 
+  display: flex;
+  display: -webkit-box;
   height: 45px;
-  left: 500px;
-  padding: 5px 10px;
-  position: absolute;
-  text-align: center;
+  left: 110px;
+  padding-top: 7px;
+  padding-left: 7px;
   top: 10px;
-  z-index: 5;
+  width: 360px;
 }
 
-#data-value {
-  font-size: 2.0em; 
-  font-weight: bold;
-}
-
-#data-label {
-  font-size: 2.0em;
-  font-weight: normal;
-  padding-right: 10px;
-}
-
-#data-label:after {
-  content: ':';
+.color-key {
+  background: linear-gradient(to right,
+    hsl(5, 69%, 54%) 0%,
+    hsl(29, 71%, 51%) 17%,
+    hsl(54, 74%, 47%) 33%,
+    hsl(78, 76%, 44%) 50%,
+    hsl(102, 78%, 41%) 67%,
+    hsl(127, 81%, 37%) 83%,
+    hsl(151, 83%, 34%) 100%);
+  flex: 1;
+  font: 1.0em/1.0em;
+  margin: 0 5px;
+  text-align: left;
+  -webkit-box-flex: 1;
 }
