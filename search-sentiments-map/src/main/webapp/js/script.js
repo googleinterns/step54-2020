@@ -18,3 +18,7 @@ function createWorldMap() {
       document.getElementById('map'),
       {center: {lat: 38.46049, lng: -5.428423}, zoom: 3});
 }
+
+function makeCredentials() {
+  Packages.com.google.sps.servlets.HomeServlet.authAppEngineStandard();
+}

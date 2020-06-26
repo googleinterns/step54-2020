@@ -9,20 +9,24 @@
     <link rel="stylesheet" href="style.css">
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
-    <script src="script.js"></script>
+    <script src="js/script.js"></script>
   </head>
-  <body onload="createWorldMap()">
+  <body onload="createWorldMap();">
     <h1>Sentiment Analysis</h1>
     <p>Type a message and click submit to analyze its sentiment:</p>
 
-    <form method="POST" action="/sentiment">
-      <textarea name="message"></textarea>
-      <br/>
-      <button>Submit</button>
-    </form>
+
+    <textarea id="search-topic" name="search-topic"></textarea>
+    <br/>
+    <button onclick="getSentiment()" type="submit">Submit</button>
+
+    <div id="sentiment-score"></div>
     
     <h1>Sentiment Map for Google Search</h1>
     <div id="map"></div>
+
+    <!-- Core JS-->
+    <script src="js/sentimentscript.js"></script>
 
     <!-- JS required for Bootstrap. -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>

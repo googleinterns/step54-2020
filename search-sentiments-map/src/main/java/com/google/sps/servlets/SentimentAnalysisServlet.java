@@ -14,35 +14,68 @@
 
 package com.google.sps.servlets;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.cloud.language.v1.Document;
 import com.google.cloud.language.v1.LanguageServiceClient;
 import com.google.cloud.language.v1.Sentiment;
+import com.google.gson.Gson;
+import com.google.sps.data.SearchTopicResult;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+
+/**
+ * Servlet that processes search result sentiment. 
+ */
 @WebServlet("/sentiment")
 public class SentimentAnalysisServlet extends HttpServlet {
 
+  private static final String SEARCHTOPICRESULT = "Search Topic Result";
+  private static final String SEARCHTOPIC = "searchTopic";
+  private static final String TIMESTAMP = "timestamp";
+  private static final String SENTIMENTSCORE = "sentimentScore";
+
+  @Override
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+    
+  }
+
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    String message = request.getParameter("message");
+    String searchTopic = request.getParameter("search-topic");
+    long timestamp = System.currentTimeMillis();
 
     Document doc =
-        Document.newBuilder().setContent(message).setType(Document.Type.PLAIN_TEXT).build();
+        Document.newBuilder().setContent(searchTopic).setType(Document.Type.PLAIN_TEXT).build();
     LanguageServiceClient languageService = LanguageServiceClient.create();
     Sentiment sentiment = languageService.analyzeSentiment(doc).getDocumentSentiment();
-    float score = sentiment.getScore();
+    double score = sentiment.getScore();
     languageService.close();
 
-    // Output the sentiment score as HTML.
-    // A real project would probably store the score alongside the content.
-    response.setContentType("text/html;");
-    response.getWriter().println("<h1>Sentiment Analysis</h1>");
-    response.getWriter().println("<p>You entered: " + message + "</p>");
-    response.getWriter().println("<p>Sentiment analysis score: " + score + "</p>");
-    response.getWriter().println("<p><a href=\"/\">Back</a></p>");
+    Entity searchTopicResultEntity = new Entity(SEARCHTOPICRESULT);
+    searchTopicResultEntity.setProperty(SEARCHTOPIC, searchTopic);
+    searchTopicResultEntity.setProperty(TIMESTAMP, timestamp);
+    searchTopicResultEntity.setProperty(SENTIMENTSCORE, score);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    datastore.put(searchTopicResultEntity);
+    
+    Gson gson = new Gson();
+
+    response.setContentType("application/json;");
+    response.getWriter().println(gson.toJson(new SearchTopicResult(searchTopic, timestamp, score)));
   }
+
 }
