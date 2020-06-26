@@ -1,0 +1,20 @@
+body {
+  margin: auto;
+}
+
+#title {
+  text-align: center;
+  margin: 30px;
+}
+
+#map {
+  height: 80vh;
+}
+
+.shown {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
