@@ -34,7 +34,7 @@ function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 29.246630, lng: 29.678410},
     zoom: 3,
-    styles: mapStyle
+    styles: mapStyle,
   });
 
   infowindow = new google.maps.InfoWindow({});
@@ -86,7 +86,6 @@ function loadCountryData() {
   * Applies a gradient style based on the 'country_data' column.
   * This is the callback passed to data.setStyle() and is called for each row in
   * the data set.
-  *
   * @param {google.maps.Data.Feature} feature
   * @returns {googe.maps.Data.StyleOptions} styling information for feature
   */
@@ -121,7 +120,6 @@ function styleFeature(feature) {
 
 /**
   * Responds to the mouse-in event on a map shape (country).
-  *
   * @param {?google.maps.MouseEvent} e
   */
 function mouseInToRegion(e) {
@@ -139,7 +137,6 @@ function mouseInToRegion(e) {
 
 /**
   * Responds to the mouse-out event on a map shape (country).
-  *
   * @param {?google.maps.MouseEvent} e
   */
 function mouseOutOfRegion(e) {
