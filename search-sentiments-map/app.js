@@ -13,29 +13,29 @@
 // limitations under the License.
 
 const PORT = process.env.PORT || 3000;
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+const Http = require('http');
+const Fs = require('fs');
+const Path = require('path');
 
 // Create server that displays the webpage with the html, css, javascript, and png files in the public folder.
-http.createServer(function(req, res) {
-  const publicPath = path.join(__dirname, 'public', req.url);
+Http.createServer(function(req, res) {
+  const publicPath = Path.join(__dirname, 'public', req.url);
 
   if (req.url === "/") {
-    fs.readFile("./public/index.html", "UTF-8", function(err, html) {
+    Fs.readFile("./public/index.html", "UTF-8", function(err, html) {
       res.writeHead(200, {"Content-Type": "text/html"});
       res.end(html);
     });
   } else if (req.url.match("\.css$")) {
-    var fileStream = fs.createReadStream(publicPath, "UTF-8");
+    var fileStream = Fs.createReadStream(publicPath, "UTF-8");
     res.writeHead(200, {"Content-Type": "text/css"});
     fileStream.pipe(res);
   } else if (req.url.match("\.js$")) {
-    var fileStream = fs.createReadStream(publicPath, "UTF-8");
+    var fileStream = Fs.createReadStream(publicPath, "UTF-8");
     res.writeHead(200, {"Content-Type": "text/javascript"});
     fileStream.pipe(res);
   } else if (req.url.match("\.png$")) {
-    var fileStream = fs.createReadStream(publicPath);
+    var fileStream = Fs.createReadStream(publicPath);
     res.writeHead(200, {"Content-Type": "image/png"});
     fileStream.pipe(res);
   } else {
