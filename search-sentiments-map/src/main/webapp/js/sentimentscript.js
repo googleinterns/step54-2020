@@ -13,6 +13,5 @@ function getSentiment() {
     .then((score) => { 
       console.log('ntarn debug:' + score.sentimentScore);
       sentimentScoreElement.innerHTML = "<p>Sentiment analysis score: " + score.sentimentScore + "</p>";
-
     });
 }  

@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 @WebServlet("/")
 public class HomeServlet extends HttpServlet {
 
@@ -28,15 +27,4 @@ public class HomeServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
   }
 
-  // static void authAppEngineStandard() throws IOException {
-  //   // Explicitly request service account credentials from the app engine standard instance.
-  //   GoogleCredentials credentials = AppEngineCredentials.getApplicationDefault();
-  //   Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
-
-  //   System.out.println("Buckets:");
-  //   Page<Bucket> buckets = storage.list();
-  //   for (Bucket bucket : buckets.iterateAll()) {
-  //     System.out.println(bucket.toString());
-  //   }
-  // }
 }
