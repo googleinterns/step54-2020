@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** Example Node.js server. To be changed later. */
+
 const express = require('express');
 const app = express();
 // Listen to the App Engine-specified port, or 3000 otherwise
