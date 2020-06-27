@@ -28,11 +28,4 @@ app.get('/', (req, res) => {
 });
 
 const trends = require('./server-scripts/trends.js');
-
-app.get('/trends', (req, res) => {
-  // Execute the callback on the exported function to get and send the JSON data of daily trends.
-  trends.dailyTrends(function(dailyTrendsJson) {
-    //res.writeHead(200, {'Content-Type': 'application/json'});
-    res.write(JSON.stringify(dailyTrendsJson));
-  });
-})
+app.use('/trends', trends);

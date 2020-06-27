@@ -20,13 +20,10 @@ function createWorldMap() {
 }
 
 function setTopTrends() {
-  console.log('set-trends');
   const trendsList = document.getElementById('trends-list');
 
   fetch('/trends').then(dailyTrendsJson => dailyTrendsJson.json()).then(dailyTrendsObj => {
-    console.log(JSON.stringify(dailyTrendsObj.default));
     var trendingSearches = dailyTrendsObj.default.trendingSearchesDays[0].trendingSearches;
-    console.log(trendingSearches);
 
     for (var i = 0; i < trendingSearches.length; i++) {
       console.log(trendingSearches[i]);
