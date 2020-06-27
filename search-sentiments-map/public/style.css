@@ -11,8 +11,13 @@ body {
   height: 80vh;
 }
 
-#trends-list:last-child {
-  list-style-type: none; 
+#see-more-or-less {
+  color: #308ECA;
+  list-style-type: none;
+}
+
+#see-more-or-less:hover {
+  color: #3aa7d6;
 }
 
 .shown {

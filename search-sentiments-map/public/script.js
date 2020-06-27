@@ -19,18 +19,19 @@ function createWorldMap() {
     {center: {lat: 38.46049, lng: -5.428423}, zoom: 3});
 }
 
+/** Displays the top trends of the US on the DOM. */
 function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
-
+  
+  // Get the 20 trending search topics from the backend.
   fetch('/trends').then(dailyTrendsJson => dailyTrendsJson.json()).then(dailyTrendsObj => {
     var trendingSearches = dailyTrendsObj.default.trendingSearchesDays[0].trendingSearches;
 
     for (var i = 0; i < trendingSearches.length; i++) {
-      console.log(trendingSearches[i]);
       var trendElement = document.createElement('li');
       trendElement.innerText = trendingSearches[i].title.query;
-      // Show 7 trending topics by default and hide the rest. 
-      if (i < 7) {
+      // Show 10 trending topics by default and hide the rest.
+      if (i < 10) {
         trendElement.className = 'shown';
       } else {
         trendElement.className = 'hidden';
@@ -38,10 +39,32 @@ function setTopTrends() {
       trendsList.append(trendElement);
     }
 
-    const seeMore = document.createElement('li');
-    seeMore.innerText = 'See More';
+    const seeMoreOrLess = document.createElement('li');
+    seeMoreOrLess.innerText = 'See More';
+    seeMoreOrLess.id = 'see-more-or-less';
+    seeMoreOrLess.addEventListener('click', () => {
+      showMoreOrLess();
+    });
+    trendsList.append(seeMoreOrLess);
   });
 }
 
-function showMore() {
+/** 
+ * Shows the remaining 10 trending topics if the user clicks on 'See More' and 
+ * hides the last 10 if the user clicks on 'See Less.'
+ */
+function showMoreOrLess() {
+  const seeMoreOrLess = document.getElementById('see-more-or-less');
+  const trendElements = document.querySelectorAll('#trends-list li');
+  if (seeMoreOrLess.innerText === 'See More') {
+    for (var i = 10; i < trendElements.length - 1; i++){
+      trendElements[i].className  = 'shown';
+    }
+    seeMoreOrLess.innerText = 'See Less';
+  } else {
+    for (var i = 10; i < trendElements.length - 1; i++) {
+      trendElements[i].className  = 'hidden';
+    }
+    seeMoreOrLess.innerText = 'See More';
+  }
 }

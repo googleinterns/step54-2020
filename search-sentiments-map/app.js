@@ -20,12 +20,13 @@ app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);
 });
 
-// Use express to create server that displays the webpage with the html, css, javascript, and
-// png files in the public folder.
+// Use express to create server that displays the webpage with the html, css, and javascript
+// files in the public folder.
 app.use(express.static(__dirname +'/public'));
 app.get('/', (req, res) => {
   res.sendFile('/index.html');
 });
 
+// Include the trends module so that it can be fetched from the client-side scripts.
 const trends = require('./server-scripts/trends.js');
 app.use('/trends', trends);

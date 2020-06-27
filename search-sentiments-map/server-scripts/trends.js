@@ -19,7 +19,7 @@ var router = express.Router();  // Using Router to divide the app into modules.
 
 const googleTrends = require('google-trends-api');
 
-/** Render a JSON object of today's top 20 search trends. */
+/** Render a JSON string of today's top 20 search trends. */
 router.get('/', (req, res) => {
   googleTrends.dailyTrends({
     trendDate: new Date(),
