@@ -11,6 +11,10 @@ body {
   height: 80vh;
 }
 
+#trends-list:last-child {
+  list-style-type: none; 
+}
+
 .shown {
   display: block;
 }
