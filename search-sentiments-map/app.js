@@ -33,6 +33,7 @@ app.use('/trends', trends.router);
 
 var schedule = require('node-schedule');
 // Schedule the function that gets top trends to be run every hour.
-var j = schedule.scheduleJob('0 0 * * * *', function(){
-  console.log('The answer to life, the universe, and everything!');
+var j = schedule.scheduleJob('0 * * * * *', function(){
+  trends.getTrendsFunction();
+  //console.log('The answer to life, the universe, and everything!');
 });

@@ -18,7 +18,6 @@ const express = require('express');
 var router = express.Router();  // Using Router to divide the app into modules.
 
 const googleTrends = require('google-trends-api');
-
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
@@ -44,6 +43,16 @@ router.get('/', (req, res) => {
   });
 });
 
+async function retrieveTrends() {
+  const query = datastore.createQuery('Trend').order('created');
+  const [trends] = await datastore.runQuery(query);
+  console.log('Trends:');
+  trends.forEach(trend => {
+    const trendKey = trend[datastore.KEY];
+    console.log(trendKey.id, trend);
+  });
+}
+
 /** 
  * Obtains daily search trends and typical results from the API and store them
  * in Datastore. 
@@ -58,15 +67,36 @@ function getDailyTrends() {
     for (var i = 0; i < trendingSearches.length; i++) {
       addTrendToDatastore(trendingSearches[i].title.query)
     }
+    console.log('deleting');
     deleteAncientTrends();
   }).catch(err => {
     console.log(err);
   });
 }
 
-/** Delete trend records that were saved more than 7 days ago. */
-function deleteAncientTrends() {
-  //var date = new Date(timestamp);
+/** 
+ * Delete all previous trends.
+ * TODO: Delete trend records that were saved more than 7 days ago. 
+ */
+async function deleteAncientTrends() {
+  const query = datastore.createQuery('Trend').order('created');
+  const [trends] = await datastore.runQuery(query);
+  for (var i = 0; i < trends.length; i++) {
+    const trendKey = trend[datastore.KEY];
+    await datastore.delete(trendKey);
+    console.log('Trend $(trendId) deleted.')
+  }
+  //trends.forEach(trend => {
+  //  const trendKey = trend[datastore.KEY];
+    //deleteTrend(trendKey.id);
+  //  await datastore.delete(trendKey);
+  //});
+}
+
+async function deleteTrend(trendId) {
+  const trendKey = datastore.key(['Trend', datastore.int(trendId)]);
+  await datastore.delete(trendKey);
+  console.log('Trend $(trendId) deleted.')
 }
 
 /** Saves the given trending topic to the Datastore. */
@@ -84,7 +114,7 @@ async function addTrendToDatastore(topic) {
 
   try {
     await datastore.save(entity);
-    console.log(`Task ${trendKey.id} created successfully.`);
+    console.log(`Trend ${trendKey.id} created successfully.`);
   } catch (err) {
     console.error('ERROR:', err);
   }
