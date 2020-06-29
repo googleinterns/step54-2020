@@ -23,6 +23,9 @@ const SEE_MORE_OR_LESS_ID = 'see-more-or-less';
 const SEE_MORE = 'See More';
 const SEE_LESS = 'See Less';
 
+const SHOWN = 'shown';
+const HIDDEN = 'hidden';
+
 /** Displays the top trends of the US on the DOM. */
 function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
@@ -35,7 +38,7 @@ function setTopTrends() {
       var trendElement = document.createElement('li');
       trendElement.innerText = trendingSearches[i].title.query;
       // Show 10 trending topics by default and hide the rest.
-      trendElement.className = i < 10 ? 'shown' : 'hidden';
+      trendElement.className = i < 10 ? SHOWN : HIDDEN;
       trendsList.append(trendElement);
     }
 
@@ -62,12 +65,12 @@ function showMoreOrLess() {
   const trendElements = document.querySelectorAll('#trends-list li');
   if (seeMoreOrLessToggleItem.innerText === SEE_MORE) {
     for (var i = 10; i < trendElements.length - 1; i++){
-      trendElements[i].className  = 'shown';
+      trendElements[i].className  = SHOWN;
     }
     seeMoreOrLessToggleItem.innerText = SEE_LESS;
   } else {
     for (var i = 10; i < trendElements.length - 1; i++) {
-      trendElements[i].className  = 'hidden';
+      trendElements[i].className  = HIDDEN;
     }
     seeMoreOrLessToggleItem.innerText = SEE_MORE;
   }
