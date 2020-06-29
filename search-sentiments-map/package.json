@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.html",
   "dependencies": {
+    "@google-cloud/datastore": "^6.0.0",
     "express": "^4.17.1",
     "google-trends-api": "^4.9.0"
   },

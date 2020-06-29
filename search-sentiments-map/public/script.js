@@ -24,9 +24,7 @@ function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
   
   // Get the 20 trending search topics from the backend.
-  fetch('/trends').then(dailyTrendsJson => dailyTrendsJson.json()).then(dailyTrendsObj => {
-    var trendingSearches = dailyTrendsObj.default.trendingSearchesDays[0].trendingSearches;
-
+  fetch('/trends').then(trendingSearchesJson => trendingSearchesJson.json()).then(trendingSearches => {
     for (var i = 0; i < trendingSearches.length; i++) {
       var trendElement = document.createElement('li');
       trendElement.innerText = trendingSearches[i].title.query;

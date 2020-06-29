@@ -19,17 +19,44 @@ var router = express.Router();  // Using Router to divide the app into modules.
 
 const googleTrends = require('google-trends-api');
 
+const {Datastore} = require('@google-cloud/datastore');
+const datastore = new Datastore();
+
 /** Render a JSON string of the top 20 (or fewer) search trends of the past 24 hours. */
 router.get('/', (req, res) => {
   googleTrends.dailyTrends({
     trendDate: new Date(),
     geo: 'US',
-  }).then(dailyTrendsJson => {
+  }).then(dailyTrendsJsonString => {
+    // Parse the JSON string and get the trending topics.
+    var trendingSearches = JSON.parse(dailyTrendsJsonString).default.trendingSearchesDays[0].trendingSearches;
+    for (var i = 0; i < trendingSearches.length; i++) {
+      addTrendToDatastore(trendingSearches[i].title.query)
+    }
+
     res.setHeader('Content-Type', 'application/json');
-    res.send(dailyTrendsJson);
+    res.send(trendingSearches);
   }).catch(err => {
     console.log(err);
   });
 });
+
+/** Saves the given trending topic to the Datastore. */
+async function addTrendToDatastore(topic) {
+  const trendKey = datastore.key('Trend');
+  const entity = {
+    key: trendKey,
+    data: {
+      trendTopic: topic,
+      date: },
+  };
+
+  try {
+    await datastore.save(entity);
+    console.log(`Task ${trendKey.id} created successfully.`);
+  } catch (err) {
+    console.error('ERROR:', err);
+  }
+}
 
 module.exports = router;
