@@ -43,6 +43,8 @@ function initMap() {
   map.data.setStyle(styleFeature);
   map.data.addListener('mouseover', mouseInToRegion);
   map.data.addListener('mouseout', mouseOutOfRegion);
+  map.data.addListener('click', clickOnRegion);
+
 
   loadMapShapes();
 }
@@ -143,4 +145,19 @@ function mouseOutOfRegion(e) {
   // Reset the hover country, returning the border to normal. Close infowindow.
   e.feature.setProperty('country', 'normal');
   infowindow.close();
+}
+
+/**
+  * Responds to a click on a map shape (country).
+  * @param {?google.maps.MouseEvent} e
+  */
+function clickOnRegion(e) {
+  $('#region-info-modal').modal('show');
+
+  // Update Modal with information for relevant country
+  const country = e.feature.getProperty('name');
+  const countryData= e.feature.getProperty('country_data').toLocaleString();
+  document.getElementById('modal-title').innerText = country;
+  document.getElementById('search-results-tab').innerText = 
+      country + ": " + countryData;
 }
