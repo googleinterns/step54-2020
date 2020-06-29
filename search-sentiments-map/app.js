@@ -27,6 +27,12 @@ app.get('/', (req, res) => {
   res.sendFile('/index.html');
 });
 
-// Include the trends module so that it can be fetched from the client-side scripts.
 const trends = require('./routes/trends.js');
-app.use('/trends', trends);
+// Use the trends router so that it can be fetched from the client-side scripts.
+app.use('/trends', trends.router);
+
+var schedule = require('node-schedule');
+// Schedule the function that gets top trends to be run every hour.
+var j = schedule.scheduleJob('0 0 * * * *', function(){
+  console.log('The answer to life, the universe, and everything!');
+});
