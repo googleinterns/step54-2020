@@ -25,12 +25,16 @@
           <ul id="trends-list">
           </ul>
         </div>
-        <form class="input-group" action="">
+        <!-- <form class="input-group" action="">
           <input type="text" class = "form-control" placeholder="Search" name="search">
           <div class="input-group-append">
             <button type="submit"><i class="fa fa-search"></i></button>
           </div>
-        </form>
+        </form> -->
+        <textarea class="form-control" id="search-topic" name="search-topic"></textarea>
+        <br/>
+        <button onclick="getSentiment()" type="submit"><i class="fa fa-search"></i></button>
+        <div id="sentiment-score"></div>
       </div>
     </div>
 
