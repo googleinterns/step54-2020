@@ -31,10 +31,14 @@
             <button type="submit"><i class="fa fa-search"></i></button>
           </div>
         </form> -->
-        <textarea class="form-control" id="search-topic" name="search-topic"></textarea>
-        <br/>
-        <button onclick="getSentiment()" type="submit"><i class="fa fa-search"></i></button>
-        <div id="sentiment-score"></div>
+        <div class="input-group">
+          <textarea class="form-control" id="search-topic" name="search-topic" placeholder="Search for a topic..."></textarea>
+          <br/>
+          <div class="input-group-append">
+            <button onclick="getSentiment()" type="submit"><i class="fa fa-search"></i></button>
+          </div>  
+          <div id="sentiment-score"></div>
+        </div>
       </div>
     </div>
 

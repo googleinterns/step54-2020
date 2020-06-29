@@ -7,27 +7,27 @@ const language = require('@google-cloud/language');
 var bodyParser = require('body-parser');  
 // Create application/x-www-form-urlencoded parser  
 var urlencodedParser = bodyParser.urlencoded({ extended: false })  
-router.post('/', urlencodedParser, function (req, res) { 
-  //  const searchTopic = document.getElementById('search-topic').value;
-  console.log('ntarn blablalba');
-  const score = quickstart()
-  // Prepare output in JSON format  
-  response = {  
-    sentimentScore:score,  
-  };  
-  console.log('ntarn debug: hardcoded number' + response);  
-  res.end(JSON.stringify(response));  
-})
+router.post('/', urlencodedParser, (req, res) => { 
+  const searchTopic = req.body.searchTopic;
+  console.log('ntarn debug: '+ searchTopic);
+  quickstart(searchTopic).then(score => {
+    // Prepare output in JSON format  
+    response = {  
+      sentimentScore:score,  
+    };  
+    console.log('ntarn debug: searchTopic score' + response.sentimentScore);  
+    res.end(JSON.stringify(response));
+  }).catch(err => {
+    console.log(err);
+  })
+});
 
-
-
-async function quickstart() {
-  
+async function quickstart(searchTopic) {
   // Instantiates a client
   const client = new language.LanguageServiceClient();
 
   // The text to analyze
-  const text = 'Hello, world!';
+  const text = searchTopic;
 
   const document = {
     content: text,
@@ -38,11 +38,11 @@ async function quickstart() {
   const [result] = await client.analyzeSentiment({document: document});
   const sentiment = result.documentSentiment;
 
-  console.log(`Text: ${text}`);
-  console.log(`Sentiment score: ${sentiment.score}`);
-  console.log(`Sentiment magnitude: ${sentiment.magnitude}`);
+  console.log(`ntarn debug use api Text: ${text}`);
+  console.log(`ntarn debug use api Sentiment score: ${sentiment.score}`);
+  console.log(`ntarn debug use api Sentiment magnitude: ${sentiment.magnitude}`);
 
-  return score;
+  return sentiment.score;
 }
 
 module.exports = router;

@@ -69,38 +69,20 @@ function showMoreOrLess() {
   }
 }
 
+/** Gets the sentiment score of an inputted search topic. */
 function getSentiment() {
   const searchTopic = document.getElementById('search-topic').value;
   const sentimentScoreElement = document.getElementById('sentiment-score');
-  const searchTopicObject = "search-topic="+encodeURIComponent(searchTopic);
-  sentimentScoreElement.innerText = 'BLAAAbeforegettingresponse';
-  fetch('/sentiment', {method: 'POST',  // Sends a request to the URL.
+  const searchTopicObject = "searchTopic="+encodeURIComponent(searchTopic);
+  fetch('/sentiment', {method: 'POST',  // Send a request to the URL.
     headers: new Headers({
-      'Content-Type': 'application/x-www-form-urlencoded', // <-- Specifying the Content-Type
+      'Content-Type': 'application/x-www-form-urlencoded',
     }),
-    body: searchTopicObject // <-- Post parameters
+    body: searchTopicObject // Send data from index.html.
     })
     .then(response => response.json())
     .then((score) => { 
-      console.log('ntarn debug:' + score);
-      sentimentScoreElement.innerHTML = "<p>Sentiment analysis score: " + score + "</p>";
+      console.log('ntarn debug: frontend' + score.sentimentScore);
+      sentimentScoreElement.innerHTML = "<p>Sentiment analysis score: " + score.sentimentScore + "</p>";
     });
 }  
-
-// function getSentiment() {
-//   const searchTopic = document.getElementById('search-topic').value;
-//   const sentimentScoreElement = document.getElementById('sentiment-score');
-//   const searchTopicObject = "search-topic="+encodeURIComponent(searchTopic);
-//   sentimentScoreElement.innerText = 'BLAAAbeforegettingresponse';
-//   fetch('/sentiment', {method: 'POST',  // Sends a request to the URL.
-//     headers: new Headers({
-//       'Content-Type': 'application/x-www-form-urlencoded', // <-- Specifying the Content-Type
-//     }),
-//     body: searchTopicObject // <-- Post parameters
-//     })
-//     .then(response => response.json())
-//     .then((score) => { 
-//       console.log('ntarn debug:' + score.sentimentScore);
-//       sentimentScoreElement.innerHTML = "<p>Sentiment analysis score: " + score.sentimentScore + "</p>";
-//     });
-// }  
