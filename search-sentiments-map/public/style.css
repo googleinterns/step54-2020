@@ -11,6 +11,10 @@ body {
   height: 80vh;
 }
 
+#search-box {
+  margin: 20px;
+}
+
 #see-more-or-less {
   color: #308ECA;
   list-style-type: none;

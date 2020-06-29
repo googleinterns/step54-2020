@@ -28,5 +28,5 @@ app.get('/', (req, res) => {
 });
 
 // Include the trends module so that it can be fetched from the client-side scripts.
-const trends = require('./server-scripts/trends.js');
+const trends = require('./routes/trends.js');
 app.use('/trends', trends);

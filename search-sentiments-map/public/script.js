@@ -39,18 +39,22 @@ function setTopTrends() {
       trendsList.append(trendElement);
     }
 
-    const seeMoreOrLess = document.createElement('li');
-    seeMoreOrLess.innerText = 'See More';
-    seeMoreOrLess.id = 'see-more-or-less';
-    seeMoreOrLess.addEventListener('click', () => {
-      showMoreOrLess();
-    });
-    trendsList.append(seeMoreOrLess);
+    // Add a button to toggle showing more or less when there are more than 10
+    // trending topics.
+    if (trendingSearches.length > 10) {
+      const seeMoreOrLess = document.createElement('li');
+      seeMoreOrLess.innerText = 'See More';
+      seeMoreOrLess.id = 'see-more-or-less';
+      seeMoreOrLess.addEventListener('click', () => {
+        showMoreOrLess();
+      });
+      trendsList.append(seeMoreOrLess);
+    }
   });
 }
 
 /** 
- * Shows the remaining 10 trending topics if the user clicks on 'See More' and 
+ * Shows the remaining 10 trending topics if the user clicks on 'See More' and
  * hides the last 10 if the user clicks on 'See Less.'
  */
 function showMoreOrLess() {
