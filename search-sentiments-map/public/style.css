@@ -15,12 +15,12 @@ body {
   margin: 20px;
 }
 
-#see-more-or-less {
+#show-more-or-less {
   color: #308ECA;
   list-style-type: none;
 }
 
-#see-more-or-less:hover {
+#show-more-or-less:hover {
   color: #3aa7d6;
 }
 
