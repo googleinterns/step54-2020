@@ -15,7 +15,7 @@
 const express = require('express');
 const app = express();
 // Listen to the App Engine-specified port, or 3000 otherwise.
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4503;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);
 });
@@ -31,11 +31,8 @@ const trends = require('./routes/trends.js');
 // Use the trends router so that it can be fetched from the client-side scripts.
 app.use('/trends', trends.router);
 
-trends.getTrendsFunction();
-
 var schedule = require('node-schedule');
-// Schedule the function that gets top trends to be run every hour.
-var j = schedule.scheduleJob('0 * * * * *', function(){
-  //trends.getTrendsFunction();
-  //console.log('The answer to life, the universe, and everything!');
+// Schedule the function that updates top trends to be run every hour at xx:00:00.
+var j = schedule.scheduleJob('0 0 * * * *', function(){
+  trends.updateTrendsFunction();
 });

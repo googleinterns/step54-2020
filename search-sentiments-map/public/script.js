@@ -24,10 +24,10 @@ function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
   
   // Get the 20 trending search topics from the backend.
-  fetch('/trends').then(trendingSearchesJson => trendingSearchesJson.json()).then(trendingSearches => {
-    for (var i = 0; i < trendingSearches.length; i++) {
+  fetch('/trends').then(trendsJsonArray => trendsJsonArray.json()).then(trends => {
+    for (var i = 0; i < trends.length; i++) {
       var trendElement = document.createElement('li');
-      trendElement.innerText = trendingSearches[i].title.query;
+      trendElement.innerText = trends[i].trendTopic;
       // Show 10 trending topics by default and hide the rest.
       if (i < 10) {
         trendElement.className = 'shown';
@@ -39,7 +39,7 @@ function setTopTrends() {
 
     // Add a button to toggle showing more or less when there are more than 10
     // trending topics.
-    if (trendingSearches.length > 10) {
+    if (trends.length > 10) {
       const seeMoreOrLess = document.createElement('li');
       seeMoreOrLess.innerText = 'See More';
       seeMoreOrLess.id = 'see-more-or-less';

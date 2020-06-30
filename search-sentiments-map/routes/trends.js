@@ -22,43 +22,38 @@ const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
 /** 
- * Render a JSON string of the top 20 (or fewer) search trends of the past 24
- * hours. 
+ * Renders a JSON array of the top 20 (or fewer) search trends with API data
+ * obtained on the hour.
  */
 router.get('/', (req, res) => {
-  googleTrends.dailyTrends({
-    trendDate: new Date(),
-    geo: 'US',
-  }).then(dailyTrendsJsonString => {
-    // Parse the JSON string and get the trending topics.
-    var trendingSearches = JSON.parse(dailyTrendsJsonString).default.trendingSearchesDays[0].trendingSearches;
-    for (var i = 0; i < trendingSearches.length; i++) {
-      //addTrendToDatastore(trendingSearches[i].title.query)
-    }
-
+  retrieveTrends().then(trendsJsonArray => {
     res.setHeader('Content-Type', 'application/json');
-    res.send(trendingSearches);
-  }).catch(err => {
-    console.log(err);
+    res.send(trendsJsonArray);
   });
 });
 
+/** Returns a JSON-formatted array of trends retrived from the Datastore. */
 async function retrieveTrends() {
   const query = datastore.createQuery('Trend').order('timestamp', {
     descending: true,
   });
   const [trends] = await datastore.runQuery(query);
-  console.log('Retrieving:', trends.length);
+
+  let trendsJsonArray = [];
   trends.forEach(trend => {
-    const trendKey = trend[datastore.KEY];
+    trendsJsonArray.push({
+      trendTopic: trend.trendTopic,
+      timestamp: trend.timestamp,
+    });
   });
+  return trendsJsonArray;
 }
 
 /** 
- * Obtains daily search trends and typical results from the API and store them
- * in Datastore.
+ * Updates daily search trends and corresponding search results (accumulates by
+ * day, updated each hour) in the Datastore.
  */
-function getDailyTrends() {
+function updateDailyTrends() {
   googleTrends.dailyTrends({
     trendDate: new Date(),
     geo: 'US',
@@ -70,8 +65,8 @@ function getDailyTrends() {
 }
 
 /**
- * Delete previous trends and save the current trends in datastore, given the
- * trends JSON obtained from the API.
+ * Delete previous trends and save the current trends in the Datastore, given
+ * the trends JSON obtained from the API.
  */
 async function saveTrendsAndDeletePrevious(dailyTrendsJsonString) {
   await deleteAncientTrends();
@@ -84,8 +79,8 @@ async function saveTrendsAndDeletePrevious(dailyTrendsJsonString) {
 }
 
 /** 
- * Delete all previous trends. TODO: Delete trend records that were saved more
- * than 7 days ago. 
+ * Delete all previous trends. TODO: Change to delete trend records that were
+ * saved more than 7 days ago. 
  */
 async function deleteAncientTrends() {
   const query = datastore.createQuery('Trend');
@@ -100,15 +95,15 @@ async function deleteAncientTrends() {
 }
 
 /** Saves the given trending topic to the Datastore. */
-async function addTrendToDatastore(topic) {
+async function addTrendToDatastore(trendTopic) {
   const trendKey = datastore.key('Trend');
   // Get the current timestamp in milliseconds.
   let timestamp = Date.now();
   const entity = {
     key: trendKey,
     data: {
-      trendTopic: topic,
-      timestamp: timestamp,
+      trendTopic: trendTopic,
+      timestamp: Date.now(),
     },
   };
 
@@ -121,4 +116,4 @@ async function addTrendToDatastore(topic) {
 }
 
 module.exports.router = router;
-module.exports.getTrendsFunction = getDailyTrends;
+module.exports.updateTrendsFunction = updateDailyTrends;
