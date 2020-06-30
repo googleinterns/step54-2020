@@ -1,5 +1,11 @@
 body {
+  background-color: #c4f2e3;
+}
+
+.content {
+  font-size: 18px;
   margin: auto;
+  padding: 30px;
 }
 
 #title {
@@ -15,6 +21,15 @@ body {
   margin: 20px;
 }
 
+#trends-list li {
+  font-family: "Lucida Console", Courier, monospace;
+}
+
+#trends-list li:hover {
+  cursor: pointer;
+  color: #2268d6;
+}
+
 #show-more-or-less {
   color: #308ECA;
   list-style-type: none;
@@ -22,6 +37,7 @@ body {
 
 #show-more-or-less:hover {
   color: #3aa7d6;
+  cursor: pointer;
 }
 
 .shown {

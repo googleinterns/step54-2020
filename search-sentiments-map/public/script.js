@@ -37,6 +37,9 @@ function setTopTrends() {
       trendElement.innerText = trends[i].trendTopic;
       // Show 10 trending topics by default and hide the rest.
       trendElement.className = i < 10 ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
+      trendElement.addEventListener('click', (event) => {
+        showResultForTopic(event);
+      })
       trendsList.append(trendElement);
     }
 
@@ -72,4 +75,11 @@ function showMoreOrLess() {
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
   }
+}
+
+/** */
+function showResultForTopic(event) {
+  const searchTopic = event.currentTarget.innerText;
+  const topicHeader = document.getElementById('topic-header');
+  topicHeader.innerText = 'Worldwide sentiments of search results for "' + searchTopic + '"';
 }
