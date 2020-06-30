@@ -52,11 +52,9 @@ function initMap() {
 
 /** Loads the country boundary polygons from a GeoJSON source. */
 function loadMapOutline() {
-  map.data.loadGeoJson('countries.geojson');
-
-  // Load country data whenever a new feature(country) is added.
-  google.maps.event.addListener(map.data, 'addfeature', function() {
-    loadCountryData();
+  // Load country data after finished loading in geojson.
+  map.data.loadGeoJson('countries.geojson', null, function () {
+      loadCountryData();
   });
 }
 
