@@ -44,59 +44,59 @@ router.get('/', (req, res) => {
 });
 
 async function retrieveTrends() {
-  const query = datastore.createQuery('Trend').order('created');
+  const query = datastore.createQuery('Trend').order('timestamp', {
+    descending: true,
+  });
   const [trends] = await datastore.runQuery(query);
-  console.log('Trends:');
+  console.log('Retrieving:', trends.length);
   trends.forEach(trend => {
     const trendKey = trend[datastore.KEY];
-    console.log(trendKey.id, trend);
   });
 }
 
 /** 
  * Obtains daily search trends and typical results from the API and store them
- * in Datastore. 
+ * in Datastore.
  */
 function getDailyTrends() {
   googleTrends.dailyTrends({
     trendDate: new Date(),
     geo: 'US',
   }).then(dailyTrendsJsonString => {
-    // Parse the JSON string and get the trending topics.
-    var trendingSearches = JSON.parse(dailyTrendsJsonString).default.trendingSearchesDays[0].trendingSearches;
-    for (var i = 0; i < trendingSearches.length; i++) {
-      addTrendToDatastore(trendingSearches[i].title.query)
-    }
-    console.log('deleting');
-    deleteAncientTrends();
+    saveTrendsAndDeletePrevious(dailyTrendsJsonString);
   }).catch(err => {
     console.log(err);
   });
 }
 
-/** 
- * Delete all previous trends.
- * TODO: Delete trend records that were saved more than 7 days ago. 
+/**
+ * Delete previous trends and save the current trends in datastore, given the
+ * trends JSON obtained from the API.
  */
-async function deleteAncientTrends() {
-  const query = datastore.createQuery('Trend').order('created');
-  const [trends] = await datastore.runQuery(query);
-  for (var i = 0; i < trends.length; i++) {
-    const trendKey = trend[datastore.KEY];
-    await datastore.delete(trendKey);
-    console.log('Trend $(trendId) deleted.')
+async function saveTrendsAndDeletePrevious(dailyTrendsJsonString) {
+  await deleteAncientTrends();
+
+  // Parse the JSON string and get the trending topics.
+  var trendingSearches = JSON.parse(dailyTrendsJsonString).default.trendingSearchesDays[0].trendingSearches;
+  for (var i = 0; i < trendingSearches.length; i++) {
+    await addTrendToDatastore(trendingSearches[i].title.query)
   }
-  //trends.forEach(trend => {
-  //  const trendKey = trend[datastore.KEY];
-    //deleteTrend(trendKey.id);
-  //  await datastore.delete(trendKey);
-  //});
 }
 
-async function deleteTrend(trendId) {
-  const trendKey = datastore.key(['Trend', datastore.int(trendId)]);
-  await datastore.delete(trendKey);
-  console.log('Trend $(trendId) deleted.')
+/** 
+ * Delete all previous trends. TODO: Delete trend records that were saved more
+ * than 7 days ago. 
+ */
+async function deleteAncientTrends() {
+  const query = datastore.createQuery('Trend');
+  const [trends] = await datastore.runQuery(query);
+  console.log(trends.length)
+
+  for (var i = 0; i < trends.length; i++) {  // Note: Can't use forEach with await.
+    const trendKey = trends[i][datastore.KEY];
+    await datastore.delete(trendKey);
+    console.log(`Trend ${trendKey.id} deleted.`)
+  }
 }
 
 /** Saves the given trending topic to the Datastore. */
@@ -108,7 +108,7 @@ async function addTrendToDatastore(topic) {
     key: trendKey,
     data: {
       trendTopic: topic,
-      date: timestamp,
+      timestamp: timestamp,
     },
   };
 

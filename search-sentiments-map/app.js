@@ -31,9 +31,11 @@ const trends = require('./routes/trends.js');
 // Use the trends router so that it can be fetched from the client-side scripts.
 app.use('/trends', trends.router);
 
+trends.getTrendsFunction();
+
 var schedule = require('node-schedule');
 // Schedule the function that gets top trends to be run every hour.
 var j = schedule.scheduleJob('0 * * * * *', function(){
-  trends.getTrendsFunction();
+  //trends.getTrendsFunction();
   //console.log('The answer to life, the universe, and everything!');
 });
