@@ -24,9 +24,11 @@ let mapStyle = [{
   'stylers': [{'visibility': 'on'}, {'color': '#bfd4ff'}],
 }];
 let map;
-let dataMin = Number.MAX_VALUE;
-let dataMax = -Number.MAX_VALUE;
 let infowindow;
+// Hold the maximum and minium values of the sentiment scores. Set to these
+// as default to be replaced by any value.
+let dataMin = Number.MAX_VALUE;
+let dataMax = Number.MIN_VALUE;
 
 
 /** Loads the map with country polygons when page loads. */
@@ -45,13 +47,11 @@ function initMap() {
   map.data.addListener('mouseout', mouseOutOfRegion);
   map.data.addListener('click', clickOnRegion);
 
-
-  loadMapShapes();
+  loadMapOutline();
 }
 
 /** Loads the country boundary polygons from a GeoJSON source. */
-function loadMapShapes() {
-  // Load country outline polygons from a GeoJson file.
+function loadMapOutline() {
   map.data.loadGeoJson('countries.geojson');
 
   // Load country data whenever a new feature(country) is added.
@@ -60,13 +60,14 @@ function loadMapShapes() {
   });
 }
 
-/** Loads the country data by randomly generating an int below 100. */
+/** Loads the country sentiment score from Datastore. */
 function loadCountryData() {
   map.data.forEach(function(row) {
     // Currently a random value, will be changed to call sentiment value.
+    // TODO: Add the sentiment value for the country. ntarn@
     const dataVariable = Math.floor(Math.random() * Math.floor(100));
 
-    // Keep track of min and max values as we read in the value.
+    // Keep track of min and max values as we read them.
     if (dataVariable < dataMin) {
       dataMin = dataVariable;
     }
@@ -76,7 +77,7 @@ function loadCountryData() {
 
     row.setProperty('country_data', dataVariable);
 
-    // update and display the legend
+    // Update and display the map legend.
     document.getElementById('data-min').textContent =
         dataMin.toLocaleString();
     document.getElementById('data-max').textContent =
@@ -85,12 +86,12 @@ function loadCountryData() {
 }
 
 /**
-  * Applies a gradient style based on the 'country_data' column.
-  * This is the callback passed to data.setStyle() and is called for each row in
-  * the data set.
-  * @param {google.maps.Data.Feature} feature
-  * @returns {googe.maps.Data.StyleOptions} styling information for feature
-  */
+ * Applies a gradient style based on the 'country_data' column.
+ * This is the callback passed to data.setStyle() and is called for each row in
+ * the data set.
+ * @param {google.maps.Data.Feature} feature
+ * @returns {googe.maps.Data.StyleOptions} styling information for feature
+ */
 function styleFeature(feature) {
   let low = [5, 69, 54];  // Color of smallest datum.
   let high = [151, 83, 34];   // Color of largest datum.
@@ -111,36 +112,35 @@ function styleFeature(feature) {
   }
 
   return {
-    strokeWeight: outlineWeight,
-    strokeColor: '#fff',
-    zIndex: zIndex,
     fillColor: 'hsl(' + color[0] + ',' + color[1] + '%,' + color[2] + '%)',
     fillOpacity: 0.75,
+    strokeColor: '#fff',
+    strokeWeight: outlineWeight,
     visible: true,
+    zIndex: zIndex,
   };
 }
 
 /**
-  * Responds to the mouse-in event on a map shape (country).
-  * @param {?google.maps.MouseEvent} e
-  */
+ * Responds to the mouse-in event on a map shape(country).
+ * @param {?google.maps.MouseEvent} e
+ */
 function mouseInToRegion(e) {
   // Set the hover country so the setStyle function can change the border.
   e.feature.setProperty('country', 'hover');
 
   // Add popup info window with country info.
-  const countryInfo =
-      e.feature.getProperty('name') + ': ' +
-          e.feature.getProperty('country_data').toLocaleString();
+  const countryInfo = e.feature.getProperty('name') + ': ' +
+      e.feature.getProperty('country_data').toLocaleString();
   infowindow.setContent(countryInfo);
   infowindow.setPosition(e.latLng);
   infowindow.open(map);
 }
 
 /**
-  * Responds to the mouse-out event on a map shape (country).
-  * @param {?google.maps.MouseEvent} e
-  */
+ * Responds to the mouse-out event on a map shape (country).
+ * @param {?google.maps.MouseEvent} e
+ */
 function mouseOutOfRegion(e) {
   // Reset the hover country, returning the border to normal. Close infowindow.
   e.feature.setProperty('country', 'normal');
@@ -148,13 +148,13 @@ function mouseOutOfRegion(e) {
 }
 
 /**
-  * Responds to a click on a map shape (country).
-  * @param {?google.maps.MouseEvent} e
-  */
+ * Responds to a click on a map shape (country).
+ * @param {?google.maps.MouseEvent} e
+ */
 function clickOnRegion(e) {
   $('#region-info-modal').modal('show');
 
-  // Update Modal with information for relevant country
+  // Update Modal with information for relevant country.
   const country = e.feature.getProperty('name');
   const countryData= e.feature.getProperty('country_data').toLocaleString();
   document.getElementById('modal-title').innerText = country;
