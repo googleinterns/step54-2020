@@ -41,7 +41,10 @@ function initMap() {
     center: {lat: 29.246630, lng: 29.678410},
     zoom: 3,
     styles: mapStyle,
+    mapTypeControl: false,
   });
+  map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
+  .push(document.getElementById('legend'));
 
   infowindow = new google.maps.InfoWindow({});
 
