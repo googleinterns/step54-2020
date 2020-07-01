@@ -27,9 +27,9 @@ app.get('/', (req, res) => {
   res.sendFile('/index.html');
 });
 
-// Include the language module so that it can be fetched from the client-side scripts.
-const language = require('./routes/sentiment.js');
-app.use('/sentiment', language);
+// Include the sentiment module so that it can be fetched from the client-side scripts.
+const sentiment = require('./routes/sentiment.js');
+app.use('/sentiment', sentiment);
 
 // Include the trends module so that it can be fetched from the client-side scripts.
 const trends = require('./routes/trends.js');

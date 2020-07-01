@@ -76,7 +76,9 @@ function showMoreOrLess() {
   }
 }
 
-/** Gets the sentiment score of an inputted search topic. */
+/** Gets the sentiment score of an inputted search topic. 
+ *  TODO(ntarn): Get the average sentiment score for the inputted search topic's search results. 
+ */
 function getSentiment() {
   const searchTopic = document.getElementById('search-topic').value;
   const sentimentScoreElement = document.getElementById('sentiment-score');

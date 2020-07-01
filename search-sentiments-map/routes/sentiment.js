@@ -1,17 +1,17 @@
-/** Server-side script that uses Google Cloud Natural Language API to get sentiment score. */
+/** Server-side script that uses the Google Cloud Natural Language API to get the sentiment score. */
 
 const express = require('express');
 var router = express.Router();  // Using Router to divide the app into modules.
 const language = require('@google-cloud/language');
 
 var bodyParser = require('body-parser');  
-// Create application/x-www-form-urlencoded parser  
+// Create application/x-www-form-urlencoded parser.
 var urlencodedParser = bodyParser.urlencoded({ extended: false })  
 router.post('/', urlencodedParser, (req, res) => { 
   const searchTopic = req.body.searchTopic;
   console.log('ntarn debug: '+ searchTopic);
   quickstart(searchTopic).then(score => {
-    // Prepare output in JSON format  
+    // Prepare output in JSON format.  
     response = {  
       sentimentScore:score,  
     };  
@@ -23,10 +23,10 @@ router.post('/', urlencodedParser, (req, res) => {
 });
 
 async function quickstart(searchTopic) {
-  // Instantiates a client
+  // Instantiate a client.
   const client = new language.LanguageServiceClient();
 
-  // The text to analyze
+  // The text to analyze.
   const text = searchTopic;
 
   const document = {
@@ -34,7 +34,7 @@ async function quickstart(searchTopic) {
     type: 'PLAIN_TEXT',
   };
 
-  // Detects the sentiment of the text
+  // Detect the sentiment of the text.
   const [result] = await client.analyzeSentiment({document: document});
   const sentiment = result.documentSentiment;
 
