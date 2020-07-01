@@ -14,7 +14,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
   <body onload="createWorldMap(); setTopTrends();">
-    <h1 id="title">Sentiment Map for Google Search</h1>
+    <h2 id="title">Sentiment Map for Google Search</h2>
     <div class="row">
       <div class="col-sm-9">
         <div id="map"></div>
@@ -25,20 +25,14 @@
           <ul id="trends-list">
           </ul>
         </div>
-        <!-- <form class="input-group" action="">
-          <input type="text" class = "form-control" placeholder="Search" name="search">
-          <div class="input-group-append">
-            <button type="submit"><i class="fa fa-search"></i></button>
-          </div>
-        </form> -->
-        <div class="input-group">
-          <textarea class="form-control" id="search-topic" name="search-topic" placeholder="Search for a topic..."></textarea>
+        <div id="search-box" class="input-group row">
+          <textarea class="form-control col-sm-9" id="search-topic" name="search-topic" placeholder="Search for a topic..." rows="1"></textarea>
           <br/>
           <div class="input-group-append">
             <button onclick="getSentiment()" type="submit"><i class="fa fa-search"></i></button>
           </div>  
-          <div id="sentiment-score"></div>
         </div>
+        <div id="sentiment-score"></div>
       </div>
     </div>
 

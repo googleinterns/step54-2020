@@ -19,11 +19,18 @@ function createWorldMap() {
     {center: {lat: 38.46049, lng: -5.428423}, zoom: 3});
 }
 
+const SHOW_MORE_OR_LESS_ID = 'show-more-or-less';
+const TOGGLE_SHOW_MORE = 'Show More';
+const TOGGLE_SHOW_LESS = 'Show Less';
+
+const CLASSNAME_SHOWN = 'shown';
+const CLASSNAME_HIDDEN = 'hidden';
+
 /** Displays the top trends of the US on the DOM. */
 function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
-  
-  // Get the 20 trending search topics from the backend.
+
+  // Get the top 20 trending search topics from the backend.
   fetch('/trends').then(dailyTrendsJson => dailyTrendsJson.json()).then(dailyTrendsObj => {
     var trendingSearches = dailyTrendsObj.default.trendingSearchesDays[0].trendingSearches;
 
@@ -31,41 +38,41 @@ function setTopTrends() {
       var trendElement = document.createElement('li');
       trendElement.innerText = trendingSearches[i].title.query;
       // Show 10 trending topics by default and hide the rest.
-      if (i < 10) {
-        trendElement.className = 'shown';
-      } else {
-        trendElement.className = 'hidden';
-      }
+      trendElement.className = i < 10 ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
       trendsList.append(trendElement);
     }
 
-    const seeMoreOrLess = document.createElement('li');
-    seeMoreOrLess.innerText = 'See More';
-    seeMoreOrLess.id = 'see-more-or-less';
-    seeMoreOrLess.addEventListener('click', () => {
-      showMoreOrLess();
-    });
-    trendsList.append(seeMoreOrLess);
+    // Add an item to the list that toggles showing more or less topics when there are more
+    // than 10 trending topics.
+    if (trendingSearches.length > 10) {
+      const showMoreOrLessToggleItem = document.createElement('li');
+      showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
+      showMoreOrLessToggleItem.id = SHOW_MORE_OR_LESS_ID;
+      showMoreOrLessToggleItem.addEventListener('click', () => {
+        showMoreOrLess();
+      });
+      trendsList.append(showMoreOrLessToggleItem);
+    }
   });
 }
 
-/** 
- * Shows the remaining 10 trending topics if the user clicks on 'See More' and 
+/**
+ * Shows the remaining 10 trending topics if the user clicks on 'See More' and
  * hides the last 10 if the user clicks on 'See Less.'
  */
 function showMoreOrLess() {
-  const seeMoreOrLess = document.getElementById('see-more-or-less');
+  const showMoreOrLessToggleItem = document.getElementById(SHOW_MORE_OR_LESS_ID);
   const trendElements = document.querySelectorAll('#trends-list li');
-  if (seeMoreOrLess.innerText === 'See More') {
+  if (showMoreOrLessToggleItem.innerText === TOGGLE_SHOW_MORE) {
     for (var i = 10; i < trendElements.length - 1; i++){
-      trendElements[i].className  = 'shown';
+      trendElements[i].className  = CLASSNAME_SHOWN;
     }
-    seeMoreOrLess.innerText = 'See Less';
+    showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_LESS;
   } else {
     for (var i = 10; i < trendElements.length - 1; i++) {
-      trendElements[i].className  = 'hidden';
+      trendElements[i].className  = CLASSNAME_HIDDEN;
     }
-    seeMoreOrLess.innerText = 'See More';
+    showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
   }
 }
 
