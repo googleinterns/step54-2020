@@ -69,7 +69,7 @@ function loadMapOutline() {
 function loadCountryData() {
   map.data.forEach(function(row) {
     // Currently a random value, will be changed to call sentiment value.
-    // TODO: Add the sentiment value for the country. ntarn@
+    // TODO(ntarn): Add the sentiment value for the country. 
     const dataVariable = Math.floor(Math.random() * Math.floor(100));
 
     // Keep track of min and max values as we read them.
