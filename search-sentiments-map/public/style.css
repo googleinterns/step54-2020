@@ -1,13 +1,35 @@
-#map {
-  height: 70vh;
-  width: 70vw;
+body {
+  margin: auto;
 }
 
-html, body { 
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
-  padding: 0;
+#title {
+  margin: 30px;
+  text-align: center;
+}
+
+#map {
+  height: 80vh;
+}
+
+#search-box {
+  margin: 20px;
+}
+
+#show-more-or-less {
+  color: #308ECA;
+  list-style-type: none;
+}
+
+#show-more-or-less:hover {
+  color: #3aa7d6;
+}
+
+.shown {
+  display: block;
+}
+
+.hidden {
+  display: none;
 }
 
 #legend { 
