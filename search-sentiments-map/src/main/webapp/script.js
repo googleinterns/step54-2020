@@ -25,8 +25,12 @@ let mapStyle = [{
 }];
 let map;
 let infowindow;
-// Hold the maximum and minium values of the sentiment scores. Set to these
-// as default to be replaced by any value.
+/* 
+ * Hold the minimum and maximum values of the sentiment scores. By default, we
+ * set them to hold the maximum and minimum possible integer values
+ * respectively, so they can later be appropriately replaced by the actual
+ * sentiment scores.
+ */
 let dataMin = Number.MAX_VALUE;
 let dataMax = Number.MIN_VALUE;
 
@@ -121,7 +125,7 @@ function styleFeature(feature) {
 
 /**
  * Responds to the mouse-in event on a map shape(country).
- * @param {?google.maps.MouseEvent} e
+ * @param {?google.maps.MouseEvent} e Mouse-in event.
  */
 function mouseInToRegion(e) {
   // Set the hover country so the setStyle function can change the border.
@@ -137,7 +141,7 @@ function mouseInToRegion(e) {
 
 /**
  * Responds to the mouse-out event on a map shape (country).
- * @param {?google.maps.MouseEvent} e
+ * @param {?google.maps.MouseEvent} e Mouse-out event.
  */
 function mouseOutOfRegion(e) {
   // Reset the hover country, returning the border to normal. Close infowindow.
@@ -147,7 +151,7 @@ function mouseOutOfRegion(e) {
 
 /**
  * Responds to a click on a map shape (country).
- * @param {?google.maps.MouseEvent} e
+ * @param {?google.maps.MouseEvent} e Click event.
  */
 function clickOnRegion(e) {
   $('#region-info-modal').modal('show');
