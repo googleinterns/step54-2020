@@ -57,6 +57,22 @@ function setTopTrends() {
   });
 }
 
+/** Displays the top results for Coronavirus from the US on the DOM. */
+function setTopResults() {
+  const searchResultsList = document.getElementById('search-results-list');
+
+  // Get the 10 search results from the backend and format them.
+  fetch('/search').then(resultsJsonArray => resultsJsonArray.json())
+      .then(results => {
+    for (let i = 0; i < results.length; i++) {
+      let resultElement = document.createElement('li');
+      resultElement.innerHTML += "<a href=" + results[i].link+">" +
+          results[i].htmlTitle + "</a><br>" + results[i].htmlSnippet;
+      searchResultsList.append(resultElement);
+    }
+  });
+}
+
 /**
  * Shows the remaining 10 trending topics if the user clicks on 'See More' and
  * hides the last 10 if the user clicks on 'See Less.'
