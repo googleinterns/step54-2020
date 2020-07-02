@@ -29,10 +29,13 @@ app.get('/', (req, res) => {
 
 const trends = require('./routes/trends.js');
 const search = require('./routes/search.js');
-// Use the trends and search routers so that they can be fetched from the
+const sentiment = require('./routes/sentiment.js');
+
+// Use the trends, search, and sentiment routers so that they can be fetched from the
 // client-side scripts.
 app.use('/trends', trends.router);
 app.use('/search', search.router);
+app.use('/sentiment', sentiment.router);
 
 var schedule = require('node-schedule');
 // Schedule the function that updates top trends to be run every hour at xx:00:00.
@@ -45,3 +48,4 @@ var j = schedule.scheduleJob('0 0 * * * *', function(){
 var searchResultUpdateSchedule = schedule.scheduleJob('0 0,12 * * *', function(){
   search.updateSearchResults();
 });
+

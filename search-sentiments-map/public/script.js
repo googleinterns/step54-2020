@@ -99,3 +99,23 @@ function showResultForTopic(event) {
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = 'Worldwide sentiments of search results for "' + searchTopic + '"';
 }
+
+/** Gets the sentiment score of an inputted search topic. 
+ *  TODO(ntarn): Get the average sentiment score for the inputted search topic's search results. 
+ */
+function getSentiment() {
+  const searchTopic = document.getElementById('search-topic').value;
+  const sentimentScoreElement = document.getElementById('sentiment-score');
+  const searchTopicObject = "searchTopic="+encodeURIComponent(searchTopic);
+  fetch('/sentiment', {method: 'POST',  // Send a request to the URL.
+    headers: new Headers({
+      'Content-Type': 'application/x-www-form-urlencoded',
+    }),
+    body: searchTopicObject // Send data from index.html.
+    })
+    .then(response => response.json())
+    .then((score) => { 
+      console.log('ntarn debug: frontend' + score.sentimentScore);
+      sentimentScoreElement.innerHTML = "<p>Sentiment analysis score: " + score.sentimentScore + "</p>";
+    });
+}  
