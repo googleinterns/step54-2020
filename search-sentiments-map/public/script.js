@@ -31,10 +31,10 @@ function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
 
   // Get the 20 trending search topics from the backend.
-  fetch('/trends').then(trendsJsonArray => trendsJsonArray.json()).then(trends => {
+  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
     for (var i = 0; i < trends.length; i++) {
       var trendElement = document.createElement('li');
-      trendElement.innerText = trends[i].trendTopic;
+      trendElement.innerText = `${trends[i].trendTopic} (${trends[i].country})`;
       // Show 10 trending topics by default and hide the rest.
       trendElement.className = i < 10 ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
       trendElement.addEventListener('click', (event) => {

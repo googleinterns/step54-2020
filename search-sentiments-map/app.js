@@ -32,7 +32,7 @@ const trends = require('./routes/trends.js');
 app.use('/trends', trends.router);
 
 var schedule = require('node-schedule');
-// Schedule the function that updates top trends to be run every hour at xx:00:00.
-var j = schedule.scheduleJob('0 0 * * * *', function(){
+// Update top trends at minute 0 past every 12th hour (12am and 12pm every day).
+var j = schedule.scheduleJob('0 */12 * * * *', function(){
   trends.updateTrendsFunction();
 });
