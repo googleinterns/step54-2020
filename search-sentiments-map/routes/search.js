@@ -24,10 +24,10 @@ const datastore = new Datastore();
 const json = require('./../public/country-code.json');
 
 /** 
- * Renders a JSON array of the top 10 search trends with API data obtained 
- * every 12 hours.
- * TODO: Convert to only request search result for specific topic.
+ * Renders a JSON array of the top search trend for all countries with API data
+ * obtained every 12 hours.
  */
+// TODO(carmenbenitez): Convert to only request search result for specific topic.
 router.get('/', (req, res) => {
   retrieveSearchResultFromDatastore('').then(customSearchTopicJsonArray => {
     res.setHeader('Content-Type', 'application/json');
@@ -37,12 +37,12 @@ router.get('/', (req, res) => {
 
 
 /** 
- * Returns a JSON-formatted array of search results retrived from the 
- * Datastore.
+ * Returns a JSON-formatted array of search results for countries retrieved
+ * from the Datastore.
  * @param {string} topic Search topic to get data for.
- * TODO: Convert to only request search result for given query. Currently
- * only returns one result(because we delete all results before adding more).
  */
+// TODO: Convert to only request search result for given query. Currently
+// only returns one result(because we delete all results before adding more).
 async function retrieveSearchResultFromDatastore(topic) {
   const query = datastore.createQuery('CustomSearchTopic').order('timestamp', {
     descending: true,
@@ -59,9 +59,10 @@ async function retrieveSearchResultFromDatastore(topic) {
 
 /** 
  * Updates daily search results (accumulates by day) in the Datastore.
- * TODO(carmenbenitez): Update this to instead loop through top 10 trending
- * searches and get that data instead.
  */
+// TODO(carmenbenitez): Update this to instead loop through top 10 trending
+// searches and get that data instead.
+
 function updateSearchResults() {
   updateSearchResultsForTopic("trump");
 }
@@ -70,14 +71,13 @@ function updateSearchResults() {
  * Retrieves search result data for all countries for a given topic. Passes
  * this data to be saved in Datastore.
  * @param {string} query Search query.
- * 
- * TODO(ntarn): Add in average score for search results of a country
  */
-//country.id replace
+// TODO(ntarn): Add in average score for search results of a country.
 async function updateSearchResultsForTopic(query) {
   let countriesData = [];
   json.forEach(country => {
     let countryData = [];
+    // Update countryData within the functions called. 
     await getSearchResultsForCountryFromAPI("country" + country.id, query, countryData)
     countriesData.push({
       country: country.id,
@@ -90,35 +90,40 @@ async function updateSearchResultsForTopic(query) {
 
 /** 
  * Gets top 10 search results for specified country and query from Custom
- * Search API and passes them to be saved in Datastore.
- * @param {string} country Country for search results to be written in
+ * Search API and passes them to be saved in countryData object.
+ * @param {string} countryCode 2 letter country code for search results to be
+ *     written in.
  * @param {string} query Search query.
+ * @param {Object} countryData Object holding all searchResults for a country.
  */
 async function getSearchResultsForCountryFromAPI(countryCode, query, countryData) {
-  let response = await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,htmlSnippet,link)');
+  let response = 
+      await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,htmlSnippet,link)');
   let searchResults =  await response.json();
   await saveResultsAndDeletePrevious(searchResults, countryData);
 }
 
 /**
- * Deletes previous search results and save the current results in the
+ * Deletes previous search results and saves the current results in the
  * Datastore, given the results JSON obtained from the API.
+ * @param {Object} searchResultsJson Object with information for top 10 search
+ *     results.
+ * @param {Object} countryData Object holding all searchResults for a country.
  */
 async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
   await deleteAncientResults();
 
   // Parse the JSON string and pass each search result to add to the
-  // Datastore.
+  // countryData object.
   var currentSearchResults = searchResultsJson.items;
   for (var i = 0; i < currentSearchResults.length; i++) {
     await addSearchResultToCountryData(currentSearchResults[i], countryData);
   }
 }
 
-/** 
- * Delete previous search results. TODO: Change to delete trend records that
- * were saved more than 7 days ago. Currently deletes all previous results.
- */
+/** Delete previous search results. */
+// TODO(@carmenbenitez): Change to delete trend records that were saved more
+// than 7 days ago. Currently deletes all previous results.
 async function deleteAncientResults() {
   const query = datastore.createQuery('CustomSearchTopic');
   const [searchResults] = await datastore.runQuery(query);
@@ -131,7 +136,12 @@ async function deleteAncientResults() {
   }
 }
 
-/** Creates empty Datastore item for given topic. */
+/** 
+ * Creates Datastore item for given topic and country search results. 
+ * @param {string} topic The seach topic the search results are for.
+ * @param {Object} countriesData Object holding all searchResults for all
+ *      countries.
+ */
 async function addTopicToDatastore(topic, countriesData) {
   const customSearchTopicKey = datastore.key('CustomSearchTopic');
   // Get the current timestamp in milliseconds.
@@ -152,8 +162,12 @@ async function addTopicToDatastore(topic, countriesData) {
   }
 }
 
-/** Updates given Datastore item to include country data. */
-// TODO(ntarn): Replace with actual sentiment
+/**
+ * Adds search result object to countryData array.
+ * @param {Object} searchResult Object with information for one search result.
+ * @param {Object} countryData Object holding all searchResults for a country.
+*/
+// TODO(ntarn): Add in sentiment score for this search result.
 function addSearchResultToCountryData(searchResult, countryData) {
   searchResultData = {
     title: searchResult.title,

@@ -57,7 +57,10 @@ function setTopTrends() {
   });
 }
 
-/** Displays the top results for Coronavirus from the US on the DOM. */
+/** 
+ * Displays the top results for Trump for the first country on the DOM. 
+ * TODO(ntarn): Delete and set map itself to show data.
+ */
 function setTopResults() {
   const searchResultsList = document.getElementById('search-results-list');
   const topicHeader = document.getElementById('topic-header');
@@ -72,7 +75,8 @@ function setTopResults() {
           results[i].htmlTitle + "</a><br>" + results[i].htmlSnippet;
       searchResultsList.append(resultElement);
     }
-    topicHeader.innerText = 'Worldwide sentiments of search results for "' + topicResults.topic  + '"';
+    topicHeader.innerText = 'Worldwide sentiments of search results for "' +
+        topicResults.topic  + '"';
   });
 }
 
