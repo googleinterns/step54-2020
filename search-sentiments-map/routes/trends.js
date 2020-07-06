@@ -120,7 +120,7 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
    }
  */
 async function saveTrendsAndDeletePrevious(trendsJsonByCountry) {
-  await deleteAncientTrends();
+  await deleteAncientTrend();
 
   const trendsEntryKey = datastore.key('TrendsEntry');
   const trendsEntry = {
@@ -143,7 +143,7 @@ async function saveTrendsAndDeletePrevious(trendsJsonByCountry) {
 /** 
  * Delete the oldest trend record if it was saved more than 7 days ago. 
  */
-async function deleteAncientTrends() {
+async function deleteAncientTrend() {
   // Query entries in ascending order of the time of creation.
   const query = datastore.createQuery('TrendsEntry').order('timestamp');
   const [trendsEntries] = await datastore.runQuery(query);
