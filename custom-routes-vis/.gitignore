@@ -1,6 +1,2 @@
 target/
 .idea
-search-sentiments-map/.settings/
-search-sentiments-map/.classpath
-search-sentiments-map/.factorypath
-search-sentiments-map/.project
