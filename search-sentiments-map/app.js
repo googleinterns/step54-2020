@@ -34,9 +34,11 @@ const search = require('./routes/search.js');
 app.use('/trends', trends.router);
 app.use('/search', search.router);
 
+//trends.updateTrendsFunction();  // Uncomment this to get trends if none is in the datastore.
+
 var schedule = require('node-schedule');
-// Schedule the function that updates top trends to be run every hour at xx:00:00.
-var j = schedule.scheduleJob('0 0 * * * *', function(){
+// Update top trends at minute 0 past every 12th hour (11am and 23pm every day).
+var j = schedule.scheduleJob('0 11,23 * * * *', function(){
   trends.updateTrendsFunction();
 });
 
