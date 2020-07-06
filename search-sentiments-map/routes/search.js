@@ -29,7 +29,8 @@ const json = require('./../public/country-code.json');
  */
 // TODO(carmenbenitez): Convert to only request search result for specific topic.
 router.get('/', (req, res) => {
-  retrieveSearchResultFromDatastore('').then(customSearchTopicJsonArray => {
+  console.log("here");
+  retrieveSearchResultFromDatastore('trump').then(customSearchTopicJsonArray => {
     res.setHeader('Content-Type', 'application/json');
     res.send(customSearchTopicJsonArray);
   });
@@ -44,17 +45,19 @@ router.get('/', (req, res) => {
 // TODO: Convert to only request search result for given query. Currently
 // only returns one result(because we delete all results before adding more).
 async function retrieveSearchResultFromDatastore(topic) {
-  const query = datastore.createQuery('CustomSearchTopic').order('timestamp', {
-    descending: true,
-  });
-  const [customSearchTopics] = await datastore.runQuery(query);
+  const query = datastore.createQuery('CustomSearchTopic').filter('topic',topic).limit(1);
 
-  let customSearchTopicJsonArray = {
-    topic: customSearchTopics[0].topic,
-    countries: customSearchTopics[0].countries,
-    timestamp: customSearchTopics[0].timestamp,
-  };
-  return customSearchTopicJsonArray;
+  try {
+    const [customSearchTopic] = await datastore.runQuery(query);
+    let customSearchTopicJsonArray = {
+      topic: customSearchTopic[0].topic,
+      countries: customSearchTopic[0].countries,
+      timestamp: customSearchTopic[0].timestamp,
+    };
+    return customSearchTopicJsonArray;
+  } catch (err) {
+    console.error('ERROR:', err);
+  }
 }
 
 /** 
@@ -62,7 +65,6 @@ async function retrieveSearchResultFromDatastore(topic) {
  */
 // TODO(carmenbenitez): Update this to instead loop through top 10 trending
 // searches and get that data instead.
-
 function updateSearchResults() {
   updateSearchResultsForTopic("trump");
 }
@@ -75,16 +77,24 @@ function updateSearchResults() {
 // TODO(ntarn): Add in average score for search results of a country.
 async function updateSearchResultsForTopic(query) {
   let countriesData = [];
-  json.forEach(country => {
+
+  // Note: Can't use forEach with await.
+  for (let i = 0; i < json.length; i++) {
+    // 100 queries per minute limit for Custom Search API. Pause to prevent
+    // surpassing limit.
+    if (i !== 0 && i % 100 === 0) {
+      await new Promise(resolve => setTimeout(resolve, 60000));
+    }
     let countryData = [];
-    // Update countryData within the functions called. 
-    await getSearchResultsForCountryFromAPI("country" + country.id, query, countryData)
+    // Update countryData within the functions called.
+    await getSearchResultsForCountryFromAPI(
+        "country" + json[i].id, query, countryData);
     countriesData.push({
-      country: country.id,
+      country: json[i].id,
       //score: score,
       results: countryData,
     });
-  });
+  }
   addTopicToDatastore(query, countriesData);
 }
 
@@ -100,6 +110,7 @@ async function getSearchResultsForCountryFromAPI(countryCode, query, countryData
   let response = 
       await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,htmlSnippet,link)');
   let searchResults =  await response.json();
+  console.log(searchResults);
   await saveResultsAndDeletePrevious(searchResults, countryData);
 }
 
@@ -116,8 +127,13 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
   // Parse the JSON string and pass each search result to add to the
   // countryData object.
   var currentSearchResults = searchResultsJson.items;
-  for (var i = 0; i < currentSearchResults.length; i++) {
-    await addSearchResultToCountryData(currentSearchResults[i], countryData);
+  try {
+    for (var i = 0; i < currentSearchResults.length; i++) {
+      await addSearchResultToCountryData(currentSearchResults[i], countryData);
+    }
+  } catch  (err) { // Occurs when no search results for that country and topic.
+    console.error('ERROR:', err);
+    countryData = null;
   }
 }
 

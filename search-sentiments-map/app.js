@@ -33,7 +33,6 @@ const search = require('./routes/search.js');
 // client-side scripts.
 app.use('/trends', trends.router);
 app.use('/search', search.router);
-search.updateSearchResults();
 
 var schedule = require('node-schedule');
 // Schedule the function that updates top trends to be run every hour at xx:00:00.

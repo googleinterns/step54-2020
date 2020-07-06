@@ -156,13 +156,33 @@ function mouseOutOfRegion(e) {
  * Responds to a click on a map shape (country).
  * @param {?google.maps.MouseEvent} e Click event.
  */
+// TODO(ntarn): Add Sentiment scores to this modal.
 function clickOnRegion(e) {
   $('#region-info-modal').modal('show');
 
   // Update Modal with information for relevant country.
-  const country = e.feature.getProperty('name');
+  const countryName = e.feature.getProperty('name');
+  const countryId = e.feature.getId();
   const countryData= e.feature.getProperty('country_data').toLocaleString();
-  document.getElementById('modal-title').innerText = country;
-  document.getElementById('search-results-tab').innerText = 
-      country + ": " + countryData;
+  document.getElementById('modal-title').innerText = countryName;
+  setTopResults(countryId);
+}
+
+/** 
+ * Displays the top results for Trump on modal. 
+ */
+// TODO(carmnebenitez): Update to call for specific query not "trump".
+function setTopResults(countryCode) { 
+  // Get the 10 search results from the backend and format them.
+  fetch('/search').then(resultsJsonArray => resultsJsonArray.json())
+      .then(topicResults => {
+    // get results for specified country
+    results = topicResults.countries[0].results;
+    let resultElement =  document.getElementById('search-results-tab');
+    resultElement.innerHTML = '';
+    for (let i = 0; i < results.length; i++) {
+      resultElement.innerHTML += '<a href=' + results[i].link + '>' +
+          results[i].htmlTitle + '</a><br>' + results[i].htmlSnippet+ '<br>';
+    }
+  });
 }
