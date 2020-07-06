@@ -42,27 +42,7 @@ async function retrieveGlobalTrends() {
     descending: true,
   });
   const [trendsEntry] = await datastore.runQuery(query);
-
-  return getGlobalTrends(trendsEntry[0].trendsByCountry);
-}
-
-/** 
- * Finds the globally trending topics based on trending topics in each country.
- * Currently returning all topics from the US. TODO(@chenyuz): get a mixture of
- * topics from different countries.
- */
-function getGlobalTrends(trendsByCountry) {
-  let UStrends = trendsByCountry.filter(trends => trends['country'] === 'US');
-  UStrends = UStrends[0].trends;
-
-  let globalTrends = [];
-  UStrends.forEach(trend => {
-    globalTrends.push({
-      country: 'US',
-      trendTopic: trend.topic,
-    });
-  });
-  return globalTrends;
+  return trendsEntry[0].globalTrends;
 }
 
 /** 
@@ -114,7 +94,7 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
     trendsByCountry: [{
         country: US,
         trends: [{
-          topic: Donald Trump,,
+          topic: Donald Trump,
           results: [title1, ..., title7],
           sentimentScore: 0.2,
           }...
@@ -122,7 +102,12 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
         country: UK,
         trends: [..., ...]
       }...
-    ]}
+    ],
+    globalTrends: [{
+        country: US,
+        trendTopic: X,
+    }, ...]
+   }
  */
 async function saveTrendsAndDeletePrevious(trendsJsonByCountry) {
   await deleteAncientTrends();
@@ -133,6 +118,7 @@ async function saveTrendsAndDeletePrevious(trendsJsonByCountry) {
     data: {
       timestamp: Date.now(),
       trendsByCountry: trendsJsonByCountry,
+      globalTrends: getGlobalTrends(trendsJsonByCountry),
     },
   };
 
@@ -158,6 +144,26 @@ async function deleteAncientTrends() {
     await datastore.delete(trendsEntryKey);
     console.log( `TrendsEntry ${trendsEntryKey.id} deleted.`);
   }
+}
+
+/** 
+ * Finds the globally trending topics based on trending topics in each country.
+ * Currently returning all topics from the US. TODO(@chenyuz): get a mixture of
+ * topics from different countries.
+ */
+function getGlobalTrends(trendsByCountry) {
+  // Find all trends list(s) whose designated country is the US.
+  let UStrends = trendsByCountry.filter(trends => trends['country'] === 'US');
+  UStrends = UStrends[0].trends;
+
+  let globalTrends = [];
+  UStrends.forEach(trend => {
+    globalTrends.push({
+      country: 'US',
+      trendTopic: trend.topic,
+    });
+  });
+  return globalTrends;
 }
 
 module.exports.router = router;
