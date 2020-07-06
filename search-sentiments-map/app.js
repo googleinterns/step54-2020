@@ -37,6 +37,9 @@ app.use('/trends', trends.router);
 app.use('/search', search.router);
 app.use('/sentiment', sentiment.router);
 
+search.updateSearchResults();
+
+
 var schedule = require('node-schedule');
 // Schedule the function that updates top trends to be run every hour at xx:00:00.
 var j = schedule.scheduleJob('0 0 * * * *', function(){

@@ -1,7 +1,3 @@
-body {
-  background-color: #c4f2e3;
-}
-
 .content {
   font-size: 18px;
   margin: auto;
@@ -46,4 +42,31 @@ body {
 
 .hidden {
   display: none;
+}
+
+#legend {
+  background: #fff;
+  border: 3px solid #000;
+  display: flex;
+  display: -webkit-box;
+  height: 45px;
+  margin: 10px;
+  padding: 10px;
+  width: 360px;
+}
+
+.color-key {
+  background: linear-gradient(to right,
+    hsl(5, 69%, 54%) 0%,
+    hsl(29, 71%, 51%) 17%,
+    hsl(54, 74%, 47%) 33%,
+    hsl(78, 76%, 44%) 50%,
+    hsl(102, 78%, 41%) 67%,
+    hsl(127, 81%, 37%) 83%,
+    hsl(151, 83%, 34%) 100%);
+  flex: 1;
+  font: 1.0em/1.0em;
+  margin: 0 5px;
+  text-align: left;
+  -webkit-box-flex: 1;
 }
