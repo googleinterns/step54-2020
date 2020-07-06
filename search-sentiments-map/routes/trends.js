@@ -23,8 +23,8 @@ const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
 /** 
- * Renders a JSON array of the top 20 (or fewer) search trends with API data
- * obtained on the hour.
+ * Renders a JSON array of the top 20 (or fewer) global search trends maintained
+ * for the current 12-hour range.
  */
 router.get('/', (req, res) => {
   retrieveGlobalTrends().then(globalTrends => {
@@ -46,8 +46,8 @@ async function retrieveGlobalTrends() {
 }
 
 /** 
- * Updates datastore storage of daily search trends and corresponding search results for the 46
- * countries where trends are available using the Google Trends API.
+ * Updates datastore storage of daily search trends and corresponding search results
+ * for the 46 countries where trends are available using the Google Trends API.
  */
 async function updateDailyTrends() {
   let countryData = fs.readFileSync('./public/countries-with-trends.json');
@@ -63,7 +63,8 @@ async function updateDailyTrends() {
       console.log('trends JSON created for', country.id, country.name);
 
       // Parse the JSON string and get the trending topics.
-      trendingSearches = JSON.parse(dailyTrendsJsonString).default.trendingSearchesDays[0].trendingSearches;
+      trendingSearches = JSON.parse(dailyTrendsJsonString)
+          .default.trendingSearchesDays[0].trendingSearches;
       trendsByCountry.push(constructCountryTrendsJson(trendingSearches, country.id));
     }).catch(err => {
       console.log(err);
@@ -76,8 +77,17 @@ async function updateDailyTrends() {
 /** Creates a JSON item for trends in the given country. */
 function constructCountryTrendsJson(trendingSearches, countryCode) {
   let trends = [];
+
   trendingSearches.forEach(trend => {
-    trends.push({topic: trend.title.query});
+    let articleTitles = [];
+    trend.articles.forEach(article => {
+      articleTitles.push(article.title);
+    })
+    trends.push({
+      topic: trend.title.query,
+      articles: articleTitles,
+      sentimentScore: 0,
+    });
   })
 
   return {
@@ -95,7 +105,7 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
         country: US,
         trends: [{
           topic: Donald Trump,
-          results: [title1, ..., title7],
+          articles: [title1, ..., title7],
           sentimentScore: 0.2,
           }...
         ]}, {
@@ -131,8 +141,8 @@ async function saveTrendsAndDeletePrevious(trendsJsonByCountry) {
 }
 
 /** 
- * Delete all previous trends. TODO(@chenyuz): Change to delete trend records that were
- * saved more than 7 days ago. 
+ * Delete all previous trends. TODO(@chenyuz): Change to delete trend records
+ * that were saved more than 7 days ago. 
  */
 async function deleteAncientTrends() {
   const query = datastore.createQuery('TrendsEntry');
