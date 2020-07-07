@@ -12,13 +12,6 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-/** Creates the world map. */
-function createWorldMap() {
-  map = new google.maps.Map(
-    document.getElementById('map'),
-    {center: {lat: 38.46049, lng: -5.428423}, zoom: 3});
-}
-
 const SHOW_MORE_OR_LESS_ID = 'show-more-or-less';
 const TOGGLE_SHOW_MORE = 'Show More';
 const TOGGLE_SHOW_LESS = 'Show Less';
@@ -32,8 +25,8 @@ function setTopTrends() {
 
   // Get the 20 trending search topics from the backend.
   fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
-    for (var i = 0; i < trends.length; i++) {
-      var trendElement = document.createElement('li');
+    for (let i = 0; i < trends.length; i++) {
+      const trendElement = document.createElement('li');
       trendElement.innerText = `${trends[i].trendTopic} (${trends[i].country})`;
       // Show 10 trending topics by default and hide the rest.
       trendElement.className = i < 10 ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
@@ -43,8 +36,8 @@ function setTopTrends() {
       trendsList.append(trendElement);
     }
 
-    // Add an item to the list that toggles showing more or less topics when there are more
-    // than 10 trending topics.
+    // Add an item to the list that toggles showing more or less topics when there
+    // are more than 10 trending topics.
     if (trends.length > 10) {
       const showMoreOrLessToggleItem = document.createElement('li');
       showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
@@ -65,23 +58,25 @@ function showMoreOrLess() {
   const showMoreOrLessToggleItem = document.getElementById(SHOW_MORE_OR_LESS_ID);
   const trendElements = document.querySelectorAll('#trends-list li');
   if (showMoreOrLessToggleItem.innerText === TOGGLE_SHOW_MORE) {
-    for (var i = 10; i < trendElements.length - 1; i++){
+    for (let i = 10; i < trendElements.length - 1; i++){
       trendElements[i].className  = CLASSNAME_SHOWN;
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_LESS;
   } else {
-    for (var i = 10; i < trendElements.length - 1; i++) {
+    for (let i = 10; i < trendElements.length - 1; i++) {
       trendElements[i].className  = CLASSNAME_HIDDEN;
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
   }
 }
 
-/** */
+/** 
+ * Update title when a trending topic is selected.
+ * TODO (@chenyuz): Show sentiment scores for all countries on the selected topic.
+ */
 function showResultForTopic(event) {
   const searchTopic = event.currentTarget.innerText;
-  const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = 'Worldwide sentiments of search results for "' + searchTopic + '"';
+  setNewTrend(searchTopic);
 }
 
 /** Gets the sentiment score of an inputted search topic. 

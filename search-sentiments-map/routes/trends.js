@@ -17,7 +17,6 @@
 const express = require('express');
 const router = express.Router();  // Using Router to divide the app into modules.
 
-const fs = require('fs');
 const googleTrends = require('google-trends-api');
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
@@ -34,8 +33,8 @@ router.get('/', (req, res) => {
 });
 
 /** 
- * Returns a JSON-formatted array of global trends and their originating countries 
- * based on the latest trends retrieved from the Datastore. 
+ * Queries the Datastore for the most recent global trends.
+ * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
  */
 async function retrieveGlobalTrends() {
   const query = datastore.createQuery('TrendsEntry').order('timestamp', {
@@ -46,16 +45,15 @@ async function retrieveGlobalTrends() {
 }
 
 /** 
- * Updates datastore storage of daily search trends and corresponding search results
+ * Updates Datastore storage of daily search trends and corresponding search results
  * for the 46 countries where trends are available using the Google Trends API.
  */
 async function updateDailyTrends() {
-  let countryData = fs.readFileSync('./public/countries-with-trends.json');
-  let countryJson = JSON.parse(countryData);
+  const countryJson = require('./../public/countries-with-trends.json');
 
-  var trendsByCountry = [];
-  for (var i = 0; i < countryJson.length; i++) {
-    country = countryJson[i];
+  let trendsByCountry = [];
+  for (let i = 0; i < countryJson.length; i++) {
+    let country = countryJson[i];
     await googleTrends.dailyTrends({
       trendDate: new Date(),
       geo: country.id,
@@ -74,10 +72,16 @@ async function updateDailyTrends() {
   saveTrendsAndDeletePrevious(trendsByCountry);
 }
 
-/** Creates a JSON item for trends in the given country. */
+/** 
+ * Creates a JSON item for trends in the given country.
+ * @param {?Array<JSON>} trendingSearches The JSON array containing the top trends 
+ * of the given country.
+ * @param {string} countryCode The two-letter code for the country considered.
+ * @return {Object<JSON>} A JSON object that includes a country's code and its 
+ * top trends.
+ */
 function constructCountryTrendsJson(trendingSearches, countryCode) {
   let trends = [];
-
   trendingSearches.forEach(trend => {
     let articleTitles = [];
     trend.articles.forEach(article => {
@@ -97,7 +101,7 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
 }
 
 /**
- * Delete previous trends and save the current trends in a `trendsEntry` entity
+ * Deletes previous trends and saves the current trends in a `trendsEntry` entity
  * in the Datastore, given the trends JSON organized by country.
  * Example data structure for a `trendsEntry`:
  * {timestamp: 111111111,
@@ -118,8 +122,10 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
         trendTopic: X,
     }, ...]
    }
+ * @param {!Array<JSON>} trendsByCountry An array where each element is a country
+ * and its trends.
  */
-async function saveTrendsAndDeletePrevious(trendsJsonByCountry) {
+async function saveTrendsAndDeletePrevious(trendsByCountry) {
   await deleteAncientTrend();
 
   const trendsEntryKey = datastore.key('TrendsEntry');
@@ -127,8 +133,8 @@ async function saveTrendsAndDeletePrevious(trendsJsonByCountry) {
     key: trendsEntryKey,
     data: {
       timestamp: Date.now(),
-      trendsByCountry: trendsJsonByCountry,
-      globalTrends: getGlobalTrends(trendsJsonByCountry),
+      trendsByCountry: trendsByCountry,
+      globalTrends: getGlobalTrends(trendsByCountry),
     },
   };
 
@@ -141,7 +147,7 @@ async function saveTrendsAndDeletePrevious(trendsJsonByCountry) {
 }
 
 /** 
- * Delete the oldest trend record if it was saved more than 7 days ago. 
+ * Deletes the oldest trend record if it was saved more than 7 days ago. 
  */
 async function deleteAncientTrend() {
   // Query entries in ascending order of the time of creation.
@@ -159,10 +165,13 @@ async function deleteAncientTrend() {
  * Finds the globally trending topics based on trending topics in each country.
  * Currently returning all topics from the US. TODO(@chenyuz): get a mixture of
  * topics from different countries.
+ * @param {!Array<JSON>} trendsByCountry An array where each element is a country
+ * and its trends.
+ * @return {!Array<JSON>} Globally trending topics and their originating countries.
  */
 function getGlobalTrends(trendsByCountry) {
   // Find all trends list(s) whose designated country is the US.
-  let UStrends = trendsByCountry.filter(trends => trends['country'] === 'US');
+  let UStrends = trendsByCountry.filter(trends => trends.country === 'US');
   UStrends = UStrends[0].trends;
 
   let globalTrends = [];
