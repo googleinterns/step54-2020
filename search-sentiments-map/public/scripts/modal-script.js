@@ -16,6 +16,7 @@
  * Responds to a click on a map shape (country).
  * @param {?google.maps.MouseEvent} e Click event.
  */
+// TODO(ntarn): Add Sentiment scores to this modal.
 function clickOnRegion(e) {
   $('#region-info-modal').modal('show');
 

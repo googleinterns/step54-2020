@@ -150,20 +150,3 @@ function mouseOutOfRegion(e) {
   e.feature.setProperty('country', 'normal');
   infowindow.close();
 }
-<<<<<<< HEAD
-
-/**
- * Responds to a click on a map shape (country).
- * @param {?google.maps.MouseEvent} e Click event.
- */
-// TODO(ntarn): Add Sentiment scores to this modal.
-function clickOnRegion(e) {
-  $('#region-info-modal').modal('show');
-
-  // Update Modal with information for relevant country.
-  const countryName = e.feature.getProperty('name');
-  const countryId = e.feature.getId();
-  const countryData= e.feature.getProperty('country_data').toLocaleString();
-  document.getElementById('modal-title').innerText = countryName;
-  setTopResults(countryId);
-}
