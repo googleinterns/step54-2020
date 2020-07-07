@@ -77,7 +77,6 @@ async function updateDailyTrends() {
 /** Creates a JSON item for trends in the given country. */
 function constructCountryTrendsJson(trendingSearches, countryCode) {
   let trends = [];
-
   trendingSearches.forEach(trend => {
     let articleTitles = [];
     trend.articles.forEach(article => {
@@ -162,7 +161,7 @@ async function deleteAncientTrend() {
  */
 function getGlobalTrends(trendsByCountry) {
   // Find all trends list(s) whose designated country is the US.
-  let UStrends = trendsByCountry.filter(trends => trends['country'] === 'US');
+  let UStrends = trendsByCountry.filter(trends => trends.country === 'US');
   UStrends = UStrends[0].trends;
 
   let globalTrends = [];
