@@ -76,6 +76,5 @@ function showMoreOrLess() {
  */
 function showResultForTopic(event) {
   const searchTopic = event.currentTarget.innerText;
-  const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = 'Worldwide sentiments of search results for "' + searchTopic + '"';
+  setNewTrend(searchTopic);
 }

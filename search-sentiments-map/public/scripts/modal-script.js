@@ -16,7 +16,6 @@
  * Responds to a click on a map shape (country).
  * @param {?google.maps.MouseEvent} e Click event.
  */
-// TODO(ntarn): Add Sentiment scores to this modal.
 function clickOnRegion(e) {
   $('#region-info-modal').modal('show');
 
@@ -60,31 +59,31 @@ function displayTrends(country) {
 }
 
 /** 
- * Displays the top results for Trump on modal. 
+ * Displays the top results in a country for current search trend on modal. 
+ * @param {string} countryCode Two letter country code for selected country.
  */
-// TODO(carmnebenitez): Update to call for specific query not "trump".
+// TODO(ntarn): Add Sentiment scores to this modal.
 function displayTopResults(countryCode) { 
+  let topic = getCurrentTrend;
+  let topicData = getCurrentCustomSearchData();
+  let date = new Date(topicData.timestamp);
   let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
-  let topic = 'trump';
-  // Get the 10 search results from the backend and format them.
-  fetch('/search/' + topic).then(resultsJsonArray => resultsJsonArray.json())
-      .then(topicResults => {
-    // get results for specified country
-    let countryData = topicResults.countries
-        .filter(countries => countries.country === countryCode);
-    let results = countryData[0].results;
-    let date = new Date(topicResults.timestamp);
-    //handle case of empty
-    if (results.length === 0) {
-      resultElement.innerHTML += 'No results.<br>';
-    }
-    for (let i = 0; i < results.length; i++) {
-      resultElement.innerHTML += '<a href=' + results[i].link + '>' +
-          results[i].htmlTitle + '</a><br>' + results[i].htmlSnippet+ '<br>';
-    }
-    resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
-    '<i><br>';
-  });
+
+  let countryData = topicData.countries
+      .filter(countries => countries.country === countryCode);
+  let results = countryData[0].results;
+
+  // Handle case where there are no results.
+  if (results.length === 0) {
+    resultElement.innerHTML += 'No results.<br>';
+  }
+
+  for (let i = 0; i < results.length; i++) {
+    resultElement.innerHTML += '<a href=' + results[i].link + '>' +
+        results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>';
+  }
+  resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
+  '<i><br>';
 }
 

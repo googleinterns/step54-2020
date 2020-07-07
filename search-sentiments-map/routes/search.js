@@ -25,19 +25,6 @@ const json = require('./../public/country-code.json');
 
 /** 
  * Renders a JSON array of the top search results for all countries with API data
- * obtained every 12 hours for the top trend.
- */
-// TODO(carmenbenitez): Update topic to be top trend.
-router.get('/', (req, res) => {
-  let topic = 'trump;'
-  retrieveSearchResultFromDatastore(topic).then(customSearchTopicJsonArray => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(customSearchTopicJsonArray);
-  });
-});
-
-/** 
- * Renders a JSON array of the top search results for all countries with API data
  * obtained every 12 hours for the specified topic.
  */
 router.get('/:topic', (req, res) => {
@@ -54,9 +41,8 @@ router.get('/:topic', (req, res) => {
  * from the Datastore.
  * @param {string} topic Search topic to get data for.
  */
-// TODO: Convert to only request search result for given query. Currently
-// only returns one result(because we delete all results before adding more).
 async function retrieveSearchResultFromDatastore(topic) {
+  // Request latest entity with a topic matching the given topic.
   const query = datastore.createQuery('CustomSearchTopic').order('timestamp', {
     descending: true,
   }).filter('topic',topic).limit(1);
@@ -122,7 +108,7 @@ async function updateSearchResultsForTopic(query) {
  */
 async function getSearchResultsForCountryFromAPI(countryCode, query, countryData) {
   let response = 
-      await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,htmlSnippet,link)');
+      await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults =  await response.json();
   console.log(searchResults);
   await saveResultsAndDeletePrevious(searchResults, countryData);
@@ -207,7 +193,6 @@ function addSearchResultToCountryData(searchResult, countryData) {
     title: searchResult.title,
     snippet: searchResult.snippet,
     htmlTitle: searchResult.htmlTitle,
-    htmlSnippet: searchResult.htmlSnippet,
     link: searchResult.link,
     // score = sentimentscore
   };
