@@ -34,7 +34,6 @@ let infowindow;
 let dataMin = Number.MAX_VALUE;
 let dataMax = Number.MIN_VALUE;
 
-
 /** Loads the map with country polygons when page loads. */
 function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {

@@ -25,17 +25,17 @@ function clickOnRegion(e) {
   document.getElementById('modal-title').innerText = country;
   document.getElementById('search-results-tab').innerText = 
       country + ": " + countryData;
-  getTrends(country);
+  displayTrends(country);
 }
 
 /** 
  * Display top trends for the selected country. 
  * @param {string} country The full name of the selected country.
  */
-function getTrends(country) {
+function displayTrends(country) {
   // Convert the country name to its two-letter code.
-  fetch('../country-code.json').then(countryCodes
-      => countryCodes.json()).then(countryCodes => {
+  fetch('../country-code.json').then(countryCodes => 
+      countryCodes.json()).then(countryCodes => {
     let queriedCountry = countryCodes
         .filter(countryEntry => countryEntry.name === country);
     return queriedCountry[0].id;
