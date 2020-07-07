@@ -1,13 +1,13 @@
 // Copyright 2019 Google LLC
 //
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// Licensed under the Apache License, Version 2.0 (the 'License'); you may not
 // use this file except in compliance with the License. You may obtain a copy of
 // the License at
 //
 //     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations under
 // the License.
@@ -31,10 +31,10 @@ function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
 
   // Get the 20 trending search topics from the backend.
-  fetch('/trends').then(trendsJsonArray => trendsJsonArray.json()).then(trends => {
+  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
     for (var i = 0; i < trends.length; i++) {
       var trendElement = document.createElement('li');
-      trendElement.innerText = trends[i].trendTopic;
+      trendElement.innerText = `${trends[i].trendTopic} (${trends[i].country})`;
       // Show 10 trending topics by default and hide the rest.
       trendElement.className = i < 10 ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
       trendElement.addEventListener('click', (event) => {
@@ -54,29 +54,6 @@ function setTopTrends() {
       });
       trendsList.append(showMoreOrLessToggleItem);
     }
-  });
-}
-
-/** 
- * Displays the top results for Trump for the first country on the DOM. 
- * TODO(ntarn): Delete and set map itself to show data.
- */
-function setTopResults() {
-  const searchResultsList = document.getElementById('search-results-list');
-  const topicHeader = document.getElementById('topic-header');
- 
-  // Get the 10 search results from the backend and format them.
-  fetch('/search').then(resultsJsonArray => resultsJsonArray.json())
-      .then(topicResults => {
-    results = topicResults.countries[0].results;
-    for (let i = 0; i < results.length; i++) {
-      let resultElement = document.createElement('li');
-      resultElement.innerHTML += "<a href=" + results[i].link+">" +
-          results[i].htmlTitle + "</a><br>" + results[i].htmlSnippet;
-      searchResultsList.append(resultElement);
-    }
-    topicHeader.innerText = 'Worldwide sentiments of search results for "' +
-        topicResults.topic  + '"';
   });
 }
 
