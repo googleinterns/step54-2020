@@ -9,8 +9,9 @@
     <!-- Bootstrap CSS. -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
-    <script src="scripts/trends-script.js"></script>
     <script src="scripts/map-script.js"></script>
+    <script src="scripts/modal-script.js"></script>
+    <script src="scripts/trends-script.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
   <body onload="initMap(); setTopTrends(); setTopResults();">
@@ -35,7 +36,7 @@
                 </ul>
                 <div class="tab-content">
                   <div role="tabpanel" class="tab-pane fade show active" id="search-results-tab"></div>
-                  <div role="tabpanel" class="tab-pane fade" id="top-trends-tab">Insert top trends here.</div>
+                  <div role="tabpanel" class="tab-pane fade" id="top-trends-tab"></div>
                 </div>
               </div>
             </div>

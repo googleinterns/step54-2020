@@ -12,13 +12,6 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-/** Creates the world map. */
-function createWorldMap() {
-  map = new google.maps.Map(
-    document.getElementById('map'),
-    {center: {lat: 38.46049, lng: -5.428423}, zoom: 3});
-}
-
 const SHOW_MORE_OR_LESS_ID = 'show-more-or-less';
 const TOGGLE_SHOW_MORE = 'Show More';
 const TOGGLE_SHOW_LESS = 'Show Less';
@@ -77,7 +70,10 @@ function showMoreOrLess() {
   }
 }
 
-/** */
+/** 
+ * Update title when a trending topic is selected.
+ * TODO (@chenyuz): Show sentiment scores for all countries on the selected topic.
+ */
 function showResultForTopic(event) {
   const searchTopic = event.currentTarget.innerText;
   const topicHeader = document.getElementById('topic-header');

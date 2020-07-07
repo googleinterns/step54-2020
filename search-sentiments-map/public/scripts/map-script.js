@@ -34,7 +34,6 @@ let infowindow;
 let dataMin = Number.MAX_VALUE;
 let dataMax = Number.MIN_VALUE;
 
-
 /** Loads the map with country polygons when page loads. */
 function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
@@ -61,7 +60,7 @@ function initMap() {
 function loadMapOutline() {
   // Load country data after finished loading in geojson.
   map.data.loadGeoJson('countries.geojson', null, function () {
-      loadCountryData();
+    loadCountryData();
   });
 }
 
@@ -151,6 +150,7 @@ function mouseOutOfRegion(e) {
   e.feature.setProperty('country', 'normal');
   infowindow.close();
 }
+<<<<<<< HEAD
 
 /**
  * Responds to a click on a map shape (country).
@@ -166,23 +166,4 @@ function clickOnRegion(e) {
   const countryData= e.feature.getProperty('country_data').toLocaleString();
   document.getElementById('modal-title').innerText = countryName;
   setTopResults(countryId);
-}
-
-/** 
- * Displays the top results for Trump on modal. 
- */
-// TODO(carmnebenitez): Update to call for specific query not "trump".
-function setTopResults(countryCode) { 
-  // Get the 10 search results from the backend and format them.
-  fetch('/search').then(resultsJsonArray => resultsJsonArray.json())
-      .then(topicResults => {
-    // get results for specified country
-    results = topicResults.countries[0].results;
-    let resultElement =  document.getElementById('search-results-tab');
-    resultElement.innerHTML = '';
-    for (let i = 0; i < results.length; i++) {
-      resultElement.innerHTML += '<a href=' + results[i].link + '>' +
-          results[i].htmlTitle + '</a><br>' + results[i].htmlSnippet+ '<br>';
-    }
-  });
 }

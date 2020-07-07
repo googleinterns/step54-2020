@@ -14,27 +14,30 @@
 
 const express = require('express');
 const app = express();
-// Listen to the App Engine-specified port, or 3000 otherwise.
+// Listen to the App Engine-specified port, or 4503 otherwise.
 const PORT = process.env.PORT || 4503;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);
 });
 
-// Use express to create server that displays the webpage with the html, css, and javascript
-// files in the public folder.
-app.use(express.static(__dirname +'/public'));
+// Use express to create server that displays the webpage with the html, css, 
+// and javascript files in the public folder.
+app.use(express.static('./public'));
 app.get('/', (req, res) => {
   res.sendFile('/index.html');
 });
 
 const trends = require('./routes/trends.js');
 const search = require('./routes/search.js');
+const countryTrends = require('./routes/country-trends.js');
 // Use the trends and search routers so that they can be fetched from the
 // client-side scripts.
 app.use('/trends', trends.router);
 app.use('/search', search.router);
+app.use('/country-trends', countryTrends.router);
 
-//trends.updateTrendsFunction();  // Uncomment this to get trends if none is in the datastore.
+// Uncomment the following line to get trends if none is in the datastore.
+// trends.updateTrendsFunction();
 
 var schedule = require('node-schedule');
 // Update top trends at minute 0 past every 12th hour (11am and 23pm every day).
