@@ -14,7 +14,7 @@
 
 const express = require('express');
 const app = express();
-// Listen to the App Engine-specified port, or 3000 otherwise.
+// Listen to the App Engine-specified port, or 4503 otherwise.
 const PORT = process.env.PORT || 4503;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);
@@ -22,7 +22,7 @@ app.listen(PORT, () => {
 
 // Use express to create server that displays the webpage with the html, css, 
 // and javascript files in the public folder.
-app.use(express.static(__dirname +'/public'));
+app.use(express.static('./public'));
 app.get('/', (req, res) => {
   res.sendFile('/index.html');
 });
