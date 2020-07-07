@@ -49,11 +49,11 @@ async function retrieveGlobalTrends() {
  * for the 46 countries where trends are available using the Google Trends API.
  */
 async function updateDailyTrends() {
-  let countryJson = require('./../public/countries-with-trends.json');
-  
+  const countryJson = require('./../public/countries-with-trends.json');
+
   let trendsByCountry = [];
   for (let i = 0; i < countryJson.length; i++) {
-    country = countryJson[i];
+    let country = countryJson[i];
     await googleTrends.dailyTrends({
       trendDate: new Date(),
       geo: country.id,
@@ -74,7 +74,7 @@ async function updateDailyTrends() {
 
 /** 
  * Creates a JSON item for trends in the given country.
- * @param {?Array<JSON>} trendingSearches The JSON array including the top trends 
+ * @param {?Array<JSON>} trendingSearches The JSON array containing the top trends 
  * of the given country.
  * @param {string} countryCode The two-letter code for the country considered.
  * @return {Object<JSON>} A JSON object that includes a country's code and its 

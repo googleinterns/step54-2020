@@ -20,7 +20,7 @@ const datastore = new Datastore();
 
 /** Renders the trends data of the country given by the request parameter. */
 router.get('/:country', (req, res) => {
-  var country = req.params.country;
+  let country = req.params.country;
   retrieveCountryTrends(country).then(trends => {
     res.setHeader('Content-Type', 'application/json');
     res.send(trends);
@@ -29,7 +29,7 @@ router.get('/:country', (req, res) => {
 
 /**
  * Gets the trends data (each trend including title, articles, and sentiment) 
- * from the datastore for the specified country.
+ * from the Datastore for the specified country.
  */
 async function retrieveCountryTrends(country) {
   const query = datastore.createQuery('TrendsEntry').order('timestamp', {

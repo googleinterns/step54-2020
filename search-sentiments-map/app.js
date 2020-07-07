@@ -31,10 +31,10 @@ const trends = require('./routes/trends.js');
 // Use the trends router so that it can be fetched from the client-side scripts.
 app.use('/trends', trends.router);
 
-// Uncomment the following line to get trends if none is in the datastore.
+// Uncomment the following line to get trends if none are in the Datastore.
 // trends.updateTrendsFunction();
 
-var schedule = require('node-schedule');
+const schedule = require('node-schedule');
 // Update top trends at minute 0 past every 12th hour (11am and 23pm every day).
 var j = schedule.scheduleJob('0 11,23 * * * *', function(){
   trends.updateTrendsFunction();

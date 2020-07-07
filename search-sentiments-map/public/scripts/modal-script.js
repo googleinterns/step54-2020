@@ -25,35 +25,29 @@ function clickOnRegion(e) {
   document.getElementById('modal-title').innerText = country;
   document.getElementById('search-results-tab').innerText = 
       country + ": " + countryData;
-  displayTrends(country);
+
+  const countryCode = e.feature.getId();
+  displayTrends(countryCode);
 }
 
-/** 
- * Display top trends for the selected country. 
- * @param {string} country The full name of the selected country.
+/**
+ * Displays trends under the top-trends modal tab for the selected country.
+ * @param {string} countryCode The two-letter code of the selected country.
  */
-function displayTrends(country) {
-  // Convert the country name to its two-letter code.
-  fetch('../country-code.json').then(countryCodes => 
-      countryCodes.json()).then(countryCodes => {
-    let queriedCountry = countryCodes
-        .filter(countryEntry => countryEntry.name === country);
-    return queriedCountry[0].id;
-  }).then(countryCode => {
-    // Retrieve the trends from the backend given the country code.
-    fetch('/country-trends/' + countryCode).then(countryTrends => 
-        countryTrends.json()).then(trends => {
-      let topTrendsTab = document.getElementById('top-trends-tab');
-      topTrendsTab.innerHTML = '';
-      if (trends.length === 0) {
-        topTrendsTab.innerText = 'Trends in this country is not available.';
-      } else {
-        trends.forEach(trend => {
-          let trendHeader = document.createElement('h5');
-          trendHeader.innerText = trend.topic;
-          topTrendsTab.appendChild(trendHeader);
-        });
-      }
-    });
+function displayTrends(countryCode) {
+  const topTrendsTab = document.getElementById('top-trends-tab');
+  topTrendsTab.innerHTML = '';
+
+  fetch('/country-trends/' + countryCode).then(countryTrends => 
+      countryTrends.json()).then(trends => {
+    if (trends.length === 0) {
+      topTrendsTab.innerText = 'Trends in this country is not available.';
+    } else {
+      trends.forEach(trend => {
+        const trendHeader = document.createElement('h5');
+        trendHeader.innerText = trend.topic;
+        topTrendsTab.appendChild(trendHeader);
+      });
+    }
   });
 }
