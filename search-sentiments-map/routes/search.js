@@ -24,13 +24,25 @@ const datastore = new Datastore();
 const json = require('./../public/country-code.json');
 
 /** 
- * Renders a JSON array of the top search trend for all countries with API data
- * obtained every 12 hours.
+ * Renders a JSON array of the top search results for all countries with API data
+ * obtained every 12 hours for the top trend.
  */
-// TODO(carmenbenitez): Convert to only request search result for specific topic.
+// TODO(carmenbenitez): Update topic to be top trend.
 router.get('/', (req, res) => {
-  console.log("here");
-  retrieveSearchResultFromDatastore('trump').then(customSearchTopicJsonArray => {
+  let topic = 'trump;'
+  retrieveSearchResultFromDatastore(topic).then(customSearchTopicJsonArray => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(customSearchTopicJsonArray);
+  });
+});
+
+/** 
+ * Renders a JSON array of the top search results for all countries with API data
+ * obtained every 12 hours for the specified topic.
+ */
+router.get('/:topic', (req, res) => {
+  let topic = req.params.topic;
+  retrieveSearchResultFromDatastore(topic).then(customSearchTopicJsonArray => {
     res.setHeader('Content-Type', 'application/json');
     res.send(customSearchTopicJsonArray);
   });
@@ -45,7 +57,9 @@ router.get('/', (req, res) => {
 // TODO: Convert to only request search result for given query. Currently
 // only returns one result(because we delete all results before adding more).
 async function retrieveSearchResultFromDatastore(topic) {
-  const query = datastore.createQuery('CustomSearchTopic').filter('topic',topic).limit(1);
+  const query = datastore.createQuery('CustomSearchTopic').order('timestamp', {
+    descending: true,
+  }).filter('topic',topic).limit(1);
 
   try {
     const [customSearchTopic] = await datastore.runQuery(query);
@@ -137,18 +151,22 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
   }
 }
 
-/** Delete previous search results. */
-// TODO(@carmenbenitez): Change to delete trend records that were saved more
-// than 7 days ago. Currently deletes all previous results.
+/** Deletes search results from 7 days ago. */
 async function deleteAncientResults() {
-  const query = datastore.createQuery('CustomSearchTopic');
+  const query = datastore.createQuery('CustomSearchTopic').order('timestamp');
   const [searchResults] = await datastore.runQuery(query);
 
   // Note: Can't use forEach with await.
+  // Loop through sorted data beginnning with oldest results, delete if older
+  // than a week. Stop when reach results from within a week.
   for (let i = 0; i < searchResults.length; i++) {
-    const searchResultKey = searchResults[i][datastore.KEY];
-    await datastore.delete(searchResultKey);
-    console.log(`Search Result ${searchResultKey.id} deleted.`)
+    if (Date.now() - searchResults[i].timestamp > 7 * 24 * 60 * 60000) {
+      const searchResultKey = searchResults[i][datastore.KEY];
+      await datastore.delete(searchResultKey);
+      console.log(`Search Result ${searchResultKey.id} deleted.`)
+    } else {
+      break;
+    }
   }
 }
 

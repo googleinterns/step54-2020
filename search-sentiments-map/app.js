@@ -48,5 +48,7 @@ var j = schedule.scheduleJob('0 11,23 * * * *', function(){
 // Schedule the function that updates search to be run  at midnight and noon
 // everyday.
 var searchResultUpdateSchedule = schedule.scheduleJob('0 0,12 * * *', function(){
-  search.updateSearchResults();
+// Commented out this line for now to avoid excess billing. Already tested.
+// Uncomment out when ready to do final deploy.
+  //  search.updateSearchResults();
 });

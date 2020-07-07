@@ -25,8 +25,8 @@ function clickOnRegion(e) {
   const countryId = e.feature.getId();
   const countryData= e.feature.getProperty('country_data').toLocaleString();
   document.getElementById('modal-title').innerText = countryName;
-  setTopResults(countryId);
-  displayTrends(country);
+  displayTopResults(countryId);
+  displayTrends(countryName);
 }
 
 /** 
@@ -59,23 +59,32 @@ function displayTrends(country) {
   });
 }
 
-
 /** 
  * Displays the top results for Trump on modal. 
  */
 // TODO(carmnebenitez): Update to call for specific query not "trump".
-function setTopResults(countryCode) { 
+function displayTopResults(countryCode) { 
+  let resultElement =  document.getElementById('search-results-tab');
+  resultElement.innerHTML = '';
+  let topic = 'trump';
   // Get the 10 search results from the backend and format them.
-  fetch('/search').then(resultsJsonArray => resultsJsonArray.json())
+  fetch('/search/' + topic).then(resultsJsonArray => resultsJsonArray.json())
       .then(topicResults => {
     // get results for specified country
-    results = topicResults.countries[0].results;
-    let resultElement =  document.getElementById('search-results-tab');
-    resultElement.innerHTML = '';
+    let countryData = topicResults.countries
+        .filter(countries => countries.country === countryCode);
+    let results = countryData[0].results;
+    let date = new Date(topicResults.timestamp);
+    //handle case of empty
+    if (results.length === 0) {
+      resultElement.innerHTML += 'No results.<br>';
+    }
     for (let i = 0; i < results.length; i++) {
       resultElement.innerHTML += '<a href=' + results[i].link + '>' +
           results[i].htmlTitle + '</a><br>' + results[i].htmlSnippet+ '<br>';
     }
+    resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
+    '<i><br>';
   });
 }
 
