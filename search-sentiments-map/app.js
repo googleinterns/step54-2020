@@ -36,10 +36,10 @@ app.use('/trends', trends.router);
 app.use('/search', search.router);
 app.use('/country-trends', countryTrends.router);
 
-// Uncomment the following line to get trends if none is in the datastore.
+// Uncomment the following line to get trends if none are in the Datastore.
 // trends.updateTrendsFunction();
 
-var schedule = require('node-schedule');
+const schedule = require('node-schedule');
 // Update top trends at minute 0 past every 12th hour (11am and 23pm every day).
 var j = schedule.scheduleJob('0 11,23 * * * *', function(){
   trends.updateTrendsFunction();
