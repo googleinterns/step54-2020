@@ -67,7 +67,7 @@ async function retrieveSearchResultFromDatastore(topic) {
 // TODO(carmenbenitez): Update this to instead loop through top 10 trending
 // searches and get that data instead.
 function updateSearchResults() {
-  updateSearchResultsForTopic("trump");
+  updateSearchResultsForTopic('trump');
 }
 
 /** 
@@ -80,7 +80,7 @@ async function updateSearchResultsForTopic(query) {
   let countriesData = [];
 
   // Note: Can't use forEach with await.
-  for (let i = 0; i < json.length; i++) {
+  for (let i = 0; i < json.length; i++) { // When testing, make this equal to 3 countries. 
     var set =0;
     // 100 queries per minute limit for Custom Search API. Pause to prevent
     // surpassing limit.
@@ -91,6 +91,7 @@ async function updateSearchResultsForTopic(query) {
     // Update countryData within the functions called.
     const avg = await getSearchResultsForCountryFromAPI(
         "country" + json[i].id, query, countryData);
+    console.log('ntarn debug country: ' + json[i].id + ' average: ' + avg);
     countriesData.push({
       country: json[i].id,
       average: avg,
@@ -131,10 +132,15 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
   var currentSearchResults = searchResultsJson.items;
   try {
     let avg = 0;
-    for (var i = 0; i < currentSearchResults.length; i++) {
-      avg = avg + await addSearchResultToCountryData(currentSearchResults[i], countryData);
+    if (currentSearchResults == undefined) {
+      return 0;
+    } else {
+      for (var i = 0; i < currentSearchResults.length; i++) {
+        avg = avg + await addSearchResultToCountryData(currentSearchResults[i], countryData);
+      }
+      return avg / currentSearchResults.length;
     }
-    return avg / currentSearchResults.length;
+    
   } catch (err) { // Occurs when no search results for that country and topic.
     console.error('ERROR:', err);
     countryData = null;
@@ -190,18 +196,24 @@ async function addTopicToDatastore(topic, countriesData) {
  * Adds search result object to countryData array.
  * @param {Object} searchResult Object with information for one search result.
  * @param {Object} countryData Object holding all searchResults for a country.
+ * Returns a Promise wrapped around a result.score //edit with typescript (look into that)
 */
 function addSearchResultToCountryData(searchResult, countryData) {
-  sentimentScore = getSentiment(searchResult);
-  searchResultData = {
-    title: searchResult.title,
-    snippet: searchResult.snippet,
-    htmlTitle: searchResult.htmlTitle,
-    link: searchResult.link,
-    score: sentimentScore,
-  };
-  countryData.push(searchResultData);
-  return sentimentScore;
+  return getSentiment(searchResult)
+    .then(response => response.json())
+    .then((result) => { 
+      console.log('ntarn debug: frontend' + result.score);
+      searchResultData = {
+        title: searchResult.title,
+        snippet: searchResult.snippet,
+        htmlTitle: searchResult.htmlTitle,
+        link: searchResult.link,
+        score: result.score,
+      };
+      countryData.push(searchResultData);
+      return result.score;
+    });
+  
 }
 
 /** 
@@ -209,16 +221,11 @@ function addSearchResultToCountryData(searchResult, countryData) {
  * @param {Object} searchResult Object with information for one search result.
  */
 function getSentiment(searchResult) {
-  fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {method: 'POST',  // Send a request to the URL.
+  return fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {method: 'POST',  // Send a request to the URL.
     headers: new Headers({
       'Content-Type': 'text/plain',
     }),
     body: searchResult.title + searchResult.snippet
-    })
-    .then(response => response.json())
-    .then((result) => { 
-      console.log('ntarn debug: frontend' + result.score);
-      return result.score;
     })
     .catch(err => {
       console.log(err);

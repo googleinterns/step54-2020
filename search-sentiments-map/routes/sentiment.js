@@ -57,7 +57,7 @@ router.post('/', textParser, (req, res) => {
       response = {  
         score: sentimentScore,  
       };  
-      console.log('ntarn debug: score' + response.average); 
+      console.log('ntarn debug: score' + response.score); 
       res.end(JSON.stringify(response)); 
     }).catch(err => {
       console.log(err);
@@ -66,26 +66,32 @@ router.post('/', textParser, (req, res) => {
 
 
 async function quickstart(searchTopic) {
-  // Instantiate a client.
-  const client = new language.LanguageServiceClient();
+  try {
+    // Instantiate a client.
+    const client = new language.LanguageServiceClient();
 
-  // The text to analyze.
-  const text = searchTopic;
+    // The text to analyze.
+    const text = searchTopic;
 
-  const document = {
-    content: text,
-    type: 'PLAIN_TEXT',
-  };
+    const document = {
+      content: text,
+      type: 'PLAIN_TEXT',
+    };
 
-  // Detect the sentiment of the text.
-  const [result] = await client.analyzeSentiment({document: document});
-  const sentiment = result.documentSentiment;
+    // Detect the sentiment of the text.
+    const [result] = await client.analyzeSentiment({document: document});
+    const sentiment = result.documentSentiment;
 
-  console.log(`ntarn debug use api Text: ${text}`);
-  console.log(`ntarn debug use api Sentiment score: ${sentiment.score}`);
-  // console.log(`ntarn debug use api Sentiment magnitude: ${sentiment.magnitude}`);
+    console.log(`ntarn debug use api Text: ${text}`);
+    console.log(`ntarn debug use api Sentiment score: ${sentiment.score}`);
+    // console.log(`ntarn debug use api Sentiment magnitude: ${sentiment.magnitude}`);
 
-  return sentiment.score;
+    return sentiment.score;
+  } catch (err) { // Occurs when the language is not supported for document sentiment analysis.
+    console.error('ERROR:', err);
+    return 0;
+  }
+
 }
 
 module.exports.router = router;
