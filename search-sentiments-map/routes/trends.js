@@ -20,6 +20,7 @@ const router = express.Router();  // Using Router to divide the app into modules
 const googleTrends = require('google-trends-api');
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
+const TRENDS_DATA_KIND = 'TrendsEntry';
 
 /** 
  * Renders a JSON array of the top 20 (or fewer) global search trends maintained
@@ -37,7 +38,7 @@ router.get('/', (req, res) => {
  * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
  */
 async function retrieveGlobalTrends() {
-  const query = datastore.createQuery('TrendsEntry').order('timestamp', {
+  const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp', {
     descending: true,
   });
   const [trendsEntry] = await datastore.runQuery(query);
@@ -126,7 +127,7 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
 async function saveTrendsAndDeletePrevious(trendsByCountry) {
   await deleteAncientTrend();
 
-  const trendsEntryKey = datastore.key('TrendsEntry');
+  const trendsEntryKey = datastore.key(TRENDS_DATA_KIND);
   const trendsEntry = {
     key: trendsEntryKey,
     data: {
@@ -149,9 +150,9 @@ async function saveTrendsAndDeletePrevious(trendsByCountry) {
  */
 async function deleteAncientTrend() {
   // Query entries in ascending order of the time of creation.
-  const query = datastore.createQuery('TrendsEntry').order('timestamp');
+  const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp');
   const [trendsEntries] = await datastore.runQuery(query);
-  
+
   if (trendsEntries.length === 0) {
     return;  // Nothing to delete.
   }
@@ -168,7 +169,7 @@ async function deleteAncientTrend() {
  * TODO(@chenyuz): Delete this function when everything is done.
  */
 async function deleteAllTrends() {
-  const query = datastore.createQuery('TrendsEntry').order('timestamp');
+  const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp');
   const [trendsEntries] = await datastore.runQuery(query);
 
   for (let i = 0; i < trendsEntries.length; i++) {
