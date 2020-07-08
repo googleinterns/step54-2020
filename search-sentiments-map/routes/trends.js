@@ -58,8 +58,6 @@ async function updateDailyTrends() {
       trendDate: new Date(),
       geo: country.id,
     }).then(dailyTrendsJsonString => {
-      console.log('trends JSON created for', country.id, country.name);
-
       // Parse the JSON string and get the trending topics.
       trendingSearches = JSON.parse(dailyTrendsJsonString)
           .default.trendingSearchesDays[0].trendingSearches;
@@ -118,8 +116,8 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
       }...
     ],
     globalTrends: [{
-        country: US,
         trendTopic: X,
+        count: 5,
     }, ...]
    }
  * @param {!Array<JSON>} trendsByCountry An array where each element is a country
@@ -153,7 +151,10 @@ async function deleteAncientTrend() {
   // Query entries in ascending order of the time of creation.
   const query = datastore.createQuery('TrendsEntry').order('timestamp');
   const [trendsEntries] = await datastore.runQuery(query);
-
+  
+  if (trendsEntries.length === 0) {
+    return;  // Nothing to delete.
+  }
   if (Date.now() - trendsEntries[0].timestamp > 7 * 24 * 60 * 60000) {
     const trendsEntryKey = trendsEntries[0][datastore.KEY];
     await datastore.delete(trendsEntryKey);
@@ -162,25 +163,68 @@ async function deleteAncientTrend() {
 }
 
 /** 
- * Finds the globally trending topics based on trending topics in each country.
- * Currently returning all topics from the US. TODO(@chenyuz): get a mixture of
- * topics from different countries.
+ * Deletes all trends entries in the Datastore. 
+ * Call this function when there is an update of the trends data structure. 
+ * TODO(@chenyuz): Delete this function when everything is done.
+ */
+async function deleteAllTrends() {
+  const query = datastore.createQuery('TrendsEntry').order('timestamp');
+  const [trendsEntries] = await datastore.runQuery(query);
+
+  for (let i = 0; i < trendsEntries.length; i++) {
+    const trendKey = trendsEntries[i][datastore.KEY];
+    await datastore.delete(trendKey);
+    console.log(`Trend ${trendsEntryKey.id} deleted.`)
+  }
+}
+
+/** 
+ * Finds the trending topics that appear the most across all recorded countries 
+ * and gets the top 10 as the globally trending topics.
  * @param {!Array<JSON>} trendsByCountry An array where each element is a country
  * and its trends.
- * @return {!Array<JSON>} Globally trending topics and their originating countries.
+ * @return {!Array<JSON>} 10 globally trending topics and the number of countries 
+ * where they are trending.
  */
 function getGlobalTrends(trendsByCountry) {
-  // Find all trends list(s) whose designated country is the US.
-  let UStrends = trendsByCountry.filter(trends => trends.country === 'US');
-  UStrends = UStrends[0].trends;
-
-  let globalTrends = [];
-  UStrends.forEach(trend => {
-    globalTrends.push({
-      country: 'US',
-      trendTopic: trend.topic,
+  // Use a map to count the number of occurences of each trend.
+  let trendCountsMap = new Map();
+  trendsByCountry.forEach(trends => {
+    trends.trends.forEach(trend => {
+      let topic = trend.topic;
+      if (trendCountsMap.has(topic)) {
+        let newCount = trendCountsMap.get(topic) + 1;
+        trendCountsMap.set(topic, newCount);
+      } else {
+        trendCountsMap.set(topic, 1)
+      }
     });
   });
+
+  // Note: Could we use only one data structure here? 
+  // One option is to install the npm SortedMap module.
+
+  // Convert the counts to an array to allow sorting.
+  let trendCountsArr = [];
+  for (let [topic, count] of trendCountsMap) {
+    trendCountsArr.push({
+      topic: topic,
+      count: count,  
+    })
+  }
+  // Sort in descending order.
+  trendCountsArr.sort((trend, otherTrend) => {
+    return otherTrend.count - trend.count;
+  })
+
+  let globalTrends = [];
+  // Get the top 10 trends overall.
+  for (let i = 0; i < 10; i++) {
+    globalTrends.push({
+      trendTopic: trendCountsArr[i].topic,
+      count: trendCountsArr[i].count,
+    });
+  }
   return globalTrends;
 }
 

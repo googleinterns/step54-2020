@@ -19,17 +19,20 @@ const TOGGLE_SHOW_LESS = 'Show Less';
 const CLASSNAME_SHOWN = 'shown';
 const CLASSNAME_HIDDEN = 'hidden';
 
-/** Displays the top trends of the US on the DOM. */
+/** Displays the top trends on the DOM. */
 function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
 
-  // Get the 20 trending search topics from the backend.
+  // Get the top 10 globally trending search topics from the backend.
   fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
     for (let i = 0; i < trends.length; i++) {
       const trendElement = document.createElement('li');
-      trendElement.innerText = `${trends[i].trendTopic} (${trends[i].country})`;
-      // Show 10 trending topics by default and hide the rest.
-      trendElement.className = i < 10 ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
+      trendElement.innerText = `${trends[i].trendTopic}`;
+      // Display the number of countries where the trend is trending when hovered.
+      trendElement.title = `Trending in ${trends[i].count} countries`;
+
+      // Show 7 trending topics by default and hide the rest.
+      trendElement.className = i < 7 ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
       trendElement.addEventListener('click', (event) => {
         showResultForTopic(event);
       })
@@ -37,8 +40,8 @@ function setTopTrends() {
     }
 
     // Add an item to the list that toggles showing more or less topics when there
-    // are more than 10 trending topics.
-    if (trends.length > 10) {
+    // are more than 7 trending topics.
+    if (trends.length > 7) {
       const showMoreOrLessToggleItem = document.createElement('li');
       showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
       showMoreOrLessToggleItem.id = SHOW_MORE_OR_LESS_ID;
@@ -51,19 +54,19 @@ function setTopTrends() {
 }
 
 /**
- * Shows the remaining 10 trending topics if the user clicks on 'See More' and
- * hides the last 10 if the user clicks on 'See Less.'
+ * Shows the trending topics over the 7th if the user clicks on 'See More' and
+ * hides those if the user clicks on 'See Less.'
  */
 function showMoreOrLess() {
   const showMoreOrLessToggleItem = document.getElementById(SHOW_MORE_OR_LESS_ID);
   const trendElements = document.querySelectorAll('#trends-list li');
   if (showMoreOrLessToggleItem.innerText === TOGGLE_SHOW_MORE) {
-    for (let i = 10; i < trendElements.length - 1; i++){
+    for (let i = 7; i < trendElements.length - 1; i++){
       trendElements[i].className  = CLASSNAME_SHOWN;
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_LESS;
   } else {
-    for (let i = 10; i < trendElements.length - 1; i++) {
+    for (let i = 7; i < trendElements.length - 1; i++) {
       trendElements[i].className  = CLASSNAME_HIDDEN;
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
