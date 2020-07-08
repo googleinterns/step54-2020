@@ -15,6 +15,6 @@
 /** Creates the world map. */
 function createWorldMap() {
   map = new google.maps.Map(
-      document.getElementById('map'),
-      {center: {lat: 38.46049, lng: -5.428423}, zoom: 3});
+    document.getElementById('map'),
+    {center: {lat: 38.46049, lng: -5.428423}, zoom: 3});
 }
