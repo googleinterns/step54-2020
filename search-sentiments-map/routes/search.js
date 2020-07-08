@@ -22,6 +22,7 @@ const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
 const json = require('./../public/country-code.json');
+global.Headers = fetch.Headers;
 
 /** 
  * Renders a JSON array of the top search results for all countries with API data
@@ -88,11 +89,11 @@ async function updateSearchResultsForTopic(query) {
     }
     let countryData = [];
     // Update countryData within the functions called.
-    await getSearchResultsForCountryFromAPI(
+    const avg = await getSearchResultsForCountryFromAPI(
         "country" + json[i].id, query, countryData);
     countriesData.push({
       country: json[i].id,
-      //score: score,
+      average: avg,
       results: countryData,
     });
   }
@@ -111,8 +112,8 @@ async function getSearchResultsForCountryFromAPI(countryCode, query, countryData
   let response = 
       await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults =  await response.json();
-  console.log(searchResults);
-  await saveResultsAndDeletePrevious(searchResults, countryData);
+  // console.log(searchResults);
+  return await saveResultsAndDeletePrevious(searchResults, countryData);
 }
 
 /**
@@ -129,11 +130,12 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
   // countryData object.
   var currentSearchResults = searchResultsJson.items;
   try {
+    let avg = 0;
     for (var i = 0; i < currentSearchResults.length; i++) {
-      await addSearchResultToCountryData(currentSearchResults[i], countryData);
-      //TODO(ntarn): search results from a given country
+      avg = avg + await addSearchResultToCountryData(currentSearchResults[i], countryData);
     }
-  } catch  (err) { // Occurs when no search results for that country and topic.
+    return avg / currentSearchResults.length;
+  } catch (err) { // Occurs when no search results for that country and topic.
     console.error('ERROR:', err);
     countryData = null;
   }
@@ -189,16 +191,38 @@ async function addTopicToDatastore(topic, countriesData) {
  * @param {Object} searchResult Object with information for one search result.
  * @param {Object} countryData Object holding all searchResults for a country.
 */
-// TODO(ntarn): Add in sentiment score for this search result.
 function addSearchResultToCountryData(searchResult, countryData) {
+  sentimentScore = getSentiment(searchResult);
   searchResultData = {
     title: searchResult.title,
     snippet: searchResult.snippet,
     htmlTitle: searchResult.htmlTitle,
     link: searchResult.link,
-    // score = sentimentscore
+    score: sentimentScore,
   };
   countryData.push(searchResultData);
+  return sentimentScore;
+}
+
+/** 
+ * Gets the sentiment score of a search result. 
+ * @param {Object} searchResult Object with information for one search result.
+ */
+function getSentiment(searchResult) {
+  fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {method: 'POST',  // Send a request to the URL.
+    headers: new Headers({
+      'Content-Type': 'text/plain',
+    }),
+    body: searchResult.title + searchResult.snippet
+    })
+    .then(response => response.json())
+    .then((result) => { 
+      console.log('ntarn debug: frontend' + result.score);
+      return result.score;
+    })
+    .catch(err => {
+      console.log(err);
+    });
 }
 
 module.exports.router = router;
