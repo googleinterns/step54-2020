@@ -36,15 +36,8 @@ const sentiment = require('./routes/sentiment.js');
 // client-side scripts.
 app.use('/trends', trends.router);
 app.use('/search', search.router);
-app.use('/sentiment', sentiment.router);
-
-
-// Use the trends, search, and sentiment routers so that they can be fetched from the
-// client-side scripts.
-app.use('/trends', trends.router);
-app.use('/search', search.router);
 app.use('/country-trends', countryTrends.router);
-app.use('/country-trends', sentiment.router);
+app.use('/sentiment', sentiment.router);
 
 // Uncomment the following line to get trends if none are in the Datastore.
 // trends.updateTrendsFunction();
