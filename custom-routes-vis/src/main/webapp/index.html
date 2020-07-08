@@ -20,9 +20,13 @@
       <div class="col-sm-3">
         <div >
           <h5>Origin Coordinates:</h5>
-          <div id='origin-coordinates'>No origin selected. Click on map to select one.</div><br>
+          <div id='origin-coordinates'></div><br>
+          <button type="button" class="btn btn-success " onclick="showMarker(0)" id="show-origin-marker">Place Marker</button>
+          <button type="button" class="btn btn-danger hidden" onclick="hideMarker(0)" id="hide-origin-marker">Delete Marker</button><br>
           <h5>Destination Coordinates:</h5>
-          <div id='destination-coordinates'>No destination selected. Click on map to select one.</div><br>
+          <div id='destination-coordinates'></div><br>
+          <button type="button" class="btn btn-success " onclick="showMarker(1)" id="show-destination-marker">Place Marker</button>
+          <button type="button" class="btn btn-danger hidden" onclick="hideMarker(1)" id="hide-destination-marker">Delete Marker</button>
         </div>
       </div>
     </div>
