@@ -151,7 +151,10 @@ async function deleteAncientTrend() {
   // Query entries in ascending order of the time of creation.
   const query = datastore.createQuery('TrendsEntry').order('timestamp');
   const [trendsEntries] = await datastore.runQuery(query);
-
+  
+  if (trendsEntries.length === 0) {
+    return;  // Nothing to delete.
+  }
   if (Date.now() - trendsEntries[0].timestamp > 7 * 24 * 60 * 60000) {
     const trendsEntryKey = trendsEntries[0][datastore.KEY];
     await datastore.delete(trendsEntryKey);
