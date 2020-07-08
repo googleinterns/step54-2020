@@ -36,7 +36,7 @@ app.use('/trends', trends.router);
 
 const schedule = require('node-schedule');
 // Update top trends at minute 0 past every 12th hour (11am and 23pm every day).
-var j = schedule.scheduleJob('0 11,23 * * * *', function(){
+var j = schedule.scheduleJob('0 11,23 * * *', function(){
   trends.updateTrendsFunction();
 });
 
