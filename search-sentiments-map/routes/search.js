@@ -63,11 +63,7 @@ async function retrieveSearchResultFromDatastore(topic) {
 /** 
  * Updates daily search results (accumulates by day) in the Datastore.
  */
-// TODO(carmenbenitez): Update this to instead loop through top 10 trending
-// searches and get that data instead.
 function updateSearchResults() {
-  // updateSearchResultsForTopic("trump");
-
   retrieveGlobalTrends().then(trends => {
     trends.forEach(function(trend) {
       updateSearchResultsForTopic(trend.trendTopic);
@@ -88,8 +84,7 @@ async function updateSearchResultsForTopic(query) {
   let countriesData = [];
 
   // Note: Can't use forEach with await.
-  //json.length;
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < json.length; i++) {
     // 100 queries per minute limit for Custom Search API. Pause to prevent
     // surpassing limit.
     if (i !== 0 && i % 100 === 0) {
