@@ -39,7 +39,7 @@ function setNewTrend(trend) {
   //   currentTrend = 'TOP TREND HERE';
   // }
 
-  currentTrend = 'trump';
+  currentTrend = 'Liverpool';
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = 
       'Worldwide sentiments of search results for "' + currentTrend + '"';

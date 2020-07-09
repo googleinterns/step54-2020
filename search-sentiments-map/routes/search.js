@@ -64,10 +64,13 @@ async function retrieveSearchResultFromDatastore(topic) {
 /** 
  * Updates daily search results (accumulates by day) in the Datastore.
  */
-// TODO(carmenbenitez): Update this to instead loop through top 10 trending
-// searches and get that data instead.
 function updateSearchResults() {
-  updateSearchResultsForTopic('trump');
+  retrieveGlobalTrends().then(async trends => {
+    for (let i =0; i < trends.length; i++) {
+      updateSearchResultsForTopic(trends[i].trendTopic);
+      await new Promise(resolve => setTimeout(resolve, 60000));
+    }
+  });
 }
 
 /** 
@@ -159,7 +162,7 @@ async function deleteAncientResults() {
     if (Date.now() - searchResults[i].timestamp > 7 * 24 * 60 * 60000) {
       const searchResultKey = searchResults[i][datastore.KEY];
       await datastore.delete(searchResultKey);
-      console.log(`Search Result ${searchResultKey.id} deleted.`)
+      console.log(`Custom Search Result ${searchResultKey.id} deleted.`)
     } else {
       break;
     }
@@ -186,7 +189,7 @@ async function addTopicToDatastore(topic, countriesData) {
   };
   try {
     await datastore.save(entity);
-    console.log(`Search Result ${customSearchTopicKey.id} created successfully.`);
+    console.log(`Custom Search Result ${customSearchTopicKey.id} created successfully.`);
   } catch (err) {
     console.error('ERROR:', err);
   }
@@ -230,6 +233,18 @@ function getSentiment(searchResult) {
     .catch(err => {
       console.log(err);
     });
+}
+
+/** 
+ * Queries the Datastore for the most recent global trends.
+ * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
+ */
+async function retrieveGlobalTrends() {
+  const query = datastore.createQuery('TrendsEntry').order('timestamp', {
+    descending: true,
+  });
+  const [trendsEntry] = await datastore.runQuery(query);
+  return trendsEntry[0].globalTrends;
 }
 
 module.exports.router = router;
