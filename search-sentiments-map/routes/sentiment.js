@@ -5,7 +5,9 @@ const language = require('@google-cloud/language');
 
 var bodyParser = require('body-parser');  
 // Create application/x-www-form-urlencoded parser.
-var urlencodedParser = bodyParser.urlencoded({ extended: false })  
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
+
+/** Returns the sentiment score of inputted search results. */  
 router.post('/', urlencodedParser, (req, res) => { 
   const searchTopic = req.body.searchTopic;
   console.log('ntarn debug: '+ searchTopic);
@@ -23,8 +25,9 @@ router.post('/', urlencodedParser, (req, res) => {
 });
 
 /** 
- * Returns a double, the sentiment score for the search topic.
+ * Analyzes the sentiment score for the search topic.
  * @param {string} searchTopic Search topic to get data for.
+ * @return {double} Sentiment score for the search topic.
  */
 async function getSentimentScore(searchTopic) {
   // Instantiate a client.

@@ -91,9 +91,9 @@ function getSentiment() {
     body: searchTopicObject // Send search topic with correct content type.
     })
     .then(response => response.json())
-    .then((score) => { 
-      // TODO(ntarn): Remove console.log statement when finished with feature. 
-      console.log('ntarn debug: frontend' + score.sentimentScore);
-      sentimentScoreElement.innerHTML = "<p>Sentiment analysis score: " + score.sentimentScore + "</p>";
-    });
+      .then((score) => { 
+        // TODO(ntarn): Remove console.log statement when finished with feature. 
+        console.log('ntarn debug: frontend' + score.sentimentScore);
+        sentimentScoreElement.innerHTML = "<p>Sentiment analysis score: " + score.sentimentScore + "</p>";
+      });
 }  
