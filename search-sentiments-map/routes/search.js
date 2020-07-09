@@ -22,6 +22,7 @@ const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 const WORLD_DATA_KIND = 'WorldDataByTopic';
 
+const searchInterestsModule = require('./search-interests.js');
 const json = require('./../public/country-code.json');
 
 /** 
@@ -35,7 +36,6 @@ router.get('/:topic', (req, res) => {
     res.send(customSearchTopicJsonArray);
   });
 });
-
 
 /** 
  * Returns a JSON-formatted array of search results for all countries retrieved
@@ -52,8 +52,8 @@ async function retrieveSearchResultFromDatastore(topic) {
     const [worldDataByTopic] = await datastore.runQuery(query);
     return {
       topic: worldDataByTopic[0].topic,
-      dataByCountry: worldDataByTopic[0].dataByCountry,
       timestamp: worldDataByTopic[0].timestamp,
+      dataByCountry: worldDataByTopic[0].dataByCountry,
     };
   } catch (err) {
     console.error('ERROR:', err);
@@ -77,25 +77,31 @@ function updateSearchResults() {
 // TODO(ntarn): Add in average score for search results of a country.
 async function updateSearchResultsForTopic(query) {
   let countriesData = [];
+  await searchInterestsModule.getGlobalSearchInterests(query)
+      .then(async (searchInterests) => {
+    for (let i = 0; i < json.length; i++) {
+      let interest = searchInterests.filter(interestsByCountry => 
+          interestsByCountry.geoCode === json[i].id);
+      let interestScore = interest.length === 0 ? 0 : interest[0].value[0];
 
-  // Note: Can't use forEach with await.
-  for (let i = 0; i < json.length; i++) {
-    // 100 queries per minute limit for Custom Search API. Pause to prevent
-    // surpassing limit.
-    if (i !== 0 && i % 100 === 0) {
-      await new Promise(resolve => setTimeout(resolve, 60000));
+      // 100 queries per minute limit for Custom Search API. Pause to prevent
+      // surpassing limit.
+      //if (i !== 0 && i % 100 === 0) {
+      //  await new Promise(resolve => setTimeout(resolve, 60000));
+      //}
+      let countryData = [];
+      // Update countryData within the functions called.
+      //await getSearchResultsForCountryFromAPI(
+      //    "country" + json[i].id, query, countryData);
+      countriesData.push({
+        country: json[i].id,
+        //score: score,
+        results: countryData,
+        interest: interestScore,
+      });
     }
-    let countryData = [];
-    // Update countryData within the functions called.
-    await getSearchResultsForCountryFromAPI(
-        "country" + json[i].id, query, countryData);
-    countriesData.push({
-      country: json[i].id,
-      //score: score,
-      results: countryData,
-      interest: 80,
-    });
-  }
+  });
+  console.log(countriesData)
   addTopicToDatastore(query, countriesData);
 }
 
@@ -206,8 +212,8 @@ async function addTopicToDatastore(topic, countriesData) {
     key: worldDataByTopicKey,
     data: {
       topic: topic,
-      dataByCountry: countriesData,
       timestamp: Date.now(),  // Get the current timestamp in milliseconds.
+      dataByCountry: countriesData,
     },
   };
   try {

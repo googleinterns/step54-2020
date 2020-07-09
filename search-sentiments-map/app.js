@@ -38,18 +38,14 @@ app.use('/country-trends', countryTrends.router);
 
 // Uncomment the following line to get trends if none are in the Datastore.
 // trends.updateTrendsFunction();
+// search.updateSearchResults();
 
 const schedule = require('node-schedule');
-// Update top trends at minute 0 past every 12th hour (11am and 23pm every day).
+// Update top trends and the corresponding search results at minute 0 past 
+// every 12th hour (11am and 23pm every day).
 var j = schedule.scheduleJob('0 11,23 * * *', async function() {
   await trends.updateTrendsFunction();
+  // Commented out this line for now to avoid excess billing. Already tested.
+  // Uncomment out when ready to do final deploy.
   // search.updateSearchResults();
-});
-
-// Schedule the function that updates search to be run  at midnight and noon
-// everyday.
-var searchResultUpdateSchedule = schedule.scheduleJob('0 0,12 * * *', function() {
-// Commented out this line for now to avoid excess billing. Already tested.
-// Uncomment out when ready to do final deploy.
-  //  search.updateSearchResults();
 });
