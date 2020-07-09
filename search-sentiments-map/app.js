@@ -32,8 +32,10 @@ app.use('/trends', trends.router);
 app.use('/search', search.router);
 app.use('/country-trends', countryTrends.router);
 
-// Uncomment the following line to get trends if none are in the Datastore.
+// Uncomment the following line to get trends or search results if none are in
+// the Datastore.
 // trends.updateTrendsFunction();
+search.updateSearchResults();
 
 // Update top trends at minute 0 past every 12th hour (11am and 23pm every day).
 var j = schedule.scheduleJob('0 11,23 * * *', function(){

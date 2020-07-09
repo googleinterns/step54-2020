@@ -66,7 +66,16 @@ async function retrieveSearchResultFromDatastore(topic) {
 // TODO(carmenbenitez): Update this to instead loop through top 10 trending
 // searches and get that data instead.
 function updateSearchResults() {
-  updateSearchResultsForTopic("trump");
+  // updateSearchResultsForTopic("trump");
+
+  retrieveGlobalTrends().then(trends => {
+    trends.forEach(function(trend) {
+      updateSearchResultsForTopic(trend.trendTopic);
+      // 100 queries per minute limit for Custom Search API. Pause to prevent
+      // surpassing limit.
+      await new Promise(resolve => setTimeout(resolve, 60000));
+    })
+  });
 }
 
 /** 
@@ -79,7 +88,8 @@ async function updateSearchResultsForTopic(query) {
   let countriesData = [];
 
   // Note: Can't use forEach with await.
-  for (let i = 0; i < json.length; i++) {
+  //json.length;
+  for (let i = 0; i < 1; i++) {
     // 100 queries per minute limit for Custom Search API. Pause to prevent
     // surpassing limit.
     if (i !== 0 && i % 100 === 0) {
@@ -110,7 +120,6 @@ async function getSearchResultsForCountryFromAPI(countryCode, query, countryData
   let response = 
       await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults =  await response.json();
-  console.log(searchResults);
   await saveResultsAndDeletePrevious(searchResults, countryData);
 }
 
@@ -149,7 +158,7 @@ async function deleteAncientResults() {
     if (Date.now() - searchResults[i].timestamp > 7 * 24 * 60 * 60000) {
       const searchResultKey = searchResults[i][datastore.KEY];
       await datastore.delete(searchResultKey);
-      console.log(`Search Result ${searchResultKey.id} deleted.`)
+      console.log(`Custom Search Result ${searchResultKey.id} deleted.`)
     } else {
       break;
     }
@@ -176,7 +185,7 @@ async function addTopicToDatastore(topic, countriesData) {
   };
   try {
     await datastore.save(entity);
-    console.log(`Search Result ${customSearchTopicKey.id} created successfully.`);
+    console.log(`Custom Search Result ${customSearchTopicKey.id} created successfully.`);
   } catch (err) {
     console.error('ERROR:', err);
   }
@@ -197,6 +206,18 @@ function addSearchResultToCountryData(searchResult, countryData) {
     // score = sentimentscore
   };
   countryData.push(searchResultData);
+}
+
+/** 
+ * Queries the Datastore for the most recent global trends.
+ * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
+ */
+async function retrieveGlobalTrends() {
+  const query = datastore.createQuery('TrendsEntry').order('timestamp', {
+    descending: true,
+  });
+  const [trendsEntry] = await datastore.runQuery(query);
+  return trendsEntry[0].globalTrends;
 }
 
 module.exports.router = router;
