@@ -18,6 +18,7 @@ const TOGGLE_SHOW_LESS = 'Show Less';
 
 const CLASSNAME_SHOWN = 'shown';
 const CLASSNAME_HIDDEN = 'hidden';
+const NUM_SHOWN = 7;
 
 /** Displays the top trends on the DOM. */
 function setTopTrends() {
@@ -31,17 +32,16 @@ function setTopTrends() {
       // Display the number of countries where the trend is trending when hovered.
       trendElement.title = `Trending in ${trends[i].count} countries`;
 
-      // Show 7 trending topics by default and hide the rest.
-      trendElement.className = i < 7 ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
+      // Show some trending topics by default and hide the rest.
+      trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
       trendElement.addEventListener('click', (event) => {
         showResultForTopic(event);
       })
       trendsList.append(trendElement);
     }
 
-    // Add an item to the list that toggles showing more or less topics when there
-    // are more than 7 trending topics.
-    if (trends.length > 7) {
+    // Add an item to the list that toggles showing more or less topics.
+    if (trends.length > NUM_SHOWN) {
       const showMoreOrLessToggleItem = document.createElement('li');
       showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
       showMoreOrLessToggleItem.id = SHOW_MORE_OR_LESS_ID;
@@ -61,12 +61,12 @@ function showMoreOrLess() {
   const showMoreOrLessToggleItem = document.getElementById(SHOW_MORE_OR_LESS_ID);
   const trendElements = document.querySelectorAll('#trends-list li');
   if (showMoreOrLessToggleItem.innerText === TOGGLE_SHOW_MORE) {
-    for (let i = 7; i < trendElements.length - 1; i++){
+    for (let i = NUM_SHOWN; i < trendElements.length - 1; i++){
       trendElements[i].className  = CLASSNAME_SHOWN;
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_LESS;
   } else {
-    for (let i = 7; i < trendElements.length - 1; i++) {
+    for (let i = NUM_SHOWN; i < trendElements.length - 1; i++) {
       trendElements[i].className  = CLASSNAME_HIDDEN;
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
