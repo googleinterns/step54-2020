@@ -56,14 +56,14 @@ function displayTrends(countryCode) {
  */
 // TODO(ntarn): Add Sentiment scores to this modal.
 function displayTopResults(countryCode) { 
-  let topic = getCurrentTrend;
+  let topic = getCurrentTrend();
   let topicData = getCurrentCustomSearchData();
   let date = new Date(topicData.timestamp);
   let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
 
-  let countryData = topicData.countries
-      .filter(countries => countries.country === countryCode);
+  let countryData = topicData.dataByCountry
+      .filter(dataByCountry => dataByCountry.country === countryCode);
   let results = countryData[0].results;
 
   // Handle case where there are no results.
