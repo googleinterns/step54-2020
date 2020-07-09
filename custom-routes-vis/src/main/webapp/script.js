@@ -73,13 +73,24 @@ function showMarker(markerIndex) {
     markers[markerIndex].setPosition(event.latLng);
     google.maps.event.removeListener(placeMarkerListener);
     markers[markerIndex].setVisible(true);
-    updateCoordinates(event.latLng.lat(), event.latLng.lng(), containerName + '-coordinates');
-    document.getElementById('hide-' + containerName + '-marker').style.display = 'block';
+    updateCoordinates(event.latLng.lat(), event.latLng.lng(),
+        containerName + '-coordinates');
+    document.getElementById('hide-' + containerName + '-marker')
+        .style.display = 'block';
+
+    // Display generate routes button when both markers have been placed.
+    if (document.getElementById('hide-' + 
+        ((markerIndex !== 0) ? 'origin' : 'destination') + '-marker')
+            .style.display === 'block') {
+      document.getElementById('generate-routes').style.display = 'block';
+    }
   });
 
-  let containerToHide = 'show-' + ((markerIndex === 0) ? 'origin' : 'destination') + '-marker'
+  let containerToHide =
+      'show-' + ((markerIndex === 0) ? 'origin' : 'destination') + '-marker';
   document.getElementById(containerToHide).style.display = 'none';
-  document.getElementById(containerName + '-coordinates').innerHTML = 'Click the map to select location!';
+  document.getElementById(containerName + '-coordinates').innerHTML =
+      'Click the map to select location!';
 }
 
 /**
@@ -94,4 +105,10 @@ function hideMarker(markerIndex) {
       'block';
   document.getElementById('hide-' + containerName + '-marker').style.display =
       'none';
+  document.getElementById('generate-routes').style.display = 'none';
+}
+
+function generateRoutes() {
+  // get coordinates
+  // make api call
 }
