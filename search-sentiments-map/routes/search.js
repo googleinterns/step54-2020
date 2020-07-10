@@ -70,8 +70,9 @@ async function retrieveSearchResultFromDatastore(topic) {
  */
 function updateSearchResults() {
   retrieveGlobalTrends().then(async trends => {
-    for (let i =0; i < trends.length; i++) {
-      updateSearchResultsForTopic(trends[i].trendTopic);
+    for (let i =2; i < trends.length; i++) { // TODO(ntarn): change this back to i =0 when fully running for all trends
+      await updateSearchResultsForTopic(trends[i].trendTopic);
+      console.log('updateSearchResult for : ' + trends[i].trendTopic);
       await new Promise(resolve => setTimeout(resolve, 60000));
     }
   });
@@ -97,10 +98,10 @@ async function updateSearchResultsForTopic(query) {
     // Update countryData within the functions called.
     const avg = await getSearchResultsForCountryFromAPI(
         "country" + json[i].id, query, countryData);
-    console.log('ntarn debug country: ' + json[i].id + ' average: ' + avg);
+    console.log('ntarn debug country: ' + json[i].id + ' averageSentiment: ' + avg);
     countriesData.push({
       country: json[i].id,
-      average: avg,
+      averageSentiment: avg,
       results: countryData,
     });
   }
@@ -119,7 +120,7 @@ async function getSearchResultsForCountryFromAPI(countryCode, query, countryData
   let response = 
       await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults =  await response.json();
-  // console.log(searchResults);
+  console.log('getsearchresults searchresults' + searchResults);
   return await saveResultsAndDeletePrevious(searchResults, countryData);
 }
 
@@ -136,6 +137,7 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
   // Parse the JSON string and pass each search result to add to the
   // countryData object.
   var currentSearchResults = searchResultsJson.items;
+  console.log('saveResultsandDeletePrevious searchresults' + currentSearchResults);
   try {
     let avg = 0;
     if (currentSearchResults == undefined) {
@@ -143,10 +145,11 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
     } else {
       for (var i = 0; i < currentSearchResults.length; i++) {
         avg = avg + await addSearchResultToCountryData(currentSearchResults[i], countryData);
+        console.log('avg in for loop of saveResults' + avg);
       }
       return avg / currentSearchResults.length;
     }
-    
+    console.log('countryData in saveResults' + countryData); 
   } catch (err) { // Occurs when no search results for that country and topic.
     console.error('ERROR:', err);
     countryData = null;
@@ -205,6 +208,7 @@ async function addTopicToDatastore(topic, countriesData) {
  * Returns a Promise wrapped around a result.score //edit with typescript (look into that)
 */
 function addSearchResultToCountryData(searchResult, countryData) {
+  console.log('addSearchResult Called');
   return getSentiment(searchResult)
     .then(response => response.json())
     .then((result) => { 
@@ -221,6 +225,25 @@ function addSearchResultToCountryData(searchResult, countryData) {
     });
   
 }
+
+// async function addSearchResultToCountryData(searchResult, countryData) {
+//   let sentimentScore;
+//   await getSentiment(searchResult)
+//     .then(response => response.json())
+//     .then((result) => { 
+//       console.log('ntarn debug: frontend' + result.score);
+//       searchResultData = {
+//         title: searchResult.title,
+//         snippet: searchResult.snippet,
+//         htmlTitle: searchResult.htmlTitle,
+//         link: searchResult.link,
+//         score: result.score,
+//       };
+//       countryData.push(searchResultData);
+//       sentimentScore = result.score;
+//     });
+//   return sentimentScore;
+// }
 
 /** 
  * Gets the sentiment score of a search result. 

@@ -36,14 +36,6 @@ app.use('/country-trends', countryTrends.router);
 app.use('/sentiment', sentiment.router);
 app.use('/update-data', updateData.router);
 
-// Schedule the function that updates search to be run  at midnight and noon
-// everyday.
-var searchResultUpdateSchedule = schedule.scheduleJob('0 0,12 * * *', function(){
-// Commented out this line for now to avoid excess billing. Already tested.
-// Uncomment out when ready to do final deploy.
-  //  search.updateSearchResults();
-});
-
 
 // Listen to the App Engine-specified port, or 4503 otherwise.
 const PORT = process.env.PORT || 4503;

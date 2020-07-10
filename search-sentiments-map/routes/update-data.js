@@ -15,13 +15,13 @@
 const express = require('express');
 const router = express.Router();  // Using Router to divide the app into modules.
 const trends = require('./trends.js');
-const search = require('./routes/search.js');
+const search = require('./search.js');
 
 // Router that updates trends data.
 // Scheduled to run at minute 0 past every 12th hour (11am and 23pm every day).
 router.get('/', (req, res) => {
-  console.log('Updating trends data. Search results to be added.');
-  trends.updateTrendsFunction();
+  console.log('Updating Search Results Data.');
+  // trends.updateTrendsFunction();
   search.updateSearchResults();
 });
 

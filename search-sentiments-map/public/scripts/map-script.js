@@ -75,9 +75,12 @@ function loadCountryData() {
     let topicData = getCurrentCustomSearchData();
     let countryData = topicData.countries
       .filter(countries => countries.country === countryCode);
-      
-    const dataVariable = countryData[0].average;
-    console.log('ntarn debug: ' + 'country: ' + countryData[0].country + ' average: ' + dataVariable);
+    let dataVariable = 0;
+    if (countryData.length != 0) {
+      dataVariable = countryData[0].averageSentiment;
+    } 
+    console.log(countryData)
+    // console.log('ntarn debug: ' + 'country: ' + countryData[0].country + ' averageSentiment: ' + dataVariable);
     
     // const dataVariable = Math.floor(Math.random() * Math.floor(100)); // Make a fetch for a given topic and retrieve 
     //the sentiment score for each country, via country ID

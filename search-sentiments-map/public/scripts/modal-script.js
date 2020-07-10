@@ -22,10 +22,10 @@ function clickOnRegion(e) {
   // Update Modal with information for relevant country.
   const countryName = e.feature.getProperty('name');
   const countryId = e.feature.getId();
-  const countryData= e.feature.getProperty('country_data').toLocaleString();
+  const countryData = e.feature.getProperty('country_data').toLocaleString();
   document.getElementById('modal-title').innerText = countryName;
   displayTopResults(countryId);
-  displayTrends(countryName);
+  displayTrends(countryId);
 }
 
 /**
@@ -35,7 +35,6 @@ function clickOnRegion(e) {
 function displayTrends(countryCode) {
   const topTrendsTab = document.getElementById('top-trends-tab');
   topTrendsTab.innerHTML = '';
-
   fetch('/country-trends/' + countryCode).then(countryTrends => 
       countryTrends.json()).then(trends => {
     if (trends.length === 0) {
@@ -64,19 +63,38 @@ function displayTopResults(countryCode) {
 
   let countryData = topicData.countries
     .filter(countries => countries.country === countryCode);
-  let results = countryData[0].results;
+  // let results = countryData[0].results;
+  
+  if (countryData.length === 0) {
+    resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
+        date.toString() +'<i><br>';
+  } else {
+    let results = countryData[0].results;
 
-  // Handle case where there are no results.
-  if (results.length === 0) {
-    resultElement.innerHTML += 'No results.<br>';
-  }
+    // Handle case where there are no results.
+    if (results.length === 0) {
+      resultElement.innerHTML += 'No results.<br>';
+    }
 
-  for (let i = 0; i < results.length; i++) {
-    resultElement.innerHTML += '<a href=' + results[i].link + '>' +
-        results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>'
-        + 'Sentiment Score: ' + results[i].score;
+    for (let i = 0; i < results.length; i++) {
+      resultElement.innerHTML += '<a href=' + results[i].link + '>' +
+          results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>'
+          + 'Sentiment Score: ' + results[i].score + '<br>';
+    }
+    resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
+    '<i><br>';
   }
-  resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
-  '<i><br>';
+  // // Handle case where there are no results.
+  // if (results.length === 0) {
+  //   resultElement.innerHTML += 'No results.<br>';
+  // }
+
+  // for (let i = 0; i < results.length; i++) {
+  //   resultElement.innerHTML += '<a href=' + results[i].link + '>' +
+  //       results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>'
+  //       + 'Sentiment Score: ' + results[i].score;
+  // }
+  // resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
+  // '<i><br>';
 }
 
