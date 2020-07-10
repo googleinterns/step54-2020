@@ -14,8 +14,8 @@
 
 const express = require('express');
 const app = express();
-// Listen to the App Engine-specified port, or 3000 otherwise.
-const PORT = process.env.PORT || 3000;
+// Listen to the App Engine-specified port, or 4503 otherwise.
+const PORT = process.env.PORT || 4503;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);
 });
@@ -26,6 +26,10 @@ app.use(express.static(__dirname +'/public'));
 app.get('/', (req, res) => {
   res.sendFile('/index.html');
 });
+
+// Include the sentiment module so that it can be fetched from the client-side scripts.
+const sentiment = require('./routes/sentiment.js');
+app.use('/sentiment', sentiment);
 
 // Include the trends module so that it can be fetched from the client-side scripts.
 const trends = require('./routes/trends.js');
