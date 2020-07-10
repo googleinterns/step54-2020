@@ -39,12 +39,12 @@ function setNewTrend(trend) {
   //   currentTrend = 'TOP TREND HERE';
   // }
 
-  currentTrend = 'trump';
+  //currentTrend = 'Liverpool';
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = 
-      'Worldwide sentiments of search results for "' + currentTrend + '"';
+      'Worldwide sentiments of search results for "' + trend + '"';
 
-  fetch('/search/' + currentTrend)
+  fetch('/search/' + trend)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicResults => {
     currentCustomSearchData = topicResults;
   });

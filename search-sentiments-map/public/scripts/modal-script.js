@@ -25,7 +25,7 @@ function clickOnRegion(e) {
   const countryData= e.feature.getProperty('country_data').toLocaleString();
   document.getElementById('modal-title').innerText = countryName;
   displayTopResults(countryId);
-  displayTrends(countryName);
+  displayTrends(countryId);
 }
 
 /**

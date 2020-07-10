@@ -56,17 +56,22 @@ async function retrieveSearchResultFromDatastore(topic) {
       dataByCountry: worldDataByTopic[0].dataByCountry,
     };
   } catch (err) {
-    console.error('ERROR:', err);
+    console.error('ERROR: retrieving data for topic', topic, err);
   }
 }
 
 /** 
  * Updates daily search results (accumulates by day) in the Datastore.
  */
-// TODO(carmenbenitez): Update this to instead loop through top 10 trending
-// searches and get that data instead.
 function updateSearchResults() {
-  updateSearchResultsForTopic("trump");
+  retrieveGlobalTrends().then(async trends => {
+    for (let i = 0; i < trends.length; i++) {
+      updateSearchResultsForTopic(trends[i].trendTopic);
+      // 100 queries per minute limit for Custom Search API. Pause to prevent
+      // surpassing limit.
+      //await new Promise(resolve => setTimeout(resolve, 60000));
+    }
+  });
 }
 
 /** 
@@ -101,7 +106,6 @@ async function updateSearchResultsForTopic(query) {
       });
     }
   });
-  console.log(countriesData)
   addTopicToDatastore(query, countriesData);
 }
 
@@ -121,7 +125,6 @@ async function getSearchResultsForCountryFromAPI(countryCode, query, countryData
           + '&cr=' + countryCode
           + '&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults =  await response.json();
-  console.log(searchResults);
   await saveResultsAndDeletePrevious(searchResults, countryData);
 }
 
@@ -177,7 +180,7 @@ async function deleteAncientResults() {
     if (Date.now() - searchResults[i].timestamp > 7 * 24 * 60 * 60000) {
       const searchResultKey = searchResults[i][datastore.KEY];
       await datastore.delete(searchResultKey);
-      console.log(`Search Result ${searchResultKey.id} deleted.`)
+      console.log(`Custom Search Result ${searchResultKey.id} deleted.`)
     } else {
       break;
     }
@@ -222,10 +225,40 @@ async function addTopicToDatastore(topic, countriesData) {
   };
   try {
     await datastore.save(entity);
-    console.log(`Search Result ${worldDataByTopicKey.id} created successfully.`);
+    console.log(topic);
+    console.log(`Custom Search Result ${worldDataByTopicKey.id} created successfully.`);
   } catch (err) {
     console.error('ERROR:', err);
   }
+}
+
+/**
+ * Adds search result object to countryData array.
+ * @param {Object} searchResult Object with information for one search result.
+ * @param {Object} countryData Object holding all searchResults for a country.
+*/
+// TODO(ntarn): Add in sentiment score for this search result.
+function addSearchResultToCountryData(searchResult, countryData) {
+  searchResultData = {
+    title: searchResult.title,
+    snippet: searchResult.snippet,
+    htmlTitle: searchResult.htmlTitle,
+    link: searchResult.link,
+    // score = sentimentscore
+  };
+  countryData.push(searchResultData);
+}
+
+/** 
+ * Queries the Datastore for the most recent global trends.
+ * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
+ */
+async function retrieveGlobalTrends() {
+  const query = datastore.createQuery('TrendsEntry').order('timestamp', {
+    descending: true,
+  });
+  const [trendsEntry] = await datastore.runQuery(query);
+  return trendsEntry[0].globalTrends;
 }
 
 module.exports.router = router;
