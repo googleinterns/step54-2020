@@ -84,16 +84,17 @@ function getSentiment() {
   const searchTopic = document.getElementById('search-topic').value;
   const sentimentScoreElement = document.getElementById('sentiment-score');
   const searchTopicObject = "searchTopic=" + encodeURIComponent(searchTopic);
-  fetch('/sentiment', {method: 'POST',  // Send a request to the URL.
+  fetch('/sentiment', {
+    method: 'POST',  // Send a request to the URL.
     headers: new Headers({
       'Content-Type': 'application/x-www-form-urlencoded',
     }),
     body: searchTopicObject // Send search topic with correct content type.
-    })
-    .then(response => response.json())
-      .then((score) => { 
-        // TODO(ntarn): Remove console.log statement when finished with feature. 
-        console.log('ntarn debug: frontend' + score.sentimentScore);
-        sentimentScoreElement.innerHTML = "<p>Sentiment analysis score: " + score.sentimentScore + "</p>";
-      });
+  })
+  .then(response => response.json())
+  .then((score) => { 
+    // TODO(ntarn): Remove console.log statement when finished with feature. 
+    console.log('ntarn debug: frontend' + score.sentimentScore);
+    sentimentScoreElement.innerHTML = "<p>Sentiment analysis score: " + score.sentimentScore + "</p>";
+  });
 }  
