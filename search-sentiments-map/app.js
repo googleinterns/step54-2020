@@ -14,9 +14,10 @@
 
 const express = require('express');
 const app = express();
-const schedule = require('node-schedule');
+//const schedule = require('node-schedule');
 const trends = require('./routes/trends.js');
 const countryTrends = require('./routes/country-trends.js');
+const updateData = require('./routes/update-data.js');
 
 // Use express to create server that displays the webpage with the html, css, 
 // and javascript files in the public folder.
@@ -28,14 +29,23 @@ app.get('/', (req, res) => {
 // Use the trends router so that it can be fetched from the client-side scripts.
 app.use('/trends', trends.router);
 app.use('/country-trends', countryTrends.router);
+app.use('/update-data', updateData.router);
 
 // Uncomment the following line to get trends if none are in the Datastore.
 // trends.updateTrendsFunction();
 
 // Update top trends at minute 0 past every 12th hour (11am and 23pm every day).
-var j = schedule.scheduleJob('0 11,23 * * *', function(){
-  trends.updateTrendsFunction();
-});
+//var j = schedule.scheduleJob('0 11,23 * * *', function(){
+//  console.log('Data update job scheduled every 12 hours.');
+//  trends.updateTrendsFunction();
+//});
+
+//var jobList = schedule.scheduledJobs;
+//for(jobName in jobList){
+  //console.log(jobName)
+  //schedule.cancelJob(jobName);
+  //jobName.cancel();
+//}
 
 // Listen to the App Engine-specified port, or 4503 otherwise.
 const PORT = process.env.PORT || 4503;
