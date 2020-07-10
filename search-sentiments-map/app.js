@@ -14,8 +14,9 @@
 
 const express = require('express');
 const app = express();
-const trends = require('./routes/trends.js');
 const countryTrends = require('./routes/country-trends.js');
+const trends = require('./routes/trends.js');
+const sentiment = require('./routes/sentiment.js');
 const updateData = require('./routes/update-data.js');
 
 // Use express to create server that displays the webpage with the html, css, 
@@ -26,8 +27,9 @@ app.get('/', (req, res) => {
 });
 
 // Use the trends router so that it can be fetched from the client-side scripts.
-app.use('/trends', trends.router);
 app.use('/country-trends', countryTrends.router);
+app.use('/trends', trends.router);
+app.use('/sentiment', sentiment);
 app.use('/update-data', updateData.router);
 
 // Listen to the App Engine-specified port, or 4503 otherwise.

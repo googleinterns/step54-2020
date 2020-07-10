@@ -55,17 +55,19 @@
             <div id="data-max">max</div>
           </div>
         </div>
+
         <div class="col-sm-3">
-          <form id="search-box" class="input-group row" action="">
-            <input type="text" class="form-control col-sm-9" placeholder="Search a Topic" name="search">
-            <div class="input-group-append">
-              <button type="submit"><i class="fa fa-search"></i></button>
-            </div>
-          </form>
           <div>
             <h3>Trending Search Topics</h3>
             <ul id="trends-list">
             </ul>
+          </div>
+          <div id="search-box" class="input-group row">
+            <textarea class="form-control col-sm-9" id="search-topic" name="search-topic" placeholder="Search for a topic..." rows="1"></textarea>
+            <br/>
+            <div class="input-group-append">
+              <button type="submit"><i class="fa fa-search"></i></button>
+            </div>  
           </div>
         </div>
       </div>
