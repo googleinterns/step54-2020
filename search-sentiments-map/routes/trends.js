@@ -190,8 +190,8 @@ async function deleteAllTrends() {
 function getGlobalTrends(trendsByCountry) {
   // Use a map to count the number of occurences of each trend.
   let trendCountsMap = new Map();
-  trendsByCountry.forEach(trends => {
-    trends.trends.forEach(trend => {
+  trendsByCountry.forEach(countryTrends => {
+    countryTrends.trends.forEach(trend => {
       let topic = trend.topic;
       if (trendCountsMap.has(topic)) {
         let newCount = trendCountsMap.get(topic) + 1;
