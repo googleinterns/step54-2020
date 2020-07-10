@@ -14,11 +14,11 @@
 
 const express = require('express');
 const app = express();
-const schedule = require('node-schedule');
 const trends = require('./routes/trends.js');
 const countryTrends = require('./routes/country-trends.js');
 const search = require('./routes/search.js');
 const sentiment = require('./routes/sentiment.js');
+const updateData = require('./routes/update-data.js');
 
 // Use express to create server that displays the webpage with the html, css, 
 // and javascript files in the public folder.
@@ -34,19 +34,7 @@ app.use('/trends', trends.router);
 app.use('/search', search.router);
 app.use('/country-trends', countryTrends.router);
 app.use('/sentiment', sentiment.router);
-
-// Uncomment the following line to get trends or search results if none are in
-// the Datastore.
-// trends.updateTrendsFunction();
-// search.updateSearchResults();
-
-
-// Update top trends at minute 0 past every 12th hour (11am and 23pm every day).
-var j = schedule.scheduleJob('0 11,23 * * *', function(){
-  trends.updateTrendsFunction();
-});
-
-// search.updateSearchResults();
+app.use('/update-data', updateData.router);
 
 // Schedule the function that updates search to be run  at midnight and noon
 // everyday.
