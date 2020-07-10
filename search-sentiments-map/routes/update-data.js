@@ -21,7 +21,7 @@ const search = require('./search.js');
 // Scheduled to run at minute 0 past every 12th hour (11am and 23pm every day).
 router.get('/', (req, res) => {
   console.log('Updating Search Results Data.');
-  // trends.updateTrendsFunction();
+  // trends.updateTrendsFunction(); Undo comment during final deploy.
   search.updateSearchResults();
 });
 

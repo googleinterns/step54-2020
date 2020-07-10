@@ -35,66 +35,50 @@ function clickOnRegion(e) {
 function displayTrends(countryCode) {
   const topTrendsTab = document.getElementById('top-trends-tab');
   topTrendsTab.innerHTML = '';
-  fetch('/country-trends/' + countryCode).then(countryTrends => 
-      countryTrends.json()).then(trends => {
-    if (trends.length === 0) {
-      topTrendsTab.innerText = 'Trends in this country is not available.';
-    } else {
-      trends.forEach(trend => {
-        const trendHeader = document.createElement('h5');
-        trendHeader.innerText = trend.topic;
-        topTrendsTab.appendChild(trendHeader);
-      });
-    }
-  });
+  fetch('/country-trends/' + countryCode).then(countryTrends =>
+    countryTrends.json()).then(trends => {
+      if (trends.length === 0) {
+        topTrendsTab.innerText = 'Trends in this country is not available.';
+      } else {
+        trends.forEach(trend => {
+          const trendHeader = document.createElement('h5');
+          trendHeader.innerText = trend.topic;
+          topTrendsTab.appendChild(trendHeader);
+        });
+      }
+    });
 }
 
 /** 
  * Displays the top results in a country for current search trend on modal. 
  * @param {string} countryCode Two letter country code for selected country.
  */
-// TODO(ntarn): Add Sentiment scores to this modal.
-function displayTopResults(countryCode) { 
+function displayTopResults(countryCode) {
   let topic = getCurrentTrend;
   let topicData = getCurrentCustomSearchData();
   let date = new Date(topicData.timestamp);
-  let resultElement =  document.getElementById('search-results-tab');
+  let resultElement = document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
 
   let countryData = topicData.countries
     .filter(countries => countries.country === countryCode);
-  // let results = countryData[0].results;
-  
+
+  // Handle case where there are no results.
   if (countryData.length === 0) {
     resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
-        date.toString() +'<i><br>';
+      date.toString() + '<i><br>';
   } else {
     let results = countryData[0].results;
 
-    // Handle case where there are no results.
-    if (results.length === 0) {
-      resultElement.innerHTML += 'No results.<br>';
-    }
+    resultElement.innerHTML += countryData[0].averageSentiment;
 
     for (let i = 0; i < results.length; i++) {
       resultElement.innerHTML += '<a href=' + results[i].link + '>' +
-          results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>'
-          + 'Sentiment Score: ' + results[i].score + '<br>';
+        results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'
+        + 'Sentiment Score: ' + results[i].score + '<br>';
     }
     resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
-    '<i><br>';
+      '<i><br>';
   }
-  // // Handle case where there are no results.
-  // if (results.length === 0) {
-  //   resultElement.innerHTML += 'No results.<br>';
-  // }
-
-  // for (let i = 0; i < results.length; i++) {
-  //   resultElement.innerHTML += '<a href=' + results[i].link + '>' +
-  //       results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>'
-  //       + 'Sentiment Score: ' + results[i].score;
-  // }
-  // resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
-  // '<i><br>';
 }
 

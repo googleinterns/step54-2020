@@ -18,7 +18,7 @@ const express = require('express');
 let router = express.Router();  // Using Router to divide the app into modules.
 
 const fetch = require('node-fetch'); // Used to access custom search.
-const {Datastore} = require('@google-cloud/datastore');
+const { Datastore } = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
 const json = require('./../public/country-code.json');
@@ -31,7 +31,8 @@ global.Headers = fetch.Headers;
 router.get('/:topic', (req, res) => {
   let topic = req.params.topic;
   retrieveSearchResultFromDatastore(topic).then(customSearchTopicJsonArray => {
-    console.log('In the router.get method');
+    // TODO(ntarn): Remove console.log statements when finished debugging.
+    console.log('ntarn debug: In the router.get method'); 
     console.log(customSearchTopicJsonArray);
     res.setHeader('Content-Type', 'application/json');
     res.send(customSearchTopicJsonArray);
@@ -47,8 +48,8 @@ router.get('/:topic', (req, res) => {
 async function retrieveSearchResultFromDatastore(topic) {
   // Request latest entity with a topic matching the given topic.
   const query = datastore.createQuery('CustomSearchTopic').order('timestamp', {
-    descending: true, // TODO(ntarn): change this back to descending
-  }).filter('topic',topic).limit(1);
+    descending: true,
+  }).filter('topic', topic).limit(1);
 
   try {
     const [customSearchTopic] = await datastore.runQuery(query);
@@ -57,7 +58,8 @@ async function retrieveSearchResultFromDatastore(topic) {
       countries: customSearchTopic[0].countries,
       timestamp: customSearchTopic[0].timestamp,
     };
-    console.log('reach retrieve search result');
+    // TODO(ntarn): Remove console.log statements when finished debugging.
+    console.log('ntarn debug: reach retrieve search result');
     console.log(customSearchTopicJsonArray);
     return customSearchTopicJsonArray;
   } catch (err) {
@@ -70,9 +72,10 @@ async function retrieveSearchResultFromDatastore(topic) {
  */
 function updateSearchResults() {
   retrieveGlobalTrends().then(async trends => {
-    for (let i =2; i < trends.length; i++) { // TODO(ntarn): change this back to i =0 when fully running for all trends
+    for (let i = 0; i < trends.length; i++) { // When testing, make i < 1 trend to test one.
       await updateSearchResultsForTopic(trends[i].trendTopic);
-      console.log('updateSearchResult for : ' + trends[i].trendTopic);
+      // TODO(ntarn): Remove console.log statements when finished debugging.
+      console.log('ntarn debug updateSearchResult for: ' + trends[i].trendTopic);
       await new Promise(resolve => setTimeout(resolve, 60000));
     }
   });
@@ -87,8 +90,8 @@ async function updateSearchResultsForTopic(query) {
   let countriesData = [];
 
   // Note: Can't use forEach with await.
-  for (let i = 0; i < json.length; i++) { // When testing, make this equal to 3 countries. 
-    var set =0;
+  for (let i = 0; i < json.length; i++) { // When testing, make i < 3 countries. 
+    var set = 0;
     // 100 queries per minute limit for Custom Search API. Pause to prevent
     // surpassing limit.
     if (i !== 0 && i % 100 === 0) {
@@ -97,7 +100,7 @@ async function updateSearchResultsForTopic(query) {
     let countryData = [];
     // Update countryData within the functions called.
     const avg = await getSearchResultsForCountryFromAPI(
-        "country" + json[i].id, query, countryData);
+      "country" + json[i].id, query, countryData);
     console.log('ntarn debug country: ' + json[i].id + ' averageSentiment: ' + avg);
     countriesData.push({
       country: json[i].id,
@@ -117,10 +120,9 @@ async function updateSearchResultsForTopic(query) {
  * @param {Object} countryData Object holding all searchResults for a country.
  */
 async function getSearchResultsForCountryFromAPI(countryCode, query, countryData) {
-  let response = 
-      await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
-  let searchResults =  await response.json();
-  console.log('getsearchresults searchresults' + searchResults);
+  let response =
+    await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q=' + query + '&cr=' + countryCode + '&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
+  let searchResults = await response.json();
   return await saveResultsAndDeletePrevious(searchResults, countryData);
 }
 
@@ -137,7 +139,6 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
   // Parse the JSON string and pass each search result to add to the
   // countryData object.
   var currentSearchResults = searchResultsJson.items;
-  console.log('saveResultsandDeletePrevious searchresults' + currentSearchResults);
   try {
     let avg = 0;
     if (currentSearchResults == undefined) {
@@ -149,7 +150,6 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
       }
       return avg / currentSearchResults.length;
     }
-    console.log('countryData in saveResults' + countryData); 
   } catch (err) { // Occurs when no search results for that country and topic.
     console.error('ERROR:', err);
     countryData = null;
@@ -208,11 +208,9 @@ async function addTopicToDatastore(topic, countriesData) {
  * Returns a Promise wrapped around a result.score //edit with typescript (look into that)
 */
 function addSearchResultToCountryData(searchResult, countryData) {
-  console.log('addSearchResult Called');
   return getSentiment(searchResult)
     .then(response => response.json())
-    .then((result) => { 
-      console.log('ntarn debug: frontend' + result.score);
+    .then((result) => {
       searchResultData = {
         title: searchResult.title,
         snippet: searchResult.snippet,
@@ -223,9 +221,11 @@ function addSearchResultToCountryData(searchResult, countryData) {
       countryData.push(searchResultData);
       return result.score;
     });
-  
+
 }
 
+// TODO(ntarn): Look into changing the above method so that it does not need to return 
+// twice for a Promise wrapped around a object.
 // async function addSearchResultToCountryData(searchResult, countryData) {
 //   let sentimentScore;
 //   await getSentiment(searchResult)
@@ -247,15 +247,16 @@ function addSearchResultToCountryData(searchResult, countryData) {
 
 /** 
  * Gets the sentiment score of a search result. 
- * @param {Object} searchResult Object with information for one search result.
+ * @param {Object} searchResult Object for one search result.
  */
 function getSentiment(searchResult) {
-  return fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {method: 'POST',  // Send a request to the URL.
+  return fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {
+    method: 'POST',  // Send a request to the URL.
     headers: new Headers({
       'Content-Type': 'text/plain',
     }),
     body: searchResult.title + searchResult.snippet
-    })
+  })
     .catch(err => {
       console.log(err);
     });
