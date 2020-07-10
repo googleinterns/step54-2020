@@ -34,7 +34,7 @@ router.get('/', (req, res) => {
 });
 
 /** 
- * Queries the Datastore for the most recent global trends.
+ * Get the global trends from the most recent Datastore entry.
  * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
  */
 async function retrieveGlobalTrends() {
@@ -47,7 +47,7 @@ async function retrieveGlobalTrends() {
 
 /** 
  * Updates Datastore storage of daily search trends and corresponding search results
- * for the 46 countries where trends are available using the Google Trends API.
+ * for the countries where trends are available using the Google Trends API.
  */
 async function updateDailyTrends() {
   const countryJson = require('./../public/countries-with-trends.json');
@@ -166,7 +166,7 @@ async function deleteAncientTrend() {
 /** 
  * Deletes all trends entries in the Datastore. 
  * Call this function when there is an update of the trends data structure. 
- * TODO(@chenyuz): Delete this function when everything is done.
+ * TODO(chenyuz): Delete this function when everything is done.
  */
 async function deleteAllTrends() {
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp');
@@ -202,7 +202,7 @@ function getGlobalTrends(trendsByCountry) {
     });
   });
 
-  // Note: Could we use only one data structure here? 
+  // TODO(chenyuz): Could we use only one data structure here? 
   // One option is to install the npm SortedMap module.
 
   // Convert the counts to an array to allow sorting.
@@ -213,7 +213,7 @@ function getGlobalTrends(trendsByCountry) {
       count: count,  
     })
   }
-  // Sort in descending order.
+  // Sort trends in descending order of their counts.
   trendCountsArr.sort((trend, otherTrend) => {
     return otherTrend.count - trend.count;
   })
