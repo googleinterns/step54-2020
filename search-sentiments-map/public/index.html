@@ -55,12 +55,12 @@
           </div>
 
           <label class="switch">
-            <input type="checkbox">
+            <input id="sentiment-popularity-check" type="checkbox" onclick="loadCountryDataByMode()">
             <span class="slider"></span>
           </label>
-          <span>Switch between Sentiment Mode & Popularity Mode.</span>
-          
+          <span id="switch-info">Switch between Sentiment Mode & Popularity Mode.</span>
         </div>
+
         <div class="col-sm-3">
           <div id="search-box" class="input-group row">
             <textarea class="form-control col-sm-9" id="search-topic" name="search-topic" placeholder="Search for a topic..." rows="1"></textarea>

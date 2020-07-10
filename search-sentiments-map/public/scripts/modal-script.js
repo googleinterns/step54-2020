@@ -17,13 +17,11 @@
  * @param {?google.maps.MouseEvent} e Click event.
  */
 function clickOnRegion(e) {
-  const countryId = e.feature.getId();
-  if (countryId === 'N/A') { return; }
-
   $('#region-info-modal').modal('show');
 
   // Update Modal with information for relevant country.
   const countryName = e.feature.getProperty('name');
+  const countryId = e.feature.getId();
   //const countryData= e.feature.getProperty('country_data').toLocaleString();
   document.getElementById('modal-title').innerText = countryName;
   displayTopResults(countryId);

@@ -71,7 +71,7 @@
   -webkit-box-flex: 1;
 }
 
-/* The switch - the box around the slider */
+/* The switch - the box around the slider. */
 .switch {
   margin-top: 20px;
   position: relative;
@@ -80,7 +80,6 @@
   height: 40px;
 }
 
-/* The slider */
 .slider {
   position: absolute;
   cursor: pointer;

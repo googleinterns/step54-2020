@@ -64,20 +64,22 @@ function loadMapOutline() {
   });
 }
 
-function switchMode() {
-
+/** 
+ * Gets the selected mode (sentiment or popularity) from the webpage and loads
+ * data correspondingly. 
+ */
+function loadCountryDataByMode() {
+  let sentimentMode = document.getElementById('sentiment-popularity-check').checked;
+  loadCountryData(sentimentMode);
 }
 
 /** 
  * Loads the sentiments or search interests for all countries from Datastore. 
- * @param {boolean=} sentiment Whether the result to obtain is the sentiments 
+ * @param {boolean=} sentimentMode Whether the result to obtain is the sentiments 
  * (search interest otherwise).
  */
-function loadCountryData(sentiment=true) {
+function loadCountryData(sentimentMode=true) {
   map.data.forEach(function(row) {
-    // No data is available for countries that don't have ID.
-    if (row.getId() === 'N/A') { return; }
-
     let dataByCountry = getCurrentCustomSearchData().dataByCountry;
     let countryData = dataByCountry.filter(data => data.country === row.getId());
 
@@ -87,7 +89,7 @@ function loadCountryData(sentiment=true) {
       dataVariable = 0;
     } else {
       dataVariable = 
-          sentiment ? countryData[0].averageSentiment : countryData[0].interest;
+          sentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
     }
 
     // Keep track of min and max values as we read them.
@@ -99,13 +101,13 @@ function loadCountryData(sentiment=true) {
     }
 
     row.setProperty('country_data', dataVariable);
-
-    // Update and display the map legend.
-    document.getElementById('data-min').textContent =
-        dataMin.toLocaleString();
-    document.getElementById('data-max').textContent =
-        dataMax.toLocaleString();
   });
+
+  // Update and display the map legend.
+  document.getElementById('data-min').textContent =
+      dataMin.toLocaleString();
+  document.getElementById('data-max').textContent =
+      dataMax.toLocaleString();
 }
 
 /**

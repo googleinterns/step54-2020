@@ -101,8 +101,8 @@ async function updateSearchResultsForTopic(query) {
       //    "country" + json[i].id, query, countryData);
       countriesData.push({
         country: json[i].id,
-        //score: score,
         results: countryData,
+        averageSentiment: 0,
         interest: interestScore,
       });
     }
@@ -198,7 +198,6 @@ async function deleteAncientResults() {
     timestamp: 1443242341,
     dataByCountry: [{
       country: US,
-      averageSentiment: 0.5,
       results: [{
         title: content, 
         snippet: content, 
@@ -207,11 +206,12 @@ async function deleteAncientResults() {
         link: content, 
         score: 0.9,},
       {...}, {...} … (10 articles)],
+      averageSentiment: 0.5,
       interest: 80,
     }, {
       country: France,
-      averageSentiment: 0.6,
       results: [{...}{...}...],
+      averageSentiment: 0.6,
       interest: 35,}...]}
  */
 async function addTopicToDatastore(topic, countriesData) {
@@ -231,23 +231,6 @@ async function addTopicToDatastore(topic, countriesData) {
   } catch (err) {
     console.error('ERROR:', err);
   }
-}
-
-/**
- * Adds search result object to countryData array.
- * @param {Object} searchResult Object with information for one search result.
- * @param {Object} countryData Object holding all searchResults for a country.
-*/
-// TODO(ntarn): Add in sentiment score for this search result.
-function addSearchResultToCountryData(searchResult, countryData) {
-  searchResultData = {
-    title: searchResult.title,
-    snippet: searchResult.snippet,
-    htmlTitle: searchResult.htmlTitle,
-    link: searchResult.link,
-    // score = sentimentscore
-  };
-  countryData.push(searchResultData);
 }
 
 /** 

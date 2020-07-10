@@ -29,17 +29,7 @@ function getCurrentCustomSearchData() {
  * Retrieves relevant data for new trend and reconstructs map with new data.
  * @param {string} trend New trend to get data for.
  */
-// TODO(carmenbenitez): Uncomment if/else block to show data for other search
-// results when custom search data for all top trends set up. Replace top trend
-// in else block with top trend.
 function setNewTrend(trend) {
-  // if (trend != null){
-  //   currentTrend = trend;
-  // } else {
-  //   currentTrend = 'TOP TREND HERE';
-  // }
-
-  //currentTrend = 'Liverpool';
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = 
       'Worldwide sentiments of search results for "' + trend + '"';
@@ -48,7 +38,7 @@ function setNewTrend(trend) {
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
     currentCustomSearchData = topicData;
   }).then(() => {
-    // Reload map with new sentiment or search interest data and relevant coloring.    
-    loadCountryData(false);
+    // Reload map with new sentiment or search interest data and relevant coloring.
+    loadCountryDataByMode()
   });
 }
