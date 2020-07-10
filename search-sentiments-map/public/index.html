@@ -12,9 +12,10 @@
     <script src="scripts/map-script.js"></script>
     <script src="scripts/modal-script.js"></script>
     <script src="scripts/trends-script.js"></script>
+    <script src="scripts/search-topic-script.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
-  <body onload="initMap(); setTopTrends(); setNewTrend();">
+  <body onload="initMap(); countrySelectSetUp();">
     <div class="content">
       <!-- Bootstrap CSS. -->
       <div class="modal fade" id="region-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -55,15 +56,16 @@
           </div>
         </div>
         <div class="col-sm-3">
-          <div id="search-box" class="input-group row">
-            <textarea class="form-control col-sm-9" id="search-topic" name="search-topic" placeholder="Search for a topic..." rows="1"></textarea>
-            <br/>
-            <div class="input-group-append">
-              <button onclick="getSentiment()" type="submit"><i class="fa fa-search"></i></button>
-            </div>  
+          <div id="search-box">
+            <div class="input-group">
+              <input type="text" class="form-control"  id="search-topic" name="search-topic" placeholder="Search for a topic...">
+              <button type="submit" class="btn btn-primary" onclick="searchTopic()">Search</button>
+            </div>
+            <label for="country-select">Choose countries to view results for (max 3): </label>
+            <select class="country-select" id="country-select" size="3" multiple></select>
           </div>
-          <div id="sentiment-score"></div>
           <div>
+            <br><br>
             <h3>Trending Search Topics</h3>
             <ul id="trends-list">
             </ul>

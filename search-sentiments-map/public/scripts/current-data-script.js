@@ -14,10 +14,16 @@
 
 let currentTrend = '';
 let currentCustomSearchData = '';
+let topTrends = '';
 
 /** Returns current trend user is viewing. */
 function getCurrentTrend() {
   return currentTrend;
+}
+
+/** Returns current trend user is viewing. */
+function getTopTrends() {
+  return topTrends;
 }
 
 /** Returns current custom search data for trend user is viewing. */
@@ -33,10 +39,15 @@ function getCurrentCustomSearchData() {
 // results when custom search data for all top trends set up. Replace top trend
 // in else block with top trend.
 function setNewTrend(trend) {
+  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
+    topTrends = trends;
+    setTopTrends(); 
+  });
+
   // if (trend != null){
   //   currentTrend = trend;
   // } else {
-  //   currentTrend = 'TOP TREND HERE';
+  //   currentTrend = topTrends[0];
   // }
 
   currentTrend = 'Liverpool';
@@ -47,9 +58,8 @@ function setNewTrend(trend) {
   fetch('/search/' + currentTrend)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicResults => {
     currentCustomSearchData = topicResults;
+    // Reload map with new sentiment data and relevant coloring.
+    loadCountryData();
   });
-
-  // Reload map with new sentiment data and relevant coloring.
-  loadCountryData();
 }
 

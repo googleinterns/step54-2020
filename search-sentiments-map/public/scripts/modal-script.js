@@ -25,7 +25,7 @@ function clickOnRegion(e) {
   const countryData= e.feature.getProperty('country_data').toLocaleString();
   document.getElementById('modal-title').innerText = countryName;
   displayTopResults(countryId);
-  displayTrends(countryName);
+  displayTrends(countryId);
 }
 
 /**
@@ -56,7 +56,6 @@ function displayTrends(countryCode) {
  */
 // TODO(ntarn): Add Sentiment scores to this modal.
 function displayTopResults(countryCode) { 
-  let topic = getCurrentTrend;
   let topicData = getCurrentCustomSearchData();
   let date = new Date(topicData.timestamp);
   let resultElement =  document.getElementById('search-results-tab');
@@ -64,18 +63,23 @@ function displayTopResults(countryCode) {
 
   let countryData = topicData.countries
       .filter(countries => countries.country === countryCode);
-  let results = countryData[0].results;
+  if (countryData.length === 0) {
+    resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
+        date.toString() +'<i><br>';
+  } else {
+    let results = countryData[0].results;
 
-  // Handle case where there are no results.
-  if (results.length === 0) {
-    resultElement.innerHTML += 'No results.<br>';
-  }
+    // Handle case where there are no results.
+    if (results.length === 0) {
+      resultElement.innerHTML += 'No results.<br>';
+    }
 
-  for (let i = 0; i < results.length; i++) {
-    resultElement.innerHTML += '<a href=' + results[i].link + '>' +
-        results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>';
+    for (let i = 0; i < results.length; i++) {
+      resultElement.innerHTML += '<a href=' + results[i].link + '>' +
+          results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>';
+    }
+    resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
+    '<i><br>';
   }
-  resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
-  '<i><br>';
 }
 

@@ -60,7 +60,7 @@ function initMap() {
 function loadMapOutline() {
   // Load country data after finished loading in geojson.
   map.data.loadGeoJson('countries.geojson', null, function () {
-    loadCountryData();
+    setNewTrend();
   });
 }
 

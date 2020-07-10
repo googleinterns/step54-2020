@@ -23,34 +23,32 @@ const NUM_SHOWN = 7;
 /** Displays the top trends on the DOM. */
 function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
+  let trends = getTopTrends();
+  
+  for (let i = 0; i < trends.length; i++) {
+    const trendElement = document.createElement('li');
+    trendElement.innerText = `${trends[i].trendTopic}`;
+    // Display the number of countries where the trend is trending when hovered.
+    trendElement.title = `Trending in ${trends[i].count} countries`;
 
-  // Get the top 10 globally trending search topics from the backend.
-  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
-    for (let i = 0; i < trends.length; i++) {
-      const trendElement = document.createElement('li');
-      trendElement.innerText = `${trends[i].trendTopic}`;
-      // Display the number of countries where the trend is trending when hovered.
-      trendElement.title = `Trending in ${trends[i].count} countries`;
+    // Show some trending topics by default and hide the rest.
+    trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
+    trendElement.addEventListener('click', (event) => {
+      showResultForTopic(event);
+    })
+    trendsList.append(trendElement);
+  }
 
-      // Show some trending topics by default and hide the rest.
-      trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
-      trendElement.addEventListener('click', (event) => {
-        showResultForTopic(event);
-      })
-      trendsList.append(trendElement);
-    }
-
-    // Add an item to the list that toggles showing more or less topics.
-    if (trends.length > NUM_SHOWN) {
-      const showMoreOrLessToggleItem = document.createElement('li');
-      showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
-      showMoreOrLessToggleItem.id = SHOW_MORE_OR_LESS_ID;
-      showMoreOrLessToggleItem.addEventListener('click', () => {
-        showMoreOrLess();
-      });
-      trendsList.append(showMoreOrLessToggleItem);
-    }
-  });
+  // Add an item to the list that toggles showing more or less topics.
+  if (trends.length > NUM_SHOWN) {
+    const showMoreOrLessToggleItem = document.createElement('li');
+    showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
+    showMoreOrLessToggleItem.id = SHOW_MORE_OR_LESS_ID;
+    showMoreOrLessToggleItem.addEventListener('click', () => {
+      showMoreOrLess();
+    });
+    trendsList.append(showMoreOrLessToggleItem);
+  }
 }
 
 /**

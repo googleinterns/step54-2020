@@ -64,13 +64,13 @@ async function retrieveSearchResultFromDatastore(topic) {
  * Updates daily search results (accumulates by day) in the Datastore.
  */
 function updateSearchResults() {
-  retrieveGlobalTrends().then(trends => {
-    trends.forEach(function(trend) {
-      updateSearchResultsForTopic(trend.trendTopic);
+  retrieveGlobalTrends().then(async trends => {
+    for (let i = 0; i < trends.length; i++) {
+      updateSearchResultsForTopic(trends[i].trendTopic);
       // 100 queries per minute limit for Custom Search API. Pause to prevent
       // surpassing limit.
       await new Promise(resolve => setTimeout(resolve, 60000));
-    })
+    }
   });
 }
 

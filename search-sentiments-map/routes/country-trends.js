@@ -34,9 +34,8 @@ router.get('/:country', (req, res) => {
 async function retrieveCountryTrends(country) {
   const query = datastore.createQuery('TrendsEntry').order('timestamp', {
     descending: true,
-  });
+  }).limit(1);
   const [trendsEntry] = await datastore.runQuery(query);
-
   const countryTrends = trendsEntry[0].trendsByCountry
       .filter(trends => trends.country === country);  
   // Return empty list if there is no trends data for the specified country.
