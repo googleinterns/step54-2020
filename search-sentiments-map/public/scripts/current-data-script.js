@@ -39,16 +39,17 @@ function setNewTrend(trend) {
   //   currentTrend = 'TOP TREND HERE';
   // }
 
-  currentTrend = 'Liverpool';
+  currentTrend = 'trump';
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = 
       'Worldwide sentiments of search results for "' + currentTrend + '"';
 
   fetch('/search/' + currentTrend)
-      .then(resultsJsonArray => resultsJsonArray.json()).then(topicResults => {
-    currentCustomSearchData = topicResults;
+    .then(resultsJsonArray => resultsJsonArray.json()).then(topicResults => {
+      currentCustomSearchData = topicResults;
   });
-
+  console.log('In setNewTrend');
+  console.log(getCurrentCustomSearchData());
   // Reload map with new sentiment data and relevant coloring.
   loadCountryData();
 }

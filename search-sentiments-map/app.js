@@ -46,7 +46,8 @@ var j = schedule.scheduleJob('0 11,23 * * *', function(){
   trends.updateTrendsFunction();
 });
 
-//search.updateSearchResults();
+// search.updateSearchResults();
+
 // Schedule the function that updates search to be run  at midnight and noon
 // everyday.
 var searchResultUpdateSchedule = schedule.scheduleJob('0 0,12 * * *', function(){

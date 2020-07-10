@@ -31,6 +31,8 @@ global.Headers = fetch.Headers;
 router.get('/:topic', (req, res) => {
   let topic = req.params.topic;
   retrieveSearchResultFromDatastore(topic).then(customSearchTopicJsonArray => {
+    console.log('In the router.get method');
+    console.log(customSearchTopicJsonArray);
     res.setHeader('Content-Type', 'application/json');
     res.send(customSearchTopicJsonArray);
   });
@@ -45,7 +47,7 @@ router.get('/:topic', (req, res) => {
 async function retrieveSearchResultFromDatastore(topic) {
   // Request latest entity with a topic matching the given topic.
   const query = datastore.createQuery('CustomSearchTopic').order('timestamp', {
-    descending: true,
+    descending: true, // TODO(ntarn): change this back to descending
   }).filter('topic',topic).limit(1);
 
   try {
@@ -55,6 +57,8 @@ async function retrieveSearchResultFromDatastore(topic) {
       countries: customSearchTopic[0].countries,
       timestamp: customSearchTopic[0].timestamp,
     };
+    console.log('reach retrieve search result');
+    console.log(customSearchTopicJsonArray);
     return customSearchTopicJsonArray;
   } catch (err) {
     console.error('ERROR:', err);
@@ -78,7 +82,6 @@ function updateSearchResults() {
  * this data to be saved in Datastore.
  * @param {string} query Search query.
  */
-// TODO(ntarn): Add in average score for search results of a country.
 async function updateSearchResultsForTopic(query) {
   let countriesData = [];
 

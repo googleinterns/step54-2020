@@ -63,7 +63,7 @@ function displayTopResults(countryCode) {
   resultElement.innerHTML = '';
 
   let countryData = topicData.countries
-      .filter(countries => countries.country === countryCode);
+    .filter(countries => countries.country === countryCode);
   let results = countryData[0].results;
 
   // Handle case where there are no results.
@@ -73,7 +73,8 @@ function displayTopResults(countryCode) {
 
   for (let i = 0; i < results.length; i++) {
     resultElement.innerHTML += '<a href=' + results[i].link + '>' +
-        results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>';
+        results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>'
+        + 'Sentiment Score: ' + results[i].score;
   }
   resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
   '<i><br>';

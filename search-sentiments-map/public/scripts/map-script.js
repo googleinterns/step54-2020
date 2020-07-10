@@ -60,7 +60,7 @@ function initMap() {
 function loadMapOutline() {
   // Load country data after finished loading in geojson.
   map.data.loadGeoJson('countries.geojson', null, function () {
-    loadCountryData();
+    setNewTrend();
   });
 }
 
@@ -69,9 +69,17 @@ function loadCountryData() {
   map.data.forEach(function(row) {
     // Currently a random value, will be changed to call sentiment value.
     // TODO(ntarn): Add the sentiment value for the country. 
-    // row.getId()
+
+    const countryCode = row.getId();
     // datastore.filter for that country ID and to get the sentiment ID
-    const dataVariable = Math.floor(Math.random() * Math.floor(100)); // Make a fetch for a given topic and retrieve 
+    let topicData = getCurrentCustomSearchData();
+    let countryData = topicData.countries
+      .filter(countries => countries.country === countryCode);
+      
+    const dataVariable = countryData[0].average;
+    console.log('ntarn debug: ' + 'country: ' + countryData[0].country + ' average: ' + dataVariable);
+    
+    // const dataVariable = Math.floor(Math.random() * Math.floor(100)); // Make a fetch for a given topic and retrieve 
     //the sentiment score for each country, via country ID
 
     // Keep track of min and max values as we read them.
