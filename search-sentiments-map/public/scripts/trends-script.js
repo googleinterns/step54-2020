@@ -35,7 +35,6 @@ function setTopTrends() {
       // Show some trending topics by default and hide the rest.
       trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
       trendElement.addEventListener('click', (event) => {
-        //showResultForTopic(event);
         setNewTrend(event.currentTarget.innerText);
       })
       trendsList.append(trendElement);
@@ -75,13 +74,4 @@ function showMoreOrLess() {
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
   }
-}
-
-/** 
- * Update title when a trending topic is selected.
- */
-function showResultForTopic(event) {
-  const searchTopic = event.currentTarget.innerText;
-  console.log(searchTopic);
-  setNewTrend(searchTopic);
 }

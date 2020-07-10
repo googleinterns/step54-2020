@@ -31,9 +31,9 @@ const json = require('./../public/country-code.json');
  */
 router.get('/:topic', (req, res) => {
   let topic = req.params.topic;
-  retrieveSearchResultFromDatastore(topic).then(customSearchTopicJsonArray => {
+  retrieveSearchResultFromDatastore(topic).then(topicDataJsonArray => {
     res.setHeader('Content-Type', 'application/json');
-    res.send(customSearchTopicJsonArray);
+    res.send(topicDataJsonArray);
   });
 });
 
@@ -50,6 +50,7 @@ async function retrieveSearchResultFromDatastore(topic) {
 
   try {
     const [worldDataByTopic] = await datastore.runQuery(query);
+    //return worldDataByTopic[0].dataByCountry;
     return {
       topic: worldDataByTopic[0].topic,
       timestamp: worldDataByTopic[0].timestamp,

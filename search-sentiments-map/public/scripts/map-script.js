@@ -60,16 +60,35 @@ function initMap() {
 function loadMapOutline() {
   // Load country data after finished loading in geojson.
   map.data.loadGeoJson('countries.geojson', null, function () {
-    loadCountryData();
+    //loadCountryData();
   });
 }
 
-/** Loads the country sentiment score from Datastore. */
-function loadCountryData() {
+function switchMode() {
+
+}
+
+/** 
+ * Loads the sentiments or search interests for all countries from Datastore. 
+ * @param {boolean=} sentiment Whether the result to obtain is the sentiments 
+ * (search interest otherwise).
+ */
+function loadCountryData(sentiment=true) {
   map.data.forEach(function(row) {
-    // Currently a random value, will be changed to call sentiment value.
-    // TODO(ntarn): Add the sentiment value for the country. 
-    const dataVariable = Math.floor(Math.random() * Math.floor(100));
+    // No data is available for countries that don't have ID.
+    if (row.getId() === 'N/A') { return; }
+
+    let dataByCountry = getCurrentCustomSearchData().dataByCountry;
+    let countryData = dataByCountry.filter(data => data.country === row.getId());
+
+    let dataVariable;
+    if (countryData.length == 0) {
+      console.log('No data for', row.getId());
+      dataVariable = 0;
+    } else {
+      dataVariable = 
+          sentiment ? countryData[0].averageSentiment : countryData[0].interest;
+    }
 
     // Keep track of min and max values as we read them.
     if (dataVariable < dataMin) {

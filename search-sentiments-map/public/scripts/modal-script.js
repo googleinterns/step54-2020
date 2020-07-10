@@ -17,12 +17,14 @@
  * @param {?google.maps.MouseEvent} e Click event.
  */
 function clickOnRegion(e) {
+  const countryId = e.feature.getId();
+  if (countryId === 'N/A') { return; }
+
   $('#region-info-modal').modal('show');
 
   // Update Modal with information for relevant country.
   const countryName = e.feature.getProperty('name');
-  const countryId = e.feature.getId();
-  const countryData= e.feature.getProperty('country_data').toLocaleString();
+  //const countryData= e.feature.getProperty('country_data').toLocaleString();
   document.getElementById('modal-title').innerText = countryName;
   displayTopResults(countryId);
   displayTrends(countryId);
@@ -57,14 +59,14 @@ function displayTrends(countryCode) {
 // TODO(ntarn): Add Sentiment scores to this modal.
 function displayTopResults(countryCode) { 
   let topic = getCurrentTrend();
-  let topicData = getCurrentCustomSearchData();
-  let date = new Date(topicData.timestamp);
+  let dataByCountry = getCurrentCustomSearchData().dataByCountry;
+  let date = new Date(getCurrentCustomSearchData().timestamp);
   let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
 
-  let countryData = topicData.dataByCountry
-      .filter(dataByCountry => dataByCountry.country === countryCode);
-  let results = countryData[0].results;
+  let countryData = dataByCountry.filter(data => data.country === countryCode);
+  // Get search results of the specified country.
+  let results = countryData.length === 0 ? [] : countryData[0].results;
 
   // Handle case where there are no results.
   if (results.length === 0) {
@@ -78,4 +80,3 @@ function displayTopResults(countryCode) {
   resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
   '<i><br>';
 }
-

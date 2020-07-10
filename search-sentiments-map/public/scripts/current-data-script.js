@@ -45,11 +45,10 @@ function setNewTrend(trend) {
       'Worldwide sentiments of search results for "' + trend + '"';
 
   fetch('/search/' + trend)
-      .then(resultsJsonArray => resultsJsonArray.json()).then(topicResults => {
-    currentCustomSearchData = topicResults;
+      .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
+    currentCustomSearchData = topicData;
+  }).then(() => {
+    // Reload map with new sentiment or search interest data and relevant coloring.    
+    loadCountryData(false);
   });
-
-  // Reload map with new sentiment data and relevant coloring.
-  loadCountryData();
 }
-

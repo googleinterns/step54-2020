@@ -36,15 +36,15 @@ app.use('/country-trends', countryTrends.router);
 // trends.updateTrendsFunction();
 // search.updateSearchResults();
 
-const schedule = require('node-schedule');
+//const schedule = require('node-schedule');
 // Update top trends and the corresponding search results at minute 0 past 
 // every 12th hour (11am and 23pm every day).
-var j = schedule.scheduleJob('0 11,23 * * *', async function() {
-  await trends.updateTrendsFunction();
+//var j = schedule.scheduleJob('0 11,23 * * *', async function() {
+  //await trends.updateTrendsFunction();
   // Commented out this line for now to avoid excess billing. Already tested.
   // Uncomment out when ready to do final deploy.
   // search.updateSearchResults();
-});
+//});
 
 // Listen to the App Engine-specified port, or 4503 otherwise.
 const PORT = process.env.PORT || 4503;
