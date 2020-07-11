@@ -19,7 +19,7 @@ let markers = []
 function createWorldMap() {
   map = new google.maps.Map(
     document.getElementById('map'),
-    {center: {lat: 38.46049, lng: -5.428423}, zoom: 3});
+    {center: {lat: 38.46049, lng: -5.428423}, zoom: 10});
   
   // Create origin and destination markers, but hides them until user selects
   // coordinates.
@@ -111,4 +111,11 @@ function hideMarker(markerIndex) {
 function generateRoutes() {
   // get coordinates
   // make api call
+  fetch('https://maps.googleapis.com/maps/api/directions/json?'
+      + 'origin=Toronto&destination=Montreal' +
+      + '&key=' + process.env.DIRECTIONS_API_KEY).then(response => {
+    console.log(response);
+  }).catch(error => {
+    console.log(error);
+  });
 }
