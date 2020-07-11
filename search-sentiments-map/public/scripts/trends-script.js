@@ -83,13 +83,3 @@ function showResultForTopic(event) {
   const searchTopic = event.currentTarget.innerText;
   setNewTrend(searchTopic);
 }
-// =======
-//  * Update the title of the displayed trend when a topic is selected.
-//  * TODO(chenyuz): Show sentiment scores for all countries on the selected topic.
-//  */
-// function showResultForTopic(event) {
-//   const searchTopic = event.currentTarget.innerText;
-//   const topicHeader = document.getElementById('topic-header');
-//   topicHeader.innerText = 'Worldwide sentiments of search results for "' + searchTopic + '"';
-// }
-// >>>>>>> dc8e192403c03cc757adbf60547f4376d3bde905

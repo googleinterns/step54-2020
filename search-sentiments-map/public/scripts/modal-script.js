@@ -20,24 +20,12 @@ function onClickCountry(e) {
   $('#region-info-modal').modal('show');
 
   // Update Modal with information for relevant country.
-// <<<<<<< HEAD
   const countryName = e.feature.getProperty('name');
   const countryId = e.feature.getId();
   const countryData = e.feature.getProperty('country_data').toLocaleString();
   document.getElementById('modal-title').innerText = countryName;
   displayTopResults(countryId);
   setCountryTrends(countryId);
-  //displayTrends(countryId);
-// =======
-//   const country = e.feature.getProperty('name');
-//   const countryData= e.feature.getProperty('country_data').toLocaleString();
-//   document.getElementById('modal-title').innerText = country;
-//   document.getElementById('search-results-tab').innerText = 
-//       country + ": " + countryData;
-
-//   const countryCode = e.feature.getId();
-//   setCountryTrends(countryCode);
-// >>>>>>> dc8e192403c03cc757adbf60547f4376d3bde905
 }
 
 /**
@@ -75,7 +63,6 @@ function displayTopResults(countryCode) {
   let countryData = topicData.countries
     .filter(countries => countries.country === countryCode);
 
-// <<<<<<< HEAD
   // Handle case where there are no results.
   if (countryData.length === 0) {
     resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
@@ -89,18 +76,6 @@ function displayTopResults(countryCode) {
       resultElement.innerHTML += '<a href=' + results[i].link + '>' +
         results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'
         + 'Sentiment Score: ' + results[i].score + '<br>';
-// =======
-//   fetch('/country-trends/' + countryCode).then(countryTrends => 
-//       countryTrends.json()).then(trends => {
-//     if (trends.length === 0) {
-//       topTrendsTab.innerText = 'Trends are not available for the selected country.';
-//     } else {
-//       trends.forEach(trend => {
-//         const trendHeader = document.createElement('h5');
-//         trendHeader.innerText = trend.topic;
-//         topTrendsTab.appendChild(trendHeader);
-//       });
-// >>>>>>> dc8e192403c03cc757adbf60547f4376d3bde905
     }
     resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
       '<i><br>';
