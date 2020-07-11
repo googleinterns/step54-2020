@@ -76,7 +76,6 @@ function showMoreOrLess() {
 }
 
 /** 
-<<<<<<< HEAD
  * Update title when a trending topic is selected.
  * TODO (@chenyuz): Show sentiment scores for all countries on the selected topic.
  */
