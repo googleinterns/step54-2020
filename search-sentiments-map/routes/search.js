@@ -205,7 +205,7 @@ async function addTopicToDatastore(topic, countriesData) {
  * Adds search result object to countryData array.
  * @param {Object} searchResult Object with information for one search result.
  * @param {Object} countryData Object holding all searchResults for a country.
- * Returns a Promise wrapped around a result.score //edit with typescript (look into that)
+ * @return {Promise} A Promise wrapped around the sentiment score of the result.
 */
 function addSearchResultToCountryData(searchResult, countryData) {
   return getSentiment(searchResult)

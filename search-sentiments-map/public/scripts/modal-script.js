@@ -70,7 +70,7 @@ function displayTopResults(countryCode) {
   } else {
     let results = countryData[0].results;
 
-    resultElement.innerHTML += countryData[0].averageSentiment;
+    resultElement.innerHTML += 'Average Sentiment Score: ' + countryData[0].averageSentiment + '<br>';
 
     for (let i = 0; i < results.length; i++) {
       resultElement.innerHTML += '<a href=' + results[i].link + '>' +

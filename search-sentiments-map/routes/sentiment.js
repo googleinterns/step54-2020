@@ -14,6 +14,7 @@ router.post('/', textParser, (req, res) => {
       response = {
         score: sentimentScore,
       };
+      // TODO(ntarn): Remove comment when done with feature.
       console.log('ntarn debug: score' + response.score);
       res.end(JSON.stringify(response));
     }).catch(err => {
