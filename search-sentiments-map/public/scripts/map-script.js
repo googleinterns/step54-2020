@@ -13,15 +13,15 @@
 // the License.
 
 let mapStyle = [{
-  'stylers': [{'visibility': 'off'}],
+  'stylers': [{ 'visibility': 'off' }],
 }, {
   'featureType': 'landscape',
   'elementType': 'geometry',
-  'stylers': [{'visibility': 'on'}, {'color': '#fcfcfc'}],
+  'stylers': [{ 'visibility': 'on' }, { 'color': '#fcfcfc' }],
 }, {
   'featureType': 'water',
   'elementType': 'geometry',
-  'stylers': [{'visibility': 'on'}, {'color': '#bfd4ff'}],
+  'stylers': [{ 'visibility': 'on' }, { 'color': '#bfd4ff' }],
 }];
 let map;
 let infowindow;
@@ -37,13 +37,13 @@ let dataMax = Number.MIN_VALUE;
 /** Loads the map with country polygons when page loads. */
 function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
-    center: {lat: 29.246630, lng: 29.678410},
+    center: { lat: 29.246630, lng: 29.678410 },
     zoom: 3,
     styles: mapStyle,
     mapTypeControl: false,
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
-  .push(document.getElementById('legend'));
+    .push(document.getElementById('legend'));
 
   infowindow = new google.maps.InfoWindow({});
 
@@ -66,24 +66,19 @@ function loadMapOutline() {
 
 /** Loads the country sentiment score from Datastore. */
 function loadCountryData() {
-  map.data.forEach(function(row) {
-    // Currently a random value, will be changed to call sentiment value.
-    // TODO(ntarn): Add the sentiment value for the country. 
-
+  map.data.forEach(function (row) {
     const countryCode = row.getId();
-    // datastore.filter for that country ID and to get the sentiment ID
     let topicData = getCurrentCustomSearchData();
     let countryData = topicData.countries
       .filter(countries => countries.country === countryCode);
     let dataVariable = 0;
     if (countryData.length != 0) {
       dataVariable = countryData[0].averageSentiment;
-    } 
-    console.log(countryData)
-    // console.log('ntarn debug: ' + 'country: ' + countryData[0].country + ' averageSentiment: ' + dataVariable);
-    
-    // const dataVariable = Math.floor(Math.random() * Math.floor(100)); // Make a fetch for a given topic and retrieve 
-    //the sentiment score for each country, via country ID
+      // TODO(ntarn): Remove console.log statements when finished debugging.
+      console.log('ntarn debug loadCountryData: ' + 'country: ' + countryData[0].country + ' averageSentiment: ' + dataVariable);
+    } else {
+      console.log('Data does not exist for this countryCode:' + countryCode);
+    }
 
     // Keep track of min and max values as we read them.
     if (dataVariable < dataMin) {
@@ -94,13 +89,13 @@ function loadCountryData() {
     }
 
     row.setProperty('country_data', dataVariable);
-    
+
 
     // Update and display the map legend.
     document.getElementById('data-min').textContent =
-        dataMin.toLocaleString();
+      dataMin.toLocaleString();
     document.getElementById('data-max').textContent =
-        dataMax.toLocaleString();
+      dataMax.toLocaleString();
   });
 }
 
@@ -113,11 +108,11 @@ function loadCountryData() {
  */
 function styleFeature(feature) {
   let low = [5, 69, 54];  // Color of smallest datum.
-  let high = [151, 83, 34];   // Color of largest datum.
+  let high = [151, 83, 34]; // Color of largest datum.
 
   // Delta represents where the value sits between the min and max.
   let delta = (feature.getProperty('country_data') - dataMin) /
-      (dataMax - dataMin);
+    (dataMax - dataMin);
 
   let color = [];
   for (let i = 0; i < 3; i++) {
@@ -150,7 +145,7 @@ function mouseInToRegion(e) {
 
   // Add popup info window with country info.
   const countryInfo = e.feature.getProperty('name') + ': ' +
-      e.feature.getProperty('country_data').toLocaleString();
+    e.feature.getProperty('country_data').toLocaleString();
   infowindow.setContent(countryInfo);
   infowindow.setPosition(e.latLng);
   infowindow.open(map);

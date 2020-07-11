@@ -1,5 +1,4 @@
 /** Server-side script that uses the Google Cloud Natural Language API to get the sentiment score. */
-
 const express = require('express');
 var router = express.Router();  // Using Router to divide the app into modules.
 var allSettled = require('promise.allsettled');
@@ -10,7 +9,7 @@ var textParser = bodyParser.text();
 
 router.post('/', textParser, (req, res) => {
   console.log('Got body:' + req.body);
-  quickstart(req.body)
+  getSentimentScore(req.body)
     .then((sentimentScore) => {
       response = {
         score: sentimentScore,
@@ -22,14 +21,19 @@ router.post('/', textParser, (req, res) => {
     });
 });
 
-// TODO(ntarn): Export this method to use directly with search.js
-async function quickstart(searchTopic) {
+/** 
+ *  Gets the sentiment score of an inputted search result title and snippet.
+ *  @param {string} searchResultTitleSnippet The search result combined title and snippet.
+ *  @return {number} The sentiment score of the combined title and snippet.
+ *  TODO(ntarn): Export this method to use directly with search.js
+ */
+async function getSentimentScore(searchResultTitleSnippet) {
   try {
     // Instantiate a client.
     const client = new language.LanguageServiceClient();
 
     // The text to analyze.
-    const text = searchTopic;
+    const text = searchResultTitleSnippet;
 
     const document = {
       content: text,
@@ -40,6 +44,7 @@ async function quickstart(searchTopic) {
     const [result] = await client.analyzeSentiment({ document: document });
     const sentiment = result.documentSentiment;
 
+    // TODO(ntarn): Remove console.log statements when finished with feature. 
     console.log(`ntarn debug use api Text: ${text}`);
     console.log(`ntarn debug use api Sentiment score: ${sentiment.score}`);
 
@@ -48,7 +53,6 @@ async function quickstart(searchTopic) {
     console.error('ERROR:', err);
     return 0;
   }
-
 }
 
 module.exports.router = router;

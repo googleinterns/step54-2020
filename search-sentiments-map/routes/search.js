@@ -59,7 +59,7 @@ async function retrieveSearchResultFromDatastore(topic) {
       timestamp: customSearchTopic[0].timestamp,
     };
     // TODO(ntarn): Remove console.log statements when finished debugging.
-    console.log('ntarn debug: reach retrieve search result');
+    console.log(`ntarn debug retrieved search result for topic: ${topic}` +  `example: ${customSearchTopic[0].countries[0].results[0]}`);
     console.log(customSearchTopicJsonArray);
     return customSearchTopicJsonArray;
   } catch (err) {

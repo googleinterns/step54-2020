@@ -24,7 +24,6 @@ const updateData = require('./routes/update-data.js');
 // and javascript files in the public folder.
 app.use(express.static('./public'));
 app.get('/', (req, res) => {
-  console.log('Running app.get');
   res.sendFile('/index.html');
 });
 
@@ -42,6 +41,3 @@ const PORT = process.env.PORT || 4503;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);
 });
-
-console.log('Running app.js');
-
