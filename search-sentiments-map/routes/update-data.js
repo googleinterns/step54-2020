@@ -18,7 +18,7 @@ const trends = require('./trends.js');
 const search = require('./search.js');
 
 // Router that updates trends data.
-// Scheduled to run at minute 0 past every 12th hour (11am and 23pm every day).
+// Scheduled to run at minute 0 past every 12th hour (11am and 11pm every day).
 router.get('/', (req, res) => {
   console.log('Updating Search Results Data.');
   // trends.updateTrendsFunction(); Undo comment during final deploy.

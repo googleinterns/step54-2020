@@ -13,10 +13,10 @@
 // the License.
 
 /**
- * Responds to a click on a map shape (country).
+ * Displays the information modal when a country on the map is clicked.
  * @param {?google.maps.MouseEvent} e Click event.
  */
-function clickOnRegion(e) {
+function onClickCountry(e) {
   $('#region-info-modal').modal('show');
 
   // Update Modal with information for relevant country.
@@ -29,10 +29,10 @@ function clickOnRegion(e) {
 }
 
 /**
- * Displays trends under the top-trends modal tab for the selected country.
+ * Sets trends under the top-trends modal tab for the selected country.
  * @param {string} countryCode The two-letter code of the selected country.
  */
-function displayTrends(countryCode) {
+function setCountryTrends(countryCode) {
   const topTrendsTab = document.getElementById('top-trends-tab');
   topTrendsTab.innerHTML = '';
   fetch('/country-trends/' + countryCode).then(countryTrends =>

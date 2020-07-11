@@ -11,5 +11,8 @@ Commands to run:
 To set project ID: 
 `gcloud config set project PROJECT_ID` or `export GCLOUD_PROJECT=...`
 
+To update the app engine's cron job:
+`gcloud app deploy cron.yaml`
+
 Northern Cyprus and Somaliland don't have country codes and therefore their IDs are marked as 'N/A' in countries.geojson. They are not present in the country-code.json file.
 We won't be able to get trends / search data for them, so we should color them grey.

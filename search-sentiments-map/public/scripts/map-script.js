@@ -51,7 +51,7 @@ function initMap() {
   map.data.setStyle(styleFeature);
   map.data.addListener('mouseover', mouseInToRegion);
   map.data.addListener('mouseout', mouseOutOfRegion);
-  map.data.addListener('click', clickOnRegion);
+  map.data.addListener('click', onClickCountry);
 
   loadMapOutline();
 }

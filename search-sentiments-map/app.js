@@ -14,10 +14,10 @@
 
 const express = require('express');
 const app = express();
-const trends = require('./routes/trends.js');
 const countryTrends = require('./routes/country-trends.js');
 const search = require('./routes/search.js');
 const sentiment = require('./routes/sentiment.js');
+const trends = require('./routes/trends.js');
 const updateData = require('./routes/update-data.js');
 
 // Use express to create server that displays the webpage with the html, css, 
@@ -29,10 +29,10 @@ app.get('/', (req, res) => {
 
 // Use the trends, search, and sentiment routers so that they can be fetched from the
 // client-side scripts.
-app.use('/trends', trends.router);
-app.use('/search', search.router);
 app.use('/country-trends', countryTrends.router);
+app.use('/search', search.router);
 app.use('/sentiment', sentiment.router);
+app.use('/trends', trends.router);
 app.use('/update-data', updateData.router);
 
 
