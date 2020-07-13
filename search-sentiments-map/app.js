@@ -14,19 +14,26 @@
 
 const express = require('express');
 const app = express();
-// Listen to the App Engine-specified port, or 3000 otherwise.
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}...`);
-});
+const countryTrends = require('./routes/country-trends.js');
+const trends = require('./routes/trends.js');
+const sentiment = require('./routes/sentiment.js');
+const updateData = require('./routes/update-data.js');
 
-// Use express to create server that displays the webpage with the html, css, and javascript
-// files in the public folder.
-app.use(express.static(__dirname +'/public'));
+// Use express to create server that displays the webpage with the html, css, 
+// and javascript files in the public folder.
+app.use(express.static('./public'));
 app.get('/', (req, res) => {
   res.sendFile('/index.html');
 });
 
-// Include the trends module so that it can be fetched from the client-side scripts.
-const trends = require('./routes/trends.js');
-app.use('/trends', trends);
+// Use the trends router so that it can be fetched from the client-side scripts.
+app.use('/country-trends', countryTrends.router);
+app.use('/trends', trends.router);
+app.use('/sentiment', sentiment);
+app.use('/update-data', updateData.router);
+
+// Listen to the App Engine-specified port, or 4503 otherwise.
+const PORT = process.env.PORT || 4503;
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}...`);
+});
