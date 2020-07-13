@@ -14,33 +14,27 @@
 
 const express = require('express');
 const app = express();
-const schedule = require('node-schedule');
 const trends = require('./routes/trends.js');
 const countryTrends = require('./routes/country-trends.js');
 const search = require('./routes/search.js');
+const sentiment = require('./routes/sentiment.js');
+const updateData = require('./routes/update-data.js');
 
 // Use express to create server that displays the webpage with the html, css, 
 // and javascript files in the public folder.
 app.use(express.static('./public'));
 app.get('/', (req, res) => {
+  console.log('Running app.get');
   res.sendFile('/index.html');
 });
 
-// Use the trends and search routers so that they can be fetched from the
+// Use the trends, search, and sentiment routers so that they can be fetched from the
 // client-side scripts.
 app.use('/trends', trends.router);
 app.use('/search', search.router);
 app.use('/country-trends', countryTrends.router);
-
-// Uncomment the following line to get trends or search results if none are in
-// the Datastore.
-// trends.updateTrendsFunction();
-// search.updateSearchResults();
-
-// Update top trends at minute 0 past every 12th hour (11am and 23pm every day).
-var j = schedule.scheduleJob('0 11,23 * * *', function(){
-  trends.updateTrendsFunction();
-});
+app.use('/sentiment', sentiment.router);
+app.use('/update-data', updateData.router);
 
 // Schedule the function that updates search to be run  at midnight and noon
 // everyday.
@@ -50,8 +44,12 @@ var searchResultUpdateSchedule = schedule.scheduleJob('0 0,12 * * *', function()
   //  search.updateSearchResults();
 });
 
+
 // Listen to the App Engine-specified port, or 4503 otherwise.
 const PORT = process.env.PORT || 4503;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);
 });
+
+console.log('Running app.js');
+

@@ -139,7 +139,7 @@ async function saveTrendsAndDeletePrevious(trendsByCountry) {
 
   try {
     await datastore.save(trendsEntry);
-    console.log(`TrendsEntry ${trendsEntryKey.id} created successfully.`);
+    //console.log(`TrendsEntry ${trendsEntryKey.id} created successfully.`);
   } catch (err) {
     console.error('ERROR:', err);
   }
@@ -159,7 +159,7 @@ async function deleteAncientTrend() {
   if (Date.now() - trendsEntries[0].timestamp > 7 * 24 * 60 * 60000) {
     const trendsEntryKey = trendsEntries[0][datastore.KEY];
     await datastore.delete(trendsEntryKey);
-    console.log(`TrendsEntry ${trendsEntryKey.id} deleted.`);
+    //console.log(`TrendsEntry ${trendsEntryKey.id} deleted.`);
   }
 }
 

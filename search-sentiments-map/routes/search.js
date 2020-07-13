@@ -22,6 +22,7 @@ const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
 const json = require('./../public/country-code.json');
+global.Headers = fetch.Headers;
 
 /** 
  * Renders a JSON array of the top search results for all countries with API data
@@ -30,6 +31,8 @@ const json = require('./../public/country-code.json');
 router.get('/:topic', (req, res) => {
   let topic = req.params.topic;
   retrieveSearchResultFromDatastore(topic).then(customSearchTopicJsonArray => {
+    console.log('In the router.get method');
+    console.log(customSearchTopicJsonArray);
     res.setHeader('Content-Type', 'application/json');
     res.send(customSearchTopicJsonArray);
   });
@@ -44,7 +47,7 @@ router.get('/:topic', (req, res) => {
 async function retrieveSearchResultFromDatastore(topic) {
   // Request latest entity with a topic matching the given topic.
   const query = datastore.createQuery('CustomSearchTopic').order('timestamp', {
-    descending: true,
+    descending: true, // TODO(ntarn): change this back to descending
   }).filter('topic',topic).limit(1);
 
   try {
@@ -54,6 +57,8 @@ async function retrieveSearchResultFromDatastore(topic) {
       countries: customSearchTopic[0].countries,
       timestamp: customSearchTopic[0].timestamp,
     };
+    console.log('reach retrieve search result');
+    console.log(customSearchTopicJsonArray);
     return customSearchTopicJsonArray;
   } catch (err) {
     console.error('ERROR:', err);
@@ -79,12 +84,12 @@ function updateSearchResults() {
  * this data to be saved in Datastore.
  * @param {string} query Search query.
  */
-// TODO(ntarn): Add in average score for search results of a country.
 async function updateSearchResultsForTopic(query) {
   let countriesData = [];
 
   // Note: Can't use forEach with await.
-  for (let i = 0; i < json.length; i++) {
+  for (let i = 0; i < json.length; i++) { // When testing, make this equal to 3 countries. 
+    var set =0;
     // 100 queries per minute limit for Custom Search API. Pause to prevent
     // surpassing limit.
     if (i !== 0 && i % 100 === 0) {
@@ -92,11 +97,12 @@ async function updateSearchResultsForTopic(query) {
     }
     let countryData = [];
     // Update countryData within the functions called.
-    await getSearchResultsForCountryFromAPI(
+    const avg = await getSearchResultsForCountryFromAPI(
         "country" + json[i].id, query, countryData);
+    console.log('ntarn debug country: ' + json[i].id + ' average: ' + avg);
     countriesData.push({
       country: json[i].id,
-      //score: score,
+      average: avg,
       results: countryData,
     });
   }
@@ -115,7 +121,8 @@ async function getSearchResultsForCountryFromAPI(countryCode, query, countryData
   let response = 
       await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults =  await response.json();
-  await saveResultsAndDeletePrevious(searchResults, countryData);
+  // console.log(searchResults);
+  return await saveResultsAndDeletePrevious(searchResults, countryData);
 }
 
 /**
@@ -132,10 +139,17 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
   // countryData object.
   var currentSearchResults = searchResultsJson.items;
   try {
-    for (var i = 0; i < currentSearchResults.length; i++) {
-      await addSearchResultToCountryData(currentSearchResults[i], countryData);
+    let avg = 0;
+    if (currentSearchResults == undefined) {
+      return 0;
+    } else {
+      for (var i = 0; i < currentSearchResults.length; i++) {
+        avg = avg + await addSearchResultToCountryData(currentSearchResults[i], countryData);
+      }
+      return avg / currentSearchResults.length;
     }
-  } catch  (err) { // Occurs when no search results for that country and topic.
+    
+  } catch (err) { // Occurs when no search results for that country and topic.
     console.error('ERROR:', err);
     countryData = null;
   }
@@ -190,17 +204,40 @@ async function addTopicToDatastore(topic, countriesData) {
  * Adds search result object to countryData array.
  * @param {Object} searchResult Object with information for one search result.
  * @param {Object} countryData Object holding all searchResults for a country.
+ * Returns a Promise wrapped around a result.score //edit with typescript (look into that)
 */
-// TODO(ntarn): Add in sentiment score for this search result.
 function addSearchResultToCountryData(searchResult, countryData) {
-  searchResultData = {
-    title: searchResult.title,
-    snippet: searchResult.snippet,
-    htmlTitle: searchResult.htmlTitle,
-    link: searchResult.link,
-    // score = sentimentscore
-  };
-  countryData.push(searchResultData);
+  return getSentiment(searchResult)
+    .then(response => response.json())
+    .then((result) => { 
+      console.log('ntarn debug: frontend' + result.score);
+      searchResultData = {
+        title: searchResult.title,
+        snippet: searchResult.snippet,
+        htmlTitle: searchResult.htmlTitle,
+        link: searchResult.link,
+        score: result.score,
+      };
+      countryData.push(searchResultData);
+      return result.score;
+    });
+  
+}
+
+/** 
+ * Gets the sentiment score of a search result. 
+ * @param {Object} searchResult Object with information for one search result.
+ */
+function getSentiment(searchResult) {
+  return fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {method: 'POST',  // Send a request to the URL.
+    headers: new Headers({
+      'Content-Type': 'text/plain',
+    }),
+    body: searchResult.title + searchResult.snippet
+    })
+    .catch(err => {
+      console.log(err);
+    });
 }
 
 /** 

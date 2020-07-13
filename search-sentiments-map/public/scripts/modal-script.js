@@ -73,13 +73,12 @@ function displayTopResults(countryCode) {
     if (results.length === 0) {
       resultElement.innerHTML += 'No results.<br>';
     }
-
     for (let i = 0; i < results.length; i++) {
       resultElement.innerHTML += '<a href=' + results[i].link + '>' +
-          results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>';
+          results[i].htmlTitle + '</a><br>' + results[i].snippet+ '<br>'
+          + 'Sentiment Score: ' + results[i].score;
     }
     resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
     '<i><br>';
   }
 }
-

@@ -69,7 +69,18 @@ function loadCountryData() {
   map.data.forEach(function(row) {
     // Currently a random value, will be changed to call sentiment value.
     // TODO(ntarn): Add the sentiment value for the country. 
-    const dataVariable = Math.floor(Math.random() * Math.floor(100));
+
+    const countryCode = row.getId();
+    // datastore.filter for that country ID and to get the sentiment ID
+    let topicData = getCurrentCustomSearchData();
+    let countryData = topicData.countries
+      .filter(countries => countries.country === countryCode);
+      
+    const dataVariable = countryData[0].average;
+    console.log('ntarn debug: ' + 'country: ' + countryData[0].country + ' average: ' + dataVariable);
+    
+    // const dataVariable = Math.floor(Math.random() * Math.floor(100)); // Make a fetch for a given topic and retrieve 
+    //the sentiment score for each country, via country ID
 
     // Keep track of min and max values as we read them.
     if (dataVariable < dataMin) {
@@ -80,6 +91,7 @@ function loadCountryData() {
     }
 
     row.setProperty('country_data', dataVariable);
+    
 
     // Update and display the map legend.
     document.getElementById('data-min').textContent =

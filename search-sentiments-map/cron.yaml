@@ -1,0 +1,5 @@
+cron:
+- description: "update trends and search data job"
+  url: /update-data
+  schedule: every 12 hours from 20:46 to 23:05
+  timezone: America/New_York
