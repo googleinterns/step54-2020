@@ -119,7 +119,7 @@ async function updateSearchResultsForTopic(query) {
  */
 async function getSearchResultsForCountryFromAPI(countryCode, query, countryData) {
   let response = 
-      await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
+      await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=006416001635532544518:fn4e6vykb3w&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults =  await response.json();
   // console.log(searchResults);
   return await saveResultsAndDeletePrevious(searchResults, countryData);
