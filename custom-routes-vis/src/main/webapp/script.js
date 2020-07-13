@@ -108,7 +108,9 @@ function hideMarker(markerIndex) {
   document.getElementById('generate-routes').style.display = 'none';
 }
 
+/**
+ * Generates routes from origin to destination by calling Directions API.
+ */
 function generateRoutes() {
-  // get coordinates
-  // make api call
+  // TODO(chenyuz): Write this code in separate branch.
 }
