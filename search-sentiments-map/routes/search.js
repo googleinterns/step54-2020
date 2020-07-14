@@ -129,7 +129,6 @@ async function updateSearchResultsForTopic(query) {
  * @param {string} countryCode 2 letter country code for search results to be
  *     written in.
  * @param {string} query Search query.
- * @param {Object} countryData Object holding all searchResults for a country.
  * @return {Object} Formatted object with country search result data and
  *     country overall score.
  */
@@ -151,7 +150,6 @@ async function formatCountryResults(searchResultsJson) {
   // Parse the JSON string and pass each search result to add to the
   // countryData object.
   let currentSearchResults = searchResultsJson.items;
-  try {
     let countryData = [];
     let totalScore = 0;
     if (currentSearchResults == undefined) {
@@ -163,13 +161,12 @@ async function formatCountryResults(searchResultsJson) {
         countryData.push(formattedResults);
         totalScore += formattedResults.score;
       }
-      let avgScore = totalScore / currentSearchResults.length;
+      let avgScore = 0;
+      if (currentSearchResults.length !== 0) {
+        avgScore = totalScore / currentSearchResults.length;
+      } 
       return {score: avgScore, results: countryData};
     }
-  } catch (err) { // Occurs when no search results for that country and topic.
-    console.error('ERROR:', err);
-    countryData = null;
-  }
 }
 
 /**
