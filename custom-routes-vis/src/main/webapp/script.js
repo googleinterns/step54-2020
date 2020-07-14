@@ -14,7 +14,7 @@
 
 // Array holding origin and destination markers.
 let markers = [];
-var displayedRoutes = [];
+let displayedRoutes = [];
 
 var map;
 
@@ -166,11 +166,19 @@ function generateRoutes() {
             path: routeCoordinates,
             geodesic: true,
             strokeColor: "#FF0000",
-            strokeOpacity: 1.0,
-            strokeWeight: 2
+            strokeOpacity: 0.5,
+            strokeWeight: 6,
           });
           route.setMap(map);
+          route.addListener('click', function(event){
+            console.log('route click');
+          });
           displayedRoutes.push(route);
         }
-    });
+        displayedRoutes[0].setOptions({ strokeOpacity: 1.0, });
+      });
+}
+
+function selectRoute() {
+  
 }

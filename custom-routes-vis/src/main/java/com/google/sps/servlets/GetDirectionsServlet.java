@@ -42,6 +42,8 @@ public class GetDirectionsServlet extends HttpServlet {
   public String getRoutesFromApi(String origin, String destination) throws IOException, MalformedURLException {
     URL directionsUrl = new URL("https://maps.googleapis.com/maps/api/directions/json?"
         + "origin=" + origin + "&destination=" + destination
+        + "&alternatives=true"
+        + "&mode=driving"
         + "&key=" + System. getenv("DIRECTIONS_API_KEY"));
     URLConnection connection = directionsUrl.openConnection();
     connection.setRequestProperty("Accept-Charset", "UTF-8");
