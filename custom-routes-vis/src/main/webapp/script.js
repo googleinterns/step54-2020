@@ -13,6 +13,7 @@
 // limitations under the License.
 
 const LATLNG = {lat: 0.0, lng: 0.0};
+
 /**
  * Marker names.
  * @enum {string}
@@ -21,6 +22,7 @@ const MarkerNames = {
   ORIGIN: 'origin',
   DESTINATION: 'destination',
 };
+
 // Array holding origin and destination markers.
 let originDestinationMarkers = []
 
