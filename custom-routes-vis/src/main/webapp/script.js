@@ -15,12 +15,17 @@
 // Array holding origin and destination markers.
 let markers = []
 
+var map;
+
 /** Creates the world map and markers. */
-function createWorldMap() {
-  map = new google.maps.Map(
-    document.getElementById('map'),
-    {center: {lat: 38.46049, lng: -5.428423}, zoom: 10});
-  
+function initMap() {
+  var chicago = new google.maps.LatLng(41.850033, -87.6500523);
+  var mapOptions = {
+    zoom:7,
+    center: chicago,
+  }
+  map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
   // Create origin and destination markers, but hides them until user selects
   // coordinates.
   createMarker('origin-coordinates', 'A', 'Origin',  {lat: 0.0, lng: 0.0});
@@ -111,11 +116,27 @@ function hideMarker(markerIndex) {
 function generateRoutes() {
   // get coordinates
   // make api call
-  fetch('https://maps.googleapis.com/maps/api/directions/json?'
-      + 'origin=Toronto&destination=Montreal' +
-      + '&key=' + process.env.DIRECTIONS_API_KEY).then(response => {
-    console.log(response);
-  }).catch(error => {
-    console.log(error);
+  var routeCoordinates = [];
+  fetch('/get-directions').then(response => response.json()).then(directions => {
+    console.log(directions.status);
+    let routes = directions.routes;
+    console.log('num routes:', routes.length);
+    let firstRouteLegs = routes[0].legs;
+    for (let i = 0; i < firstRouteLegs.length; i++) {
+      let legSteps = firstRouteLegs[i].steps;
+      console.log('num legs', firstRouteLegs.length);
+      for (let j = 0; j < legSteps.length; j++) {
+        routeCoordinates.push(legSteps[j].start_location);
+      }
+    }
+
+    var route = new google.maps.Polyline({
+      path: routeCoordinates,
+      geodesic: true,
+      strokeColor: "#FF0000",
+      strokeOpacity: 1.0,
+      strokeWeight: 2
+    });
+    route.setMap(map);
   });
 }
