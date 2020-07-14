@@ -13,8 +13,8 @@
 // limitations under the License.
 
 // Array holding origin and destination markers.
-let markers = []
-let route;
+let markers = [];
+var displayedRoutes = [];
 
 var map;
 
@@ -108,9 +108,7 @@ function showMarker(markerIndex) {
  */
 function hideMarker(markerIndex) {
   markers[markerIndex].setVisible(false);
-  if (route != null) {
-    route.setVisible(false);
-  }
+  clearRoutes();
 
   let containerName = ((markerIndex === 0) ? 'origin' : 'destination');
   document.getElementById(containerName + '-coordinates').innerHTML = '';
@@ -121,11 +119,18 @@ function hideMarker(markerIndex) {
   document.getElementById('generate-routes').style.display = 'none';
 }
 
+/** Removes all routes from the DOM. */
+function clearRoutes() {
+  for (let i = 0; i < displayedRoutes.length; i++) {
+    console.log('removing route')
+    displayedRoutes[i].setMap(null);
+  }
+  displayedRoutes = [];
+}
+
 /** Precondition: two markers exist in the markers array. */
 function generateRoutes() {
-  if (route != null) {
-    route.setVisible(false);  // Remove the current route from the DOM.
-  }
+  clearRoutes();
 
   // Get coordinates of origin and destination.
   let startLatLng = markers[0].getPosition();
@@ -134,35 +139,38 @@ function generateRoutes() {
   let destination = endLatLng.lat() + ',' + endLatLng.lng();
 
   // Get the route and display on map.
-  let routeCoordinates = [];
   fetch('/get-directions?origin=' + origin + '&destination=' + destination)
       .then(response => response.json()).then(directions => {
         console.log(directions.status);
         let routes = directions.routes;
         console.log('num routes:', routes.length);
 
-        let firstRouteLegs = routes[0].legs;
-        console.log('num legs', firstRouteLegs.length);
+        for (let routeNum = 0; routeNum < routes.length; routeNum++) {
+          let routeCoordinates = [];
+          let routeLegs = routes[routeNum].legs;
+          console.log('num legs', routeLegs.length);
 
-        for (let i = 0; i < firstRouteLegs.length; i++) {
-          let legSteps = firstRouteLegs[i].steps;
-          console.log('num steps', legSteps.length);
+          for (let i = 0; i < routeLegs.length; i++) {
+            let legSteps = routeLegs[i].steps;
+            console.log('num steps', legSteps.length);
 
-          for (let j = 0; j < legSteps.length; j++) {
-            routeCoordinates.push(legSteps[j].start_location);
+            for (let j = 0; j < legSteps.length; j++) {
+              routeCoordinates.push(legSteps[j].start_location);
+            }
+            if (i == routeLegs.length - 1) {
+              routeCoordinates.push(legSteps[legSteps.length - 1].end_location);
+            }
           }
-          if (i == firstRouteLegs.length - 1) {
-            routeCoordinates.push(legSteps[legSteps.length - 1].end_location);
-          }
+
+          let route = new google.maps.Polyline({
+            path: routeCoordinates,
+            geodesic: true,
+            strokeColor: "#FF0000",
+            strokeOpacity: 1.0,
+            strokeWeight: 2
+          });
+          route.setMap(map);
+          displayedRoutes.push(route);
         }
-
-        route = new google.maps.Polyline({
-          path: routeCoordinates,
-          geodesic: true,
-          strokeColor: "#FF0000",
-          strokeOpacity: 1.0,
-          strokeWeight: 2
-        });
-        route.setMap(map);
     });
 }
