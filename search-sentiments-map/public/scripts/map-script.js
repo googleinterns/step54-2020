@@ -13,15 +13,15 @@
 // the License.
 
 let mapStyle = [{
-  'stylers': [{ 'visibility': 'off' }],
+  'stylers': [{'visibility': 'off'}],
 }, {
   'featureType': 'landscape',
   'elementType': 'geometry',
-  'stylers': [{ 'visibility': 'on' }, { 'color': '#fcfcfc' }],
+  'stylers': [{'visibility': 'on'}, {'color': '#fcfcfc'}],
 }, {
   'featureType': 'water',
   'elementType': 'geometry',
-  'stylers': [{ 'visibility': 'on' }, { 'color': '#bfd4ff' }],
+  'stylers': [{'visibility': 'on'}, {'color': '#bfd4ff'}],
 }];
 let map;
 let infowindow;
@@ -43,7 +43,7 @@ function initMap() {
     mapTypeControl: false,
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
-    .push(document.getElementById('legend'));
+      .push(document.getElementById('legend'));
 
   infowindow = new google.maps.InfoWindow({});
 
@@ -93,9 +93,9 @@ function loadCountryData() {
 
     // Update and display the map legend.
     document.getElementById('data-min').textContent =
-      dataMin.toLocaleString();
+        dataMin.toLocaleString();
     document.getElementById('data-max').textContent =
-      dataMax.toLocaleString();
+        dataMax.toLocaleString();
   });
 }
 
@@ -112,7 +112,7 @@ function styleFeature(feature) {
 
   // Delta represents where the value sits between the min and max.
   let delta = (feature.getProperty('country_data') - dataMin) /
-    (dataMax - dataMin);
+      (dataMax - dataMin);
 
   let color = [];
   for (let i = 0; i < 3; i++) {
@@ -145,7 +145,7 @@ function mouseInToRegion(e) {
 
   // Add popup info window with country info.
   const countryInfo = e.feature.getProperty('name') + ': ' +
-    e.feature.getProperty('country_data').toLocaleString();
+      e.feature.getProperty('country_data').toLocaleString();
   infowindow.setContent(countryInfo);
   infowindow.setPosition(e.latLng);
   infowindow.open(map);

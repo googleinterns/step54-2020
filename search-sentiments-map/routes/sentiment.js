@@ -8,7 +8,6 @@ var bodyParser = require('body-parser');
 var textParser = bodyParser.text();
 
 router.post('/', textParser, (req, res) => {
-  console.log('Got body:' + req.body);
   getSentimentScore(req.body)
     .then((sentimentScore) => {
       response = {
@@ -30,10 +29,7 @@ router.post('/', textParser, (req, res) => {
  */
 async function getSentimentScore(searchResultTitleSnippet) {
   try {
-    // Instantiate a client.
     const client = new language.LanguageServiceClient();
-
-    // The text to analyze.
     const text = searchResultTitleSnippet;
 
     const document = {

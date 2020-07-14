@@ -61,16 +61,17 @@ function displayTopResults(countryCode) {
   resultElement.innerHTML = '';
 
   let countryData = topicData.countries
-    .filter(countries => countries.country === countryCode);
+      .filter(countries => countries.country === countryCode);
 
   // Handle case where there are no results.
   if (countryData.length === 0) {
     resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
-      date.toString() + '<i><br>';
+        date.toString() + '<i><br>';
   } else {
     let results = countryData[0].results;
 
-    resultElement.innerHTML += 'Average Sentiment Score: ' + countryData[0].averageSentiment + '<br>';
+    resultElement.innerHTML += 'Average Sentiment Score: ' + 
+        countryData[0].averageSentiment + '<br>';
 
     for (let i = 0; i < results.length; i++) {
       resultElement.innerHTML += '<a href=' + results[i].link + '>' +

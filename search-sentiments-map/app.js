@@ -35,7 +35,6 @@ app.use('/sentiment', sentiment.router);
 app.use('/trends', trends.router);
 app.use('/update-data', updateData.router);
 
-
 // Listen to the App Engine-specified port, or 4503 otherwise.
 const PORT = process.env.PORT || 4503;
 app.listen(PORT, () => {

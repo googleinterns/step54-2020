@@ -18,7 +18,7 @@ const express = require('express');
 const router = express.Router();  // Using Router to divide the app into modules.
 
 const googleTrends = require('google-trends-api');
-const { Datastore } = require('@google-cloud/datastore');
+const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 const TRENDS_DATA_KIND = 'TrendsEntry';
 
@@ -61,7 +61,7 @@ async function updateDailyTrends() {
     }).then(dailyTrendsJsonString => {
       // Parse the JSON string and get the trending topics.
       trendingSearches = JSON.parse(dailyTrendsJsonString)
-        .default.trendingSearchesDays[0].trendingSearches;
+          .default.trendingSearchesDays[0].trendingSearches;
       trendsByCountry.push(constructCountryTrendsJson(trendingSearches, country.id));
     }).catch(err => {
       console.log(err);

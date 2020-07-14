@@ -74,11 +74,21 @@ function updateSearchResults() {
   retrieveGlobalTrends().then(async trends => {
     for (let i = 0; i < trends.length; i++) { // When testing, make i < 1 trend to test one.
       await updateSearchResultsForTopic(trends[i].trendTopic);
-      // TODO(ntarn): Remove console.log statements when finished debugging.
-      console.log('ntarn debug updateSearchResult for: ' + trends[i].trendTopic);
       await new Promise(resolve => setTimeout(resolve, 60000));
     }
   });
+}
+
+/** 
+ * Queries the Datastore for the most recent global trends.
+ * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
+ */
+async function retrieveGlobalTrends() {
+  const query = datastore.createQuery('TrendsEntry').order('timestamp', {
+    descending: true,
+  });
+  const [trendsEntry] = await datastore.runQuery(query);
+  return trendsEntry[0].globalTrends;
 }
 
 /** 
@@ -91,7 +101,6 @@ async function updateSearchResultsForTopic(query) {
 
   // Note: Can't use forEach with await.
   for (let i = 0; i < json.length; i++) { // When testing, make i < 3 countries. 
-    var set = 0;
     // 100 queries per minute limit for Custom Search API. Pause to prevent
     // surpassing limit.
     if (i !== 0 && i % 100 === 0) {
@@ -99,12 +108,13 @@ async function updateSearchResultsForTopic(query) {
     }
     let countryData = [];
     // Update countryData within the functions called.
-    const avg = await getSearchResultsForCountryFromAPI(
-      "country" + json[i].id, query, countryData);
+    const avgCountrySentimentScore = await getSearchResultsForCountryFromAPI(
+        "country" + json[i].id, query, countryData);
+    // TODO(ntarn): Remove when done with sentiment chart feature debugging.
     console.log('ntarn debug country: ' + json[i].id + ' averageSentiment: ' + avg);
     countriesData.push({
       country: json[i].id,
-      averageSentiment: avg,
+      averageSentiment: avgCountrySentimentScore,
       results: countryData,
     });
   }
@@ -118,6 +128,8 @@ async function updateSearchResultsForTopic(query) {
  *     written in.
  * @param {string} query Search query.
  * @param {Object} countryData Object holding all searchResults for a country.
+ * @return {number} The average sentiment score propagated from the
+ * saveResultsAndDeletePrevious method.
  */
 async function getSearchResultsForCountryFromAPI(countryCode, query, countryData) {
   let response =
@@ -138,66 +150,21 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
 
   // Parse the JSON string and pass each search result to add to the
   // countryData object.
-  var currentSearchResults = searchResultsJson.items;
+  let currentSearchResults = searchResultsJson.items;
   try {
     let avg = 0;
     if (currentSearchResults == undefined) {
       return 0;
     } else {
-      for (var i = 0; i < currentSearchResults.length; i++) {
-        avg = avg + await addSearchResultToCountryData(currentSearchResults[i], countryData);
-        console.log('avg in for loop of saveResults' + avg);
+      for (let i = 0; i < currentSearchResults.length; i++) {
+        avg = avg + await addSearchResultToCountryData(currentSearchResults[i], 
+            countryData);
       }
       return avg / currentSearchResults.length;
     }
   } catch (err) { // Occurs when no search results for that country and topic.
     console.error('ERROR:', err);
     countryData = null;
-  }
-}
-
-/** Deletes search results from 7 days ago. */
-async function deleteAncientResults() {
-  const query = datastore.createQuery('CustomSearchTopic').order('timestamp');
-  const [searchResults] = await datastore.runQuery(query);
-
-  // Note: Can't use forEach with await.
-  // Loop through sorted data beginnning with oldest results, delete if older
-  // than a week. Stop when reach results from within a week.
-  for (let i = 0; i < searchResults.length; i++) {
-    if (Date.now() - searchResults[i].timestamp > 7 * 24 * 60 * 60000) {
-      const searchResultKey = searchResults[i][datastore.KEY];
-      await datastore.delete(searchResultKey);
-      console.log(`Custom Search Result ${searchResultKey.id} deleted.`)
-    } else {
-      break;
-    }
-  }
-}
-
-/** 
- * Creates Datastore item for given topic and country search results. 
- * @param {string} topic The seach topic the search results are for.
- * @param {Object} countriesData Object holding all searchResults for all
- *      countries.
- */
-async function addTopicToDatastore(topic, countriesData) {
-  const customSearchTopicKey = datastore.key('CustomSearchTopic');
-  // Get the current timestamp in milliseconds.
-  let timestamp = Date.now();
-  const entity = {
-    key: customSearchTopicKey,
-    data: {
-      topic: topic,
-      countries: countriesData,
-      timestamp: Date.now(),
-    },
-  };
-  try {
-    await datastore.save(entity);
-    console.log(`Custom Search Result ${customSearchTopicKey.id} created successfully.`);
-  } catch (err) {
-    console.error('ERROR:', err);
   }
 }
 
@@ -256,22 +223,54 @@ function getSentiment(searchResult) {
       'Content-Type': 'text/plain',
     }),
     body: searchResult.title + searchResult.snippet
-  })
-    .catch(err => {
-      console.log(err);
-    });
+  }).catch(err => {
+    console.log(err);
+  });
+}
+
+/** Deletes search results from 7 days ago. */
+async function deleteAncientResults() {
+  const query = datastore.createQuery('CustomSearchTopic').order('timestamp');
+  const [searchResults] = await datastore.runQuery(query);
+
+  // Note: Can't use forEach with await.
+  // Loop through sorted data beginnning with oldest results, delete if older
+  // than a week. Stop when reach results from within a week.
+  for (let i = 0; i < searchResults.length; i++) {
+    if (Date.now() - searchResults[i].timestamp > 7 * 24 * 60 * 60000) {
+      const searchResultKey = searchResults[i][datastore.KEY];
+      await datastore.delete(searchResultKey);
+      console.log(`Custom Search Result ${searchResultKey.id} deleted.`)
+    } else {
+      break;
+    }
+  }
 }
 
 /** 
- * Queries the Datastore for the most recent global trends.
- * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
+ * Creates Datastore item for given topic and country search results. 
+ * @param {string} topic The seach topic the search results are for.
+ * @param {Object} countriesData Object holding all searchResults for all
+ *      countries.
  */
-async function retrieveGlobalTrends() {
-  const query = datastore.createQuery('TrendsEntry').order('timestamp', {
-    descending: true,
-  });
-  const [trendsEntry] = await datastore.runQuery(query);
-  return trendsEntry[0].globalTrends;
+async function addTopicToDatastore(topic, countriesData) {
+  const customSearchTopicKey = datastore.key('CustomSearchTopic');
+  // Get the current timestamp in milliseconds.
+  let timestamp = Date.now();
+  const entity = {
+    key: customSearchTopicKey,
+    data: {
+      topic: topic,
+      countries: countriesData,
+      timestamp: Date.now(),
+    },
+  };
+  try {
+    await datastore.save(entity);
+    console.log(`Custom Search Result ${customSearchTopicKey.id} created successfully.`);
+  } catch (err) {
+    console.error('ERROR:', err);
+  }
 }
 
 module.exports.router = router;
