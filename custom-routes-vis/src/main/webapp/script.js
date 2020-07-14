@@ -14,6 +14,7 @@
 
 // Array holding origin and destination markers.
 let markers = []
+let route;
 
 var map;
 
@@ -53,6 +54,9 @@ function createMarker (containerId, label, title, latLng) {
 
   marker.addListener('dragend', function(event){
     updateCoordinates(event.latLng.lat(), event.latLng.lng(), containerId);
+    if (markers.length == 2 && markers[0].getVisible() && markers[1].getVisible()) {
+      generateRoutes();
+    }
   });
 }
 
@@ -104,6 +108,10 @@ function showMarker(markerIndex) {
  */
 function hideMarker(markerIndex) {
   markers[markerIndex].setVisible(false);
+  if (route != null) {
+    route.setVisible(false);
+  }
+
   let containerName = ((markerIndex === 0) ? 'origin' : 'destination');
   document.getElementById(containerName + '-coordinates').innerHTML = '';
   document.getElementById('show-' + containerName + '-marker').style.display =
@@ -113,30 +121,48 @@ function hideMarker(markerIndex) {
   document.getElementById('generate-routes').style.display = 'none';
 }
 
+/** Precondition: two markers exist in the markers array. */
 function generateRoutes() {
-  // get coordinates
-  // make api call
-  var routeCoordinates = [];
-  fetch('/get-directions').then(response => response.json()).then(directions => {
-    console.log(directions.status);
-    let routes = directions.routes;
-    console.log('num routes:', routes.length);
-    let firstRouteLegs = routes[0].legs;
-    for (let i = 0; i < firstRouteLegs.length; i++) {
-      let legSteps = firstRouteLegs[i].steps;
-      console.log('num legs', firstRouteLegs.length);
-      for (let j = 0; j < legSteps.length; j++) {
-        routeCoordinates.push(legSteps[j].start_location);
-      }
-    }
+  if (route != null) {
+    route.setVisible(false);  // Remove the current route from the DOM.
+  }
 
-    var route = new google.maps.Polyline({
-      path: routeCoordinates,
-      geodesic: true,
-      strokeColor: "#FF0000",
-      strokeOpacity: 1.0,
-      strokeWeight: 2
+  // Get coordinates of origin and destination.
+  let startLatLng = markers[0].getPosition();
+  let endLatLng = markers[1].getPosition();
+  let origin = startLatLng.lat() + ',' + startLatLng.lng();
+  let destination = endLatLng.lat() + ',' + endLatLng.lng();
+
+  // Get the route and display on map.
+  let routeCoordinates = [];
+  fetch('/get-directions?origin=' + origin + '&destination=' + destination)
+      .then(response => response.json()).then(directions => {
+        console.log(directions.status);
+        let routes = directions.routes;
+        console.log('num routes:', routes.length);
+
+        let firstRouteLegs = routes[0].legs;
+        console.log('num legs', firstRouteLegs.length);
+
+        for (let i = 0; i < firstRouteLegs.length; i++) {
+          let legSteps = firstRouteLegs[i].steps;
+          console.log('num steps', legSteps.length);
+
+          for (let j = 0; j < legSteps.length; j++) {
+            routeCoordinates.push(legSteps[j].start_location);
+          }
+          if (i == firstRouteLegs.length - 1) {
+            routeCoordinates.push(legSteps[legSteps.length - 1].end_location);
+          }
+        }
+
+        route = new google.maps.Polyline({
+          path: routeCoordinates,
+          geodesic: true,
+          strokeColor: "#FF0000",
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+        route.setMap(map);
     });
-    route.setMap(map);
-  });
 }

@@ -30,16 +30,18 @@ public class GetDirectionsServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    String directions = getRoutesFromApi();
+    String origin = request.getParameter("origin");
+    String destination = request.getParameter("destination");
+    String directions = getRoutesFromApi(origin, destination);
     System.out.println(directions);
 
     response.setContentType("application/json;");
     response.getWriter().println(directions);
   }
 
-  public String getRoutesFromApi() throws IOException, MalformedURLException {
+  public String getRoutesFromApi(String origin, String destination) throws IOException, MalformedURLException {
     URL directionsUrl = new URL("https://maps.googleapis.com/maps/api/directions/json?"
-        + "origin=Chicago&destination=Baltimore"
+        + "origin=" + origin + "&destination=" + destination
         + "&key=" + System. getenv("DIRECTIONS_API_KEY"));
     URLConnection connection = directionsUrl.openConnection();
     connection.setRequestProperty("Accept-Charset", "UTF-8");
