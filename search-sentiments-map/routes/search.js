@@ -117,14 +117,13 @@ async function updateSearchResultsForTopic(query) {
     if (i !== 0 && i % 100 === 0) {
       await new Promise(resolve => setTimeout(resolve, 60000));
     }
-    let countryData = [];
     // Update countryData within the functions called.
     const avgCountrySentimentScore = await getSearchResultsForCountryFromAPI(
         "country" + json[i].id, query, countryData);
     countriesData.push({
       country: json[i].id,
-      averageSentiment: avgCountrySentimentScore,
-      results: countryData,
+      averageSentiment: countryResults.score,
+      results: countryResults.results,
     });
   }
   addTopicToDatastore(query, countriesData);
@@ -136,44 +135,44 @@ async function updateSearchResultsForTopic(query) {
  * @param {string} countryCode 2 letter country code for search results to be
  *     written in.
  * @param {string} query Search query.
- * @param {Object} countryData Object holding all searchResults for a country.
- * @return {number} The average sentiment score propagated from the
- * formatResults method.
+ * @return {Object} Formatted object with country search result data and
+ *     country overall score.
  */
-async function getSearchResultsForCountryFromAPI(countryCode, query, countryData) {
-  let response = 
-      await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=006416001635532544518:fn4e6vykb3w&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
-  let searchResults =  await response.json();
-  return await saveResultsAndDeletePrevious(searchResults, countryData);
+async function getSearchResultsForCountryFromAPI(countryCode, query) {
+  let response =
+    await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q=' + query + '&cr=' + countryCode + '&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
+  let searchResults = await response.json();
+  return await formatCountryResults(searchResults);
 }
 
 /**
  * Formats the current results given the results JSON obtained from theAPI.
  * @param {Object} searchResultsJson Object with information for top 10 search
  *     results.
- * @param {Object} countryData Object holding all searchResults for a country.
+ * @return {Object} Formatted object with country search result data and
+ *     country overall score.
  */
-async function formatCountryResults(searchResultsJson, countryData) {
+async function formatCountryResults(searchResultsJson) {
   // Parse the JSON string and pass each search result to add to the
   // countryData object.
   let currentSearchResults = searchResultsJson.items;
-  try {
-    let avg = 0;
+    let countryData = [];
+    let totalScore = 0;
     if (currentSearchResults == undefined) {
-      return 0;
+      return {score: 0, results: countryData};
     } else {
       for (let i = 0; i < currentSearchResults.length; i++) {
         let formattedResults =
             await formatSearchResults(currentSearchResults[i]);
         countryData.push(formattedResults);
-        avg += formattedResults.score;
+        totalScore += formattedResults.score;
       }
-      return avg / currentSearchResults.length;
+      let avgScore = 0;
+      if (currentSearchResults.length !== 0) {
+        avgScore = totalScore / currentSearchResults.length;
+      } 
+      return {score: avgScore, results: countryData};
     }
-  } catch (err) { // Occurs when no search results for that country and topic.
-    console.error('ERROR:', err);
-    countryData = null;
-  }
 }
 
 /**
