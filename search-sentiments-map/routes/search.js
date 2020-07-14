@@ -31,12 +31,22 @@ global.Headers = fetch.Headers;
 router.get('/:topic', (req, res) => {
   let topic = req.params.topic;
   retrieveSearchResultFromDatastore(topic).then(customSearchTopicJsonArray => {
-    // TODO(ntarn): Remove console.log statements when finished debugging.
-    console.log('ntarn debug: In the router.get method'); 
-    console.log(customSearchTopicJsonArray);
     res.setHeader('Content-Type', 'application/json');
     res.send(customSearchTopicJsonArray);
   });
+});
+
+/** 
+ * Renders a JSON array of the top search results for all countries with API data
+ * obtained every 12 hours for the specified topic.
+ */
+router.get('/:topic/:countries', (req, res) => {
+  console.log('topic:'+ req.params.topic);
+  let countries = JSON.parse(req.params.countries);
+  console.log(countries);
+  // countries.forEach(country => {
+  //   console.log(country);
+  // });
 });
 
 
@@ -58,9 +68,6 @@ async function retrieveSearchResultFromDatastore(topic) {
       countries: customSearchTopic[0].countries,
       timestamp: customSearchTopic[0].timestamp,
     };
-    // TODO(ntarn): Remove console.log statements when finished debugging.
-    console.log(`ntarn debug retrieved search result for topic: ${topic}` +  `example: ${customSearchTopic[0].countries[0].results[0]}`);
-    console.log(customSearchTopicJsonArray);
     return customSearchTopicJsonArray;
   } catch (err) {
     console.error('ERROR:', err);
@@ -114,9 +121,6 @@ async function updateSearchResultsForTopic(query) {
     // Update countryData within the functions called.
     const avgCountrySentimentScore = await getSearchResultsForCountryFromAPI(
         "country" + json[i].id, query, countryData);
-    // TODO(ntarn): Remove when done with sentiment chart feature debugging.
-    console.log('ntarn debug country: ' + json[i].id + ' averageSentiment: ' +
-        avgCountrySentimentScore);
     countriesData.push({
       country: json[i].id,
       averageSentiment: avgCountrySentimentScore,
@@ -140,7 +144,6 @@ async function getSearchResultsForCountryFromAPI(countryCode, query, countryData
   let response = 
       await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=006416001635532544518:fn4e6vykb3w&q='+query+'&cr='+countryCode+'&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults =  await response.json();
-  // console.log(searchResults);
   return await saveResultsAndDeletePrevious(searchResults, countryData);
 }
 
@@ -191,27 +194,6 @@ function formatSearchResults(searchResult) {
       return searchResultData;
     });
 }
-
-// TODO(ntarn): Look into changing the above method so that it does not need to return 
-// twice for a Promise wrapped around a object.
-// async function formatSearchResults(searchResult, countryData) {
-//   let sentimentScore;
-//   await getSentiment(searchResult)
-//     .then(response => response.json())
-//     .then((result) => { 
-//       console.log('ntarn debug: frontend' + result.score);
-//       searchResultData = {
-//         title: searchResult.title,
-//         snippet: searchResult.snippet,
-//         htmlTitle: searchResult.htmlTitle,
-//         link: searchResult.link,
-//         score: result.score,
-//       };
-//       countryData.push(searchResultData);
-//       sentimentScore = result.score;
-//     });
-//   return sentimentScore;
-// }
 
 /** 
  * Gets the sentiment score of a search result. 

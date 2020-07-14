@@ -19,22 +19,18 @@ function searchTopic() {
   // Maximum of 3 countries. If given more, only take first 3.
   let countries = $('#country-select').val().slice(0, 3);
 
-  if (countries.length === 0) {
-    console.log("select countries!")
-  }
-  if (topic.length === 0) {
-    console.log("Give a search term!")
-  }
-
-  // Get search results from existing custom search data when search topic is
-  // in the top global trends.
-  let trendFilter = topTrends.filter(trends => 
-      trends.trendTopic.toLowerCase() === topic.toLowerCase());
-  if (trendFilter.length !== 0) {
-    console.log("in top trends")
-    // use data from custom search
-  } else {
-    // call to custom search for data
+  // Get new search results when given a topic and at least 1 country.
+  if (topic.length !== 0 && countries.length !== 0) {
+    // Get search results from existing custom search data when search topic is
+    // in the top global trends.
+    let trendFilter = topTrends.filter(trends => 
+        trends.trendTopic.toLowerCase() === topic.toLowerCase());
+    if (trendFilter.length !== 0) {
+      console.log("in top trends")
+      // use data from custom search
+    } else {
+      fetch('/search/testTopic/'+JSON.stringify('[UK, US]'));
+    }
   }
 }
 
