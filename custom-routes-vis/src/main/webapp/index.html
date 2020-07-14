@@ -11,10 +11,31 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCKQFQPXICbli-dG9mQz0WRUZAyKPVfqIk"></script>
     <script src="script.js"></script>
   </head>
-  <body onload="createWorldMap()">
-    <h1>Custom Routes Visualization</h1>
-    <div id="map"></div>
-
+  <body onload="createWorldMapWithMarkers()">
+    <div class="row">
+      <div class="col-sm-10 offset-sm-1">
+        <h1>Custom Routes Visualization</h1>
+        <div id="map"></div>
+        <br>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-4 offset-sm-1">
+        <h5>Origin Coordinates:</h5>
+        <div id='origin-coordinates'></div><br>
+        <button type="button" class="btn btn-success" onclick="showMarker('origin')" id="show-origin-marker">Place Marker</button>
+        <button type="button" class="btn btn-danger hidden" onclick="hideMarker('origin')" id="hide-origin-marker">Delete Marker</button><br>
+      </div>
+      <div class="col-sm-4">
+        <h5>Destination Coordinates:</h5>
+        <div id='destination-coordinates'></div><br>
+        <button type="button" class="btn btn-success" onclick="showMarker('destination')" id="show-destination-marker">Place Marker</button>
+        <button type="button" class="btn btn-danger hidden" onclick="hideMarker('destination')" id="hide-destination-marker">Delete Marker</button><br>
+      </div>
+      <div class="col-sm-2">
+        <button type="button" class="btn btn-primary hidden" onclick="generateRoutes()" id="generate-routes">Generate Routes</button>
+      </div>
+    </div>
     <!-- JS required for Bootstrap. -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
