@@ -22,7 +22,7 @@ const search = require('./search.js');
 router.get('/', (req, res) => {
   console.log('Updating Search Results Data.');
   // trends.updateTrendsFunction(); Undo comment during final deploy.
-  search.updateSearchResults();
+  // search.updateSearchResults();
 });
 
 module.exports.router = router;

@@ -74,7 +74,7 @@ function updateSearchResults() {
   retrieveGlobalTrends().then(async trends => {
     for (let i = 0; i < trends.length; i++) { // When testing, make i < 1 trend to test one.
       await updateSearchResultsForTopic(trends[i].trendTopic);
-      await new Promise(resolve => setTimeout(resolve, 60000));
+      // await new Promise(resolve => setTimeout(resolve, 60000));
     }
   });
 }
@@ -113,7 +113,8 @@ async function updateSearchResultsForTopic(query) {
     const avgCountrySentimentScore = await getSearchResultsForCountryFromAPI(
         "country" + json[i].id, query, countryData);
     // TODO(ntarn): Remove when done with sentiment chart feature debugging.
-    console.log('ntarn debug country: ' + json[i].id + ' averageSentiment: ' + avg);
+    console.log('ntarn debug country: ' + json[i].id + ' averageSentiment: ' +
+        avgCountrySentimentScore);
     countriesData.push({
       country: json[i].id,
       averageSentiment: avgCountrySentimentScore,
