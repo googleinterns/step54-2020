@@ -52,8 +52,8 @@ function setTopTrends() {
 }
 
 /**
- * Shows the trending topics over the 7th if the user clicks on 'See More' and
- * hides those if the user clicks on 'See Less.'
+ * Shows more trending topics if the user clicks on 'See More' and hides those
+ * if the user clicks on 'See Less.'
  */
 function showMoreOrLess() {
   const showMoreOrLessToggleItem = document.getElementById(SHOW_MORE_OR_LESS_ID);

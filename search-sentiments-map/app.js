@@ -14,42 +14,29 @@
 
 const express = require('express');
 const app = express();
-const trends = require('./routes/trends.js');
 const countryTrends = require('./routes/country-trends.js');
 const search = require('./routes/search.js');
 const sentiment = require('./routes/sentiment.js');
+const trends = require('./routes/trends.js');
 const updateData = require('./routes/update-data.js');
 
 // Use express to create server that displays the webpage with the html, css, 
 // and javascript files in the public folder.
 app.use(express.static('./public'));
 app.get('/', (req, res) => {
-  console.log('Running app.get');
   res.sendFile('/index.html');
 });
 
 // Use the trends, search, and sentiment routers so that they can be fetched from the
 // client-side scripts.
-app.use('/trends', trends.router);
-app.use('/search', search.router);
 app.use('/country-trends', countryTrends.router);
+app.use('/search', search.router);
 app.use('/sentiment', sentiment.router);
+app.use('/trends', trends.router);
 app.use('/update-data', updateData.router);
-
-// Schedule the function that updates search to be run  at midnight and noon
-// everyday.
-var searchResultUpdateSchedule = schedule.scheduleJob('0 0,12 * * *', function(){
-// Commented out this line for now to avoid excess billing. Already tested.
-// Uncomment out when ready to do final deploy.
-  //  search.updateSearchResults();
-});
-
 
 // Listen to the App Engine-specified port, or 4503 otherwise.
 const PORT = process.env.PORT || 4503;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);
 });
-
-console.log('Running app.js');
-

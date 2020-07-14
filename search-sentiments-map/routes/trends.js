@@ -34,7 +34,7 @@ router.get('/', (req, res) => {
 });
 
 /** 
- * Queries the Datastore for the most recent global trends.
+ * Get the global trends from the most recent Datastore entry.
  * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
  */
 async function retrieveGlobalTrends() {
@@ -47,7 +47,7 @@ async function retrieveGlobalTrends() {
 
 /** 
  * Updates Datastore storage of daily search trends and corresponding search results
- * for the 46 countries where trends are available using the Google Trends API.
+ * for the countries where trends are available using the Google Trends API.
  */
 async function updateDailyTrends() {
   const countryJson = require('./../public/countries-with-trends.json');
@@ -139,7 +139,7 @@ async function saveTrendsAndDeletePrevious(trendsByCountry) {
 
   try {
     await datastore.save(trendsEntry);
-    //console.log(`TrendsEntry ${trendsEntryKey.id} created successfully.`);
+    console.log(`TrendsEntry ${trendsEntryKey.id} created successfully.`);
   } catch (err) {
     console.error('ERROR:', err);
   }
@@ -159,14 +159,14 @@ async function deleteAncientTrend() {
   if (Date.now() - trendsEntries[0].timestamp > 7 * 24 * 60 * 60000) {
     const trendsEntryKey = trendsEntries[0][datastore.KEY];
     await datastore.delete(trendsEntryKey);
-    //console.log(`TrendsEntry ${trendsEntryKey.id} deleted.`);
+    console.log(`TrendsEntry ${trendsEntryKey.id} deleted.`);
   }
 }
 
 /** 
  * Deletes all trends entries in the Datastore. 
  * Call this function when there is an update of the trends data structure. 
- * TODO(@chenyuz): Delete this function when everything is done.
+ * TODO(chenyuz): Delete this function when everything is done.
  */
 async function deleteAllTrends() {
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp');
@@ -190,8 +190,8 @@ async function deleteAllTrends() {
 function getGlobalTrends(trendsByCountry) {
   // Use a map to count the number of occurences of each trend.
   let trendCountsMap = new Map();
-  trendsByCountry.forEach(trends => {
-    trends.trends.forEach(trend => {
+  trendsByCountry.forEach(countryTrends => {
+    countryTrends.trends.forEach(trend => {
       let topic = trend.topic;
       if (trendCountsMap.has(topic)) {
         let newCount = trendCountsMap.get(topic) + 1;
@@ -202,7 +202,7 @@ function getGlobalTrends(trendsByCountry) {
     });
   });
 
-  // Note: Could we use only one data structure here? 
+  // TODO(chenyuz): Could we use only one data structure here? 
   // One option is to install the npm SortedMap module.
 
   // Convert the counts to an array to allow sorting.
@@ -210,10 +210,10 @@ function getGlobalTrends(trendsByCountry) {
   for (let [topic, count] of trendCountsMap) {
     trendCountsArr.push({
       topic: topic,
-      count: count,  
+      count: count,
     })
   }
-  // Sort in descending order.
+  // Sort trends in descending order of their counts.
   trendCountsArr.sort((trend, otherTrend) => {
     return otherTrend.count - trend.count;
   })

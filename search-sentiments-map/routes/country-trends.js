@@ -30,6 +30,9 @@ router.get('/:country', (req, res) => {
 /**
  * Gets the trends data (each trend including title, articles, and sentiment) 
  * from the Datastore for the specified country.
+ * @param {!string} country The two-letter code for the country requested.
+ * @return {!Array<JSON>} An array of the trends; empty array if there is no
+ * trends data for the specified country.
  */
 async function retrieveCountryTrends(country) {
   const query = datastore.createQuery('TrendsEntry').order('timestamp', {
@@ -38,7 +41,6 @@ async function retrieveCountryTrends(country) {
   const [trendsEntry] = await datastore.runQuery(query);
   const countryTrends = trendsEntry[0].trendsByCountry
       .filter(trends => trends.country === country);  
-  // Return empty list if there is no trends data for the specified country.
   if (countryTrends.length === 0) {
     return [];
   }
