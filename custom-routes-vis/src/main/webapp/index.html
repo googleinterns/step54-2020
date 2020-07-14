@@ -11,7 +11,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCKQFQPXICbli-dG9mQz0WRUZAyKPVfqIk"></script>
     <script src="script.js"></script>
   </head>
-  <body onload="initMap()">
+  <body onload="initMapWithMarkers()">
     <div class="row">
       <div class="col-sm-10 offset-sm-1">
         <h1>Custom Routes Visualization</h1>
@@ -23,14 +23,14 @@
       <div class="col-sm-4 offset-sm-1">
         <h5>Origin Coordinates:</h5>
         <div id='origin-coordinates'></div><br>
-        <button type="button" class="btn btn-success " onclick="showMarker(0)" id="show-origin-marker">Place Marker</button>
-        <button type="button" class="btn btn-danger hidden" onclick="hideMarker(0)" id="hide-origin-marker">Delete Marker</button><br>
+        <button type="button" class="btn btn-success" onclick="showMarker('origin')" id="show-origin-marker">Place Marker</button>
+        <button type="button" class="btn btn-danger hidden" onclick="hideMarker('origin')" id="hide-origin-marker">Delete Marker</button><br>
       </div>
       <div class="col-sm-4">
         <h5>Destination Coordinates:</h5>
         <div id='destination-coordinates'></div><br>
-        <button type="button" class="btn btn-success " onclick="showMarker(1)" id="show-destination-marker">Place Marker</button>
-        <button type="button" class="btn btn-danger hidden" onclick="hideMarker(1)" id="hide-destination-marker">Delete Marker</button><br>
+        <button type="button" class="btn btn-success" onclick="showMarker('destination')" id="show-destination-marker">Place Marker</button>
+        <button type="button" class="btn btn-danger hidden" onclick="hideMarker('destination')" id="hide-destination-marker">Delete Marker</button><br>
       </div>
       <div class="col-sm-2">
         <button type="button" class="btn btn-primary hidden" onclick="generateRoutes()" id="generate-routes">Generate Routes</button>
