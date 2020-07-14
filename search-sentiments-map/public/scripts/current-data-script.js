@@ -20,7 +20,9 @@ function getCurrentTrend() {
   return currentTrend;
 }
 
-/**Returns current custom search data for the trend that the user is viewing. */
+/** 
+ * Returns current custom search data for the trend that the user is viewing.
+ */
 function getCurrentCustomSearchData() {
   return currentCustomSearchData;
 }

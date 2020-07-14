@@ -38,7 +38,8 @@ function setCountryTrends(countryCode) {
   fetch('/country-trends/' + countryCode).then(countryTrends =>
     countryTrends.json()).then(trends => {
       if (trends.length === 0) {
-        topTrendsTab.innerText = 'Trends in this country is not available.';
+        topTrendsTab.innerText = 
+            'Trends are not available for the selected country.';
       } else {
         trends.forEach(trend => {
           const trendHeader = document.createElement('h5');

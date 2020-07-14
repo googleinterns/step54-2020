@@ -8,17 +8,16 @@ var bodyParser = require('body-parser');
 var textParser = bodyParser.text();
 
 router.post('/', textParser, (req, res) => {
-  getSentimentScore(req.body)
-    .then((sentimentScore) => {
-      response = {
-        score: sentimentScore,
-      };
-      // TODO(ntarn): Remove comment when done with feature.
-      console.log('ntarn debug: score' + response.score);
-      res.end(JSON.stringify(response));
-    }).catch(err => {
-      console.log(err);
-    });
+  getSentimentScore(req.body).then((sentimentScore) => {
+    response = {
+      score: sentimentScore,
+    };
+    // TODO(ntarn): Remove comment when done with feature.
+    console.log('ntarn debug: score' + response.score);
+    res.end(JSON.stringify(response));
+  }).catch(err => {
+    console.log(err);
+  });
 });
 
 /** 

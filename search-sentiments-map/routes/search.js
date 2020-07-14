@@ -93,11 +93,13 @@ async function retrieveGlobalTrends() {
 
 /** 
  * Retrieves search result data for all countries for a given topic. Passes
- * this data to be saved in Datastore.
+ * this data to be saved in Datastore. Deletes data from more than 7 days ago
+ * in the datastore.
  * @param {string} query Search query.
  */
 async function updateSearchResultsForTopic(query) {
   let countriesData = [];
+  await deleteAncientResults();
 
   // Note: Can't use forEach with await.
   for (let i = 0; i < json.length; i++) { // When testing, make i < 3 countries. 
@@ -129,25 +131,22 @@ async function updateSearchResultsForTopic(query) {
  * @param {string} query Search query.
  * @param {Object} countryData Object holding all searchResults for a country.
  * @return {number} The average sentiment score propagated from the
- * saveResultsAndDeletePrevious method.
+ * formatResults method.
  */
 async function getSearchResultsForCountryFromAPI(countryCode, query, countryData) {
   let response =
     await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q=' + query + '&cr=' + countryCode + '&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults = await response.json();
-  return await saveResultsAndDeletePrevious(searchResults, countryData);
+  return await formatCountryResults(searchResults, countryData);
 }
 
 /**
- * Deletes previous search results and saves the current results in the
- * Datastore, given the results JSON obtained from the API.
+ * Formats the current results given the results JSON obtained from theAPI.
  * @param {Object} searchResultsJson Object with information for top 10 search
  *     results.
  * @param {Object} countryData Object holding all searchResults for a country.
  */
-async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
-  await deleteAncientResults();
-
+async function formatCountryResults(searchResultsJson, countryData) {
   // Parse the JSON string and pass each search result to add to the
   // countryData object.
   let currentSearchResults = searchResultsJson.items;
@@ -157,8 +156,10 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
       return 0;
     } else {
       for (let i = 0; i < currentSearchResults.length; i++) {
-        avg = avg + await addSearchResultToCountryData(currentSearchResults[i], 
-            countryData);
+        let formattedResults =
+            await formatSearchResults(currentSearchResults[i]);
+        countryData.push(formattedResults);
+        avg += formattedResults.score;
       }
       return avg / currentSearchResults.length;
     }
@@ -169,14 +170,12 @@ async function saveResultsAndDeletePrevious(searchResultsJson, countryData) {
 }
 
 /**
- * Adds search result object to countryData array.
+ * Formats search result object.
  * @param {Object} searchResult Object with information for one search result.
- * @param {Object} countryData Object holding all searchResults for a country.
- * @return {Promise} A Promise wrapped around the sentiment score of the result.
+ * @return {Object} Formatted search result data in JSON form.
 */
-function addSearchResultToCountryData(searchResult, countryData) {
-  return getSentiment(searchResult)
-    .then(response => response.json())
+function formatSearchResults(searchResult) {
+  return getSentiment(searchResult).then(response => response.json())
     .then((result) => {
       searchResultData = {
         title: searchResult.title,
@@ -185,15 +184,13 @@ function addSearchResultToCountryData(searchResult, countryData) {
         link: searchResult.link,
         score: result.score,
       };
-      countryData.push(searchResultData);
-      return result.score;
+      return searchResultData;
     });
-
 }
 
 // TODO(ntarn): Look into changing the above method so that it does not need to return 
 // twice for a Promise wrapped around a object.
-// async function addSearchResultToCountryData(searchResult, countryData) {
+// async function formatSearchResults(searchResult, countryData) {
 //   let sentimentScore;
 //   await getSentiment(searchResult)
 //     .then(response => response.json())
