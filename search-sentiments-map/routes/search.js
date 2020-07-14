@@ -18,7 +18,7 @@ const express = require('express');
 let router = express.Router();  // Using Router to divide the app into modules.
 
 const fetch = require('node-fetch'); // Used to access custom search.
-const { Datastore } = require('@google-cloud/datastore');
+const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
 const json = require('./../public/country-code.json');
@@ -187,27 +187,6 @@ function formatSearchResults(searchResult) {
       return searchResultData;
     });
 }
-
-// TODO(ntarn): Look into changing the above method so that it does not need to return 
-// twice for a Promise wrapped around a object.
-// async function formatSearchResults(searchResult, countryData) {
-//   let sentimentScore;
-//   await getSentiment(searchResult)
-//     .then(response => response.json())
-//     .then((result) => { 
-//       console.log('ntarn debug: frontend' + result.score);
-//       searchResultData = {
-//         title: searchResult.title,
-//         snippet: searchResult.snippet,
-//         htmlTitle: searchResult.htmlTitle,
-//         link: searchResult.link,
-//         score: result.score,
-//       };
-//       countryData.push(searchResultData);
-//       sentimentScore = result.score;
-//     });
-//   return sentimentScore;
-// }
 
 /** 
  * Gets the sentiment score of a search result. 

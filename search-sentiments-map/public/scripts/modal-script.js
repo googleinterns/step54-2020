@@ -36,18 +36,18 @@ function setCountryTrends(countryCode) {
   const topTrendsTab = document.getElementById('top-trends-tab');
   topTrendsTab.innerHTML = '';
   fetch('/country-trends/' + countryCode).then(countryTrends =>
-    countryTrends.json()).then(trends => {
-      if (trends.length === 0) {
-        topTrendsTab.innerText = 
-            'Trends are not available for the selected country.';
-      } else {
-        trends.forEach(trend => {
-          const trendHeader = document.createElement('h5');
-          trendHeader.innerText = trend.topic;
-          topTrendsTab.appendChild(trendHeader);
-        });
-      }
-    });
+      countryTrends.json()).then(trends => {
+        if (trends.length === 0) {
+          topTrendsTab.innerText = 
+              'Trends are not available for the selected country.';
+        } else {
+          trends.forEach(trend => {
+            const trendHeader = document.createElement('h5');
+            trendHeader.innerText = trend.topic;
+            topTrendsTab.appendChild(trendHeader);
+          });
+        }
+      });
 }
 
 /** 

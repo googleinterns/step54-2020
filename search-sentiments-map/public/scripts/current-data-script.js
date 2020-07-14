@@ -35,12 +35,6 @@ function getCurrentCustomSearchData() {
 // results when custom search data for all top trends set up. Replace top trend
 // in else block with top trend.
 function setNewTrend(trend) {
-  // if (trend != null){
-  //   currentTrend = trend;
-  // } else {
-  //   currentTrend = 'TOP TREND HERE';
-  // }
-
   currentTrend = 'The Old Guard';
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = 
@@ -48,9 +42,9 @@ function setNewTrend(trend) {
 
   // Reload map with new sentiment data and relevant coloring.
   fetch('/search/' + currentTrend)
-    .then(resultsJsonArray => resultsJsonArray.json()).then(topicResults => {
-      currentCustomSearchData = topicResults;
-      loadCountryData();
-  });
+      .then(resultsJsonArray => resultsJsonArray.json()).then(topicResults => {
+        currentCustomSearchData = topicResults;
+        loadCountryData();
+      });
 }
 
