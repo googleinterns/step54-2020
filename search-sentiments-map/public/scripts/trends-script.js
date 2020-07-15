@@ -76,8 +76,8 @@ function showMoreOrLess() {
 }
 
 /** 
- * Update title when a trending topic is selected.
- * TODO (@chenyuz): Show sentiment scores for all countries on the selected topic.
+ * Update the title of the displayed trend when a topic is selected.
+ * TODO(chenyuz): Show sentiment scores for all countries on the selected topic.
  */
 function showResultForTopic(event) {
   const searchTopic = event.currentTarget.innerText;

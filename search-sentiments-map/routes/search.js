@@ -129,7 +129,7 @@ async function updateSearchResultsForTopic(query) {
       results: countryResults.results,
     });
   }
-  addTopicToDatastore(query, countriesData);
+  addCustomSearchTopicEntityToDatastore(query, countriesData);
 }
 
 /** 
@@ -184,17 +184,18 @@ async function formatCountryResults(searchResultsJson) {
  * @return {Object} Formatted search result data in JSON form.
 */
 function formatSearchResults(searchResult) {
-  return getSentiment(searchResult).then(response => response.json())
-    .then((result) => {
-      searchResultData = {
-        title: searchResult.title,
-        snippet: searchResult.snippet,
-        htmlTitle: searchResult.htmlTitle,
-        link: searchResult.link,
-        score: result.score,
-      };
-      return searchResultData;
-    });
+  return getSentiment(searchResult)
+      .then(response => response.json())
+      .then((result) => {
+        searchResultData = {
+          title: searchResult.title,
+          snippet: searchResult.snippet,
+          htmlTitle: searchResult.htmlTitle,
+          link: searchResult.link,
+          score: result.score,
+        };
+        return searchResultData;
+      });
 }
 
 /** 
@@ -240,7 +241,7 @@ async function deleteAncientResults() {
  * @param {Object} countriesData Object holding all searchResults for all
  *      countries.
  */
-async function addTopicToDatastore(topic, countriesData) {
+async function addCustomSearchTopicEntityToDatastore(topic, countriesData) {
   const customSearchTopicKey = datastore.key('CustomSearchTopic');
   // Get the current timestamp in milliseconds.
   let timestamp = Date.now();
