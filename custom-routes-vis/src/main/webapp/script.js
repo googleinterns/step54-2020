@@ -25,7 +25,8 @@ const MarkerNames = {
 
 let originDestinationMarkers = [];
 let displayedRoutes = [];
-
+const routeColors = ['#ff0000', '#f7cb52', '#3299d1'];
+let selectedRouteNum = 0;
 var map;
 
 /** Creates the world map and markers. */
@@ -62,9 +63,11 @@ function createMarker(containerId, label, title, latLng) {
   // Add marker to originDestinationMarkers array to access in other functions.
   originDestinationMarkers.push(marker);
 
-  marker.addListener('dragend', function(event){
+  marker.addListener('dragend', function(event) {
     updateCoordinates(event.latLng.lat(), event.latLng.lng(), containerId);
-    if (markers.length == 2 && markers[0].getVisible() && markers[1].getVisible()) {
+    if (originDestinationMarkers.length == 2 
+        && originDestinationMarkers[0].getVisible() 
+        && originDestinationMarkers[1].getVisible()) {
       generateRoutes();
     }
   });
@@ -104,7 +107,7 @@ function showMarker(markerName) {
       break;
   }
   let placeMarkerListener =
-      google.maps.event.addListener(map, 'click', function (event) {
+      google.maps.event.addListener(map, 'click', function(event) {
         originDestinationMarkers[markerIndex].setPosition(event.latLng);
         google.maps.event.removeListener(placeMarkerListener);
         originDestinationMarkers[markerIndex].setVisible(true);
@@ -160,6 +163,7 @@ function clearRoutes() {
     displayedRoutes[i].setMap(null);
   }
   displayedRoutes = [];
+  selectedRouteNum = 0;
 }
 
 /**
@@ -175,7 +179,7 @@ function generateRoutes() {
   let origin = startLatLng.lat() + ',' + startLatLng.lng();
   let destination = endLatLng.lat() + ',' + endLatLng.lng();
 
-  // Get the route and display on map.
+  // Get the routes and display them on map.
   fetch('/get-directions?origin=' + origin + '&destination=' + destination)
       .then(response => response.json()).then(directions => {
         console.log(directions.status);
@@ -183,39 +187,73 @@ function generateRoutes() {
         console.log('num routes:', routes.length);
 
         for (let routeNum = 0; routeNum < routes.length; routeNum++) {
-          let routeCoordinates = [];
           let routeLegs = routes[routeNum].legs;
           console.log('num legs', routeLegs.length);
-
-          for (let i = 0; i < routeLegs.length; i++) {
-            let legSteps = routeLegs[i].steps;
-            console.log('num steps', legSteps.length);
-
-            for (let j = 0; j < legSteps.length; j++) {
-              routeCoordinates.push(legSteps[j].start_location);
-            }
-            if (i == routeLegs.length - 1) {
-              routeCoordinates.push(legSteps[legSteps.length - 1].end_location);
-            }
-          }
-
-          let route = new google.maps.Polyline({
-            path: routeCoordinates,
-            geodesic: true,
-            strokeColor: "#FF0000",
-            strokeOpacity: 0.5,
-            strokeWeight: 6,
-          });
-          route.setMap(map);
-          route.addListener('click', function(event){
-            console.log('route click');
-          });
-          displayedRoutes.push(route);
+          createRoutePolyline(routeNum, routeLegs);
         }
-        displayedRoutes[0].setOptions({ strokeOpacity: 1.0, });
       });
 }
 
-function selectRoute() {
-  
+/** 
+ * Creates a polyline for a route on the map.
+ * @param {num} routeNum The index of the route in the order as it is returned 
+ * from the API.
+ * @param {!Array} routeLegs JSON array containing all information of legs of 
+ * the target route. We'll have more than one legs if waypoints are specified.
+ */
+function createRoutePolyline(routeNum, routeLegs) {
+  let routeCoordinates = [];
+  let totalDuration = 0;  // Total duration of route in seconds.
+  let totalDistance = 0;  // Total distance of route in meters.
+
+  for (let i = 0; i < routeLegs.length; i++) {
+    let legSteps = routeLegs[i].steps;
+    console.log('num steps', legSteps.length);
+
+    for (let j = 0; j < legSteps.length; j++) {
+      routeCoordinates.push(legSteps[j].start_location);
+    }
+    if (i == routeLegs.length - 1) {
+        routeCoordinates.push(legSteps[legSteps.length - 1].end_location);
+    }
+    totalDuration += parseInt(routeLegs[i].duration.value);
+    totalDistance += parseInt(routeLegs[i].distance.value);
+  }
+
+  let route = new google.maps.Polyline({
+    path: routeCoordinates,
+    geodesic: true,
+    strokeColor: routeColors[routeNum % 3],
+    strokeOpacity: 0.5,
+    strokeWeight: 6,
+  });
+  route.setMap(map);
+  displayedRoutes.push(route);
+
+  // Select the first route as default.
+  if (routeNum == 0) {
+    selectRouteDisplayDetails(0, totalDuration, totalDistance);
+  }
+
+  route.addListener('click', function(event) {
+    console.log('route click');
+    selectRouteDisplayDetails(routeNum, totalDuration, totalDistance);
+  });
+}
+
+/** 
+ * Highlights the selected route and displays its duration and distance.
+ * @param {num} routeNum The index of the selected route in the routes array.
+ * @param {num} totalDuration The duration of the route in seconds.
+ * @param {num} totalDistance The distance of the route in meters.
+ */
+function selectRouteDisplayDetails(routeNum, totalDuration, totalDistance) {
+  displayedRoutes[selectedRouteNum].setOptions({ strokeOpacity: 0.5, })
+  selectedRouteNum = routeNum;
+  displayedRoutes[routeNum].setOptions({ strokeOpacity: 1.0, });
+
+  let routeInfoElement = document.getElementById('route-info');
+  routeInfoElement.innerText = 'Selected Route Info:\n' 
+      + 'Duration: ' + totalDuration + ' seconds\n'
+      + 'Distance: ' + totalDistance + ' meters' 
 }
