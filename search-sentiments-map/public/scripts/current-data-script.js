@@ -63,3 +63,25 @@ function setNewTrend(trend) {
   });
 }
 
+/** 
+ * Retrieves relevant data for new trend and reconstructs map with new data.
+ * @param {string} topic New topic to get data for.
+ * @param {Array} countries Countries to get data for.
+ */
+function setUserSearchTopic(topic, countries) {
+  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
+    topTrends = trends;
+    setTopTrends(); 
+  });
+
+  currentTrend = topic;
+  const topicHeader = document.getElementById('topic-header');
+  topicHeader.innerText = 
+      'Worldwide sentiments of search results for "' + currentTrend + '"';
+
+  fetch('/search/' + topic + '/' + JSON.stringify(countries)).then(response => response.json())
+      .then(topicResults => {
+        currentCustomSearchData = topicResults;
+        loadCountryData();
+  });
+}

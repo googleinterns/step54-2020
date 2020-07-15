@@ -25,8 +25,8 @@ const json = require('./../public/country-code.json');
 global.Headers = fetch.Headers;
 
 /** 
- * Renders a JSON array of the top search results for all countries with API data
- * obtained every 12 hours for the specified topic.
+ * Renders a JSON array of the top search results for all countries with API
+ * data obtained every 12 hours for the specified topic.
  */
 router.get('/:topic', (req, res) => {
   let topic = req.params.topic;
@@ -37,8 +37,8 @@ router.get('/:topic', (req, res) => {
 });
 
 /** 
- * Renders a JSON array of the top search results for all countries with API data
- * obtained every 12 hours for the specified topic.
+ * Renders a JSON array of the top search results for requested countries with
+ * API data from within the last 12 hours for the specified topic.
  */
 router.get('/:topic/:countries', (req, res) => {
   let topic = req.params.topic;
@@ -49,63 +49,67 @@ router.get('/:topic/:countries', (req, res) => {
   });
 });
 
-
-
 /** 
- * Returns a JSON-formatted array of search results for countries retrieved
- * from the Datastore.
+ * Retrieves search result data for specified countries for a given topic.
+ *   - Obtains and formats search results from Custom Search API if the data
+ *         is not currently stored.
+ *   - Saves any new search results to the datastore.
+ *   - Retrieves any relevant existing search results from datastore.
+ *   - Returns all requested search results on the topic from the countries.
  * @param {string} topic Search topic to get data for.
  * @param {Array} countries Countries to get search topic data for.
+ * @return {Object} JSON-formatted array of search results from requested
+ *     countries.
  */
 async function retrieveUserSearchResultFromDatastore(topic, countries) {
-  //find if topic is in datstore within last 12 hours
-  //if yes: retrieve data for countries//make if not
-  //if no: create new data for it
-
   // Request latest entity with a topic matching the given topic.
   const query = datastore.createQuery('CustomSearchTopic').order('timestamp', {
     descending: true,
   }).filter('topic', topic).limit(1);
   const [customSearchTopic] = await datastore.runQuery(query);
-  // TODO(carmenbenitez): Handle capitalization differences.
+  // TODO(carmenbenitez): Handle capitalization differences. Change to last 12 hours
 
-  let countriesData = [];
+  let countriesDataToReturn = [];
   let timestamp;
-  if (Date.now() - customSearchTopic[0].timestamp > 12 * 60 * 60000) {
-    timestamp = customSearchTopic[0].timestamp;
-    countries.forEach(country => {
-      console.log(country);
-      let countryData = customSearchTopic[0].countries
-          .filter(countries => countries.country === country);
-      //TODO(carmenbenitez): See if we can filter once for all countries.
-      if (countryData.length === 0) {
-        // call add data function
-        countriesData.push(addNewCountryData(country, customSearchTopic[0]));
-      } else {
-        countriesData.push(countryData[0]);
-      }
-    });
-    //if yes: retrieve data for countries//make if not
-    // Loop through countries.
-    //If country does exists. Get Data.
-    // If country does not. Add Data and get it.
-  } else {
-    // Loop through countries.
-    // Create country entry and add data adn save it
+  if (customSearchTopic.length !== 0 &&
+      Date.now() - customSearchTopic[0].timestamp < 7 * 24 * 60 * 60000) {
+      timestamp = customSearchTopic[0].timestamp;
+      let countriesToAddDataFor = [];
 
-    //create trend
-    timestamp = customSearchTopicEntity.timestamp;
-    countries.forEach(country => {
-      console.log(country);
-      // call add data function
-      countriesData.push(addNewCountryData(country, customSearchTopicEntity));
-    });
+      // Determine whether a country has existing data or data needs to be
+      // retrieved from Custom Search API for this country on this topic.
+      countries.forEach(country => {
+        let countryData = customSearchTopic[0].countries
+            .filter(countries => countries.country === country);
+        if (countryData.length === 0) {
+          countriesToAddDataFor.push(country);
+        } else {
+          countriesDataToReturn.push(countryData[0]);
+        }
+      });
+
+      // Obtain custom search data for countries without current data.     
+      // Add new custom search data to existing entity and to the data to
+      // send back to front end.
+      if (countriesToAddDataFor.length !== 0) {
+        let newCountriesData = await getSearchResultsForArrayOfCountries(
+          countriesToAddDataFor, topic);
+        await addNewCountryData(newCountriesData, customSearchTopic[0]);
+        countriesDataToReturn = countriesDataToReturn.concat(newCountriesData);
+      }
+  } else {
+    // Get data for all of the requested countries when there is no existing
+    // entity and create a new entity with this data.
+    countriesDataToReturn = await getSearchResultsForArrayOfCountries(
+      countries, topic);
+    await addTopicToDatastore(topic, countriesDataToReturn);
+    timestamp = Date.now();
   }
 
   try {
     let customSearchTopicJsonArray = {
       topic: topic,
-      countries: countriesData,
+      countries: countriesDataToReturn,
       timestamp: timestamp,
     };
     return customSearchTopicJsonArray;
@@ -115,15 +119,41 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
 }
 
 /** 
- * Adds country data for specific topic to a CustomSearchTopic entity.
- * @param {string} country Country code for country to add search data for.
- * @param {Object} topicEntity Entity for topic we are adding search results to.
- * @return {Object} Data for this country and topic.
+ * Retrieves search result data for given countries for a given topic. Returns
+ * this data.
+ * @param {Array} countries Array of 2 letter country codes for search results
+ *     to be written in.
+ * @param {string} topic Search query.
+ * @return {Object} Formatted object with country search result data and
+ *     country overall score for all given countries.
  */
-function addNewCountryData(country, topicEntity) {
-  return {};
+async function getSearchResultsForArrayOfCountries(countries, topic) {
+  let countriesSearchResultData = [];
+  for (let i = 0; i < countries.length; i++) {
+    const countryResults =
+        await getSearchResultsForCountryFromAPI(countries[i], topic);
+    countriesSearchResultData.push({
+      country: countries[i],
+      averageSentiment: countryResults.score,
+      results: countryResults.results,
+    });
+  }
+  return countriesSearchResultData;
 }
 
+/** 
+ * Adds country data for specific topic to a CustomSearchTopic entity.
+ * @param {string} countriesData Search results for countries to add to the
+ *     Datastore.
+ * @param {Object} customSearchEntity Entity we are adding search results to.
+ */
+async function addNewCountryData(countriesData, customSearchEntity) {
+  // Do not update timestamp to make sure the oldest data is from within the
+  // last 12 hours. 
+  customSearchEntity.countries =
+      customSearchEntity.countries.concat(countriesData);
+  await datastore.save(customSearchEntity);
+}
 
 /** 
  * Returns a JSON-formatted array of search results for countries retrieved
@@ -193,8 +223,8 @@ async function updateSearchResultsForTopic(query) {
       await new Promise(resolve => setTimeout(resolve, 60000));
     }
     // Update countryData within the functions called.
-    const avgCountrySentimentScore = await getSearchResultsForCountryFromAPI(
-        "country" + json[i].id, query, countryData);
+    const countryResults =
+        await getSearchResultsForCountryFromAPI(json[i].id, query);
     countriesData.push({
       country: json[i].id,
       averageSentiment: countryResults.score,
@@ -215,7 +245,7 @@ async function updateSearchResultsForTopic(query) {
  */
 async function getSearchResultsForCountryFromAPI(countryCode, query) {
   let response =
-    await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q=' + query + '&cr=' + countryCode + '&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
+    await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q=' + query + '&cr=country' + countryCode + '&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults = await response.json();
   return await formatCountryResults(searchResults);
 }

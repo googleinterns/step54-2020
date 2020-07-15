@@ -19,11 +19,10 @@ function searchTopic() {
   // Maximum of 3 countries. If given more, only take first 3.
   let countries = $('#country-select').val().slice(0, 3);
 
+
   // Get new search results when given a topic and at least 1 country.
   if (topic.length !== 0 && countries.length !== 0) {
-    fetch('/search/' + topic + '/' + JSON.stringify(countries)).then(json => {
-      console.log(json);
-    });
+    setUserSearchTopic(topic, countries);
   }
 }
 

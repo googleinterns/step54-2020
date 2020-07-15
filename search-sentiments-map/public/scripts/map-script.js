@@ -66,6 +66,10 @@ function loadMapOutline() {
 
 /** Loads the country sentiment score from Datastore. */
 function loadCountryData() {
+  // Reset min and max values to accurate get new min and max.
+  dataMin = Number.MAX_VALUE;
+  dataMax = Number.MIN_VALUE;
+  
   map.data.forEach(function (row) {
     const countryCode = row.getId();
     let topicData = getCurrentCustomSearchData();
@@ -74,8 +78,6 @@ function loadCountryData() {
     let dataVariable = 0;
     if (countryData.length != 0) {
       dataVariable = countryData[0].averageSentiment;
-      // TODO(ntarn): Remove console.log statements when finished debugging.
-      console.log('ntarn debug loadCountryData: ' + 'country: ' + countryData[0].country + ' averageSentiment: ' + dataVariable);
     } else {
       console.log('Data does not exist for this countryCode:' + countryCode);
     }
