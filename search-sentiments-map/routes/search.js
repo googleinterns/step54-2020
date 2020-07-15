@@ -15,7 +15,8 @@
 /** Server-side script that gets search results from the custom search api. */
 
 const express = require('express');
-let router = express.Router();  // Using Router to divide the app into modules.
+// Use Router to divide the app into modules.
+let router = express.Router();
 
 const fetch = require('node-fetch'); // Used to access custom search.
 const {Datastore} = require('@google-cloud/datastore');
@@ -23,6 +24,8 @@ const datastore = new Datastore();
 
 const json = require('./../public/country-code.json');
 global.Headers = fetch.Headers;
+
+const SEVENDAYS = 7 * 24 * 60 * 60000;
 
 /** 
  * Renders a JSON array of the top search results for all countries with API data
@@ -68,19 +71,21 @@ async function retrieveSearchResultFromDatastore(topic) {
 }
 
 /** 
- * Updates daily search results (accumulates by day) in the Datastore.
+ * Updates daily search results (accumulated by day) in the Datastore.
  */
 function updateSearchResults() {
   retrieveGlobalTrends().then(async trends => {
-    for (let i = 0; i < trends.length; i++) { // When testing, make i < 1 trend to test one.
+    // When testing, make i < 1 to test for only one trend and comment out
+    // await new Promise line to avoid 1 minute pauses.
+    for (let i = 0; i < trends.length; i++) {
       await updateSearchResultsForTopic(trends[i].trendTopic);
-      // await new Promise(resolve => setTimeout(resolve, 60000));
+      await new Promise(resolve => setTimeout(resolve, 60000));
     }
   });
 }
 
 /** 
- * Queries the Datastore for the most recent global trends.
+ * Obtains the most recent global trends by querying the Datastore.
  * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
  */
 async function retrieveGlobalTrends() {
@@ -92,24 +97,28 @@ async function retrieveGlobalTrends() {
 }
 
 /** 
- * Retrieves search result data for all countries for a given topic. Passes
- * this data to be saved in Datastore. Deletes data from more than 7 days ago
- * in the datastore.
+ * Updates search result data for all countries for a given topic.
+ *   - Deletes stale data from Datastore.
+ *   - Retrieves and formats search result data for each country.
+ *   - Saves the search results for all countries to the datastore.
  * @param {string} query Search query.
  */
 async function updateSearchResultsForTopic(query) {
   let countriesData = [];
   await deleteAncientResults();
 
-  // Note: Can't use forEach with await.
-  for (let i = 0; i < json.length; i++) { // When testing, make i < 3 countries. 
-    // 100 queries per minute limit for Custom Search API. Pause to prevent
-    // surpassing limit.
+  // TODO(carmenbenitez): Delete comment on for each when finished with this
+  // function.
+  // Note: We can't use forEach with await.
+  // When testing, make i < 3 countries.
+  for (let i = 0; i < json.length; i++) {
+    // Use 100 queries per minute limit for the Custom Search API, and include
+    // a pause of 1 minute to prevent surpassing limit.
     if (i !== 0 && i % 100 === 0) {
       await new Promise(resolve => setTimeout(resolve, 60000));
     }
-    // Update countryData within the functions called.
-    const countryResults = await getSearchResultsForCountryFromAPI(
+    // Update {@code countryData} within the functions called.
+    const countryResults = await getCustomSearchResultsForCountry(
         "country" + json[i].id, query);
     // TODO(ntarn): Remove when done with sentiment chart feature debugging.
     console.log('ntarn debug country: ' + json[i].id + ' averageSentiment: ' +
@@ -132,7 +141,7 @@ async function updateSearchResultsForTopic(query) {
  * @return {Object} Formatted object with country search result data and
  *     country overall score.
  */
-async function getSearchResultsForCountryFromAPI(countryCode, query) {
+async function getCustomSearchResultsForCountry(countryCode, query) {
   let response =
     await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q=' + query + '&cr=' + countryCode + '&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults = await response.json();
@@ -140,15 +149,15 @@ async function getSearchResultsForCountryFromAPI(countryCode, query) {
 }
 
 /**
- * Formats the current results given the results JSON obtained from theAPI.
- * @param {Object} searchResultsJson Object with information for top 10 search
- *     results.
- * @return {Object} Formatted object with country search result data and
- *     country overall score.
+ * Formats the current results given the JSON results obtained from theAPI.
+ * @param {Object} searchResultsJson Object with information about the top 10
+ *     search results.
+ * @return {Object} Formatted object with country's search result data and
+ *      average sentiment score of all search result of that country.
  */
 async function formatCountryResults(searchResultsJson) {
   // Parse the JSON string and pass each search result to add to the
-  // countryData object.
+  // {@code countryData} object.
   let currentSearchResults = searchResultsJson.items;
     let countryData = [];
     let totalScore = 0;
@@ -204,16 +213,18 @@ function getSentiment(searchResult) {
   });
 }
 
-/** Deletes search results from 7 days ago. */
+/** Deletes stale search results. Currently deletes after 7 days. */
 async function deleteAncientResults() {
   const query = datastore.createQuery('CustomSearchTopic').order('timestamp');
   const [searchResults] = await datastore.runQuery(query);
 
-  // Note: Can't use forEach with await.
+  // TODO(carmenbenitez): Delete comment on for each when finished with this
+  // function.
+  // Note: We can't use forEach with await.
   // Loop through sorted data beginnning with oldest results, delete if older
   // than a week. Stop when reach results from within a week.
   for (let i = 0; i < searchResults.length; i++) {
-    if (Date.now() - searchResults[i].timestamp > 7 * 24 * 60 * 60000) {
+    if (Date.now() - searchResults[i].timestamp > SEVENDAYS) {
       const searchResultKey = searchResults[i][datastore.KEY];
       await datastore.delete(searchResultKey);
       console.log(`Custom Search Result ${searchResultKey.id} deleted.`)

@@ -91,7 +91,6 @@ function loadCountryData() {
 
     row.setProperty('country_data', dataVariable);
 
-
     // Update and display the map legend.
     document.getElementById('data-min').textContent =
         dataMin.toLocaleString();

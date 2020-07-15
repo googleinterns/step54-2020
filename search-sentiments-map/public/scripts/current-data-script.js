@@ -12,10 +12,13 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+// The current trend a user is viewing.
 let currentTrend = '';
+
+// The custom search data for the trend that the user is viewing.
 let currentCustomSearchData = '';
 
-/** Returns current trend user is viewing. */
+/** Returns the current trend that the user is viewing. */
 function getCurrentTrend() {
   return currentTrend;
 }
@@ -31,11 +34,11 @@ function getCurrentCustomSearchData() {
  * Retrieves relevant data for new trend and reconstructs map with new data.
  * @param {string} trend New trend to get data for.
  */
-// TODO(carmenbenitez): Uncomment if/else block to show data for other search
-// results when custom search data for all top trends set up. Replace top trend
-// in else block with top trend.
 function setNewTrend(trend) {
+  // TODO(carmenbenitez): Add if/else block to show data for other search
+  // results when custom search data for all current top trends is set up. 
   currentTrend = 'The Old Guard';
+  
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = 
       'Worldwide sentiments of search results for "' + currentTrend + '"';
