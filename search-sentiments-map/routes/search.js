@@ -41,13 +41,88 @@ router.get('/:topic', (req, res) => {
  * obtained every 12 hours for the specified topic.
  */
 router.get('/:topic/:countries', (req, res) => {
-  console.log('topic:'+ req.params.topic);
+  let topic = req.params.topic;
   let countries = JSON.parse(req.params.countries);
-  console.log(countries);
-  // countries.forEach(country => {
-  //   console.log(country);
-  // });
+  retrieveUserSearchResultFromDatastore(topic, countries).then(userSearchTopicJsonArray => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(userSearchTopicJsonArray);
+  });
 });
+
+
+
+/** 
+ * Returns a JSON-formatted array of search results for countries retrieved
+ * from the Datastore.
+ * @param {string} topic Search topic to get data for.
+ * @param {Array} countries Countries to get search topic data for.
+ */
+async function retrieveUserSearchResultFromDatastore(topic, countries) {
+  //find if topic is in datstore within last 12 hours
+  //if yes: retrieve data for countries//make if not
+  //if no: create new data for it
+
+  // Request latest entity with a topic matching the given topic.
+  const query = datastore.createQuery('CustomSearchTopic').order('timestamp', {
+    descending: true,
+  }).filter('topic', topic).limit(1);
+  const [customSearchTopic] = await datastore.runQuery(query);
+  // TODO(carmenbenitez): Handle capitalization differences.
+
+  let countriesData = [];
+  let timestamp;
+  if (Date.now() - customSearchTopic[0].timestamp > 12 * 60 * 60000) {
+    timestamp = customSearchTopic[0].timestamp;
+    countries.forEach(country => {
+      console.log(country);
+      let countryData = customSearchTopic[0].countries
+          .filter(countries => countries.country === country);
+      //TODO(carmenbenitez): See if we can filter once for all countries.
+      if (countryData.length === 0) {
+        // call add data function
+        countriesData.push(addNewCountryData(country, customSearchTopic[0]));
+      } else {
+        countriesData.push(countryData[0]);
+      }
+    });
+    //if yes: retrieve data for countries//make if not
+    // Loop through countries.
+    //If country does exists. Get Data.
+    // If country does not. Add Data and get it.
+  } else {
+    // Loop through countries.
+    // Create country entry and add data adn save it
+
+    //create trend
+    timestamp = customSearchTopicEntity.timestamp;
+    countries.forEach(country => {
+      console.log(country);
+      // call add data function
+      countriesData.push(addNewCountryData(country, customSearchTopicEntity));
+    });
+  }
+
+  try {
+    let customSearchTopicJsonArray = {
+      topic: topic,
+      countries: countriesData,
+      timestamp: timestamp,
+    };
+    return customSearchTopicJsonArray;
+  } catch (err) {
+    console.error('ERROR:', err);
+  }
+}
+
+/** 
+ * Adds country data for specific topic to a CustomSearchTopic entity.
+ * @param {string} country Country code for country to add search data for.
+ * @param {Object} topicEntity Entity for topic we are adding search results to.
+ * @return {Object} Data for this country and topic.
+ */
+function addNewCountryData(country, topicEntity) {
+  return {};
+}
 
 
 /** 

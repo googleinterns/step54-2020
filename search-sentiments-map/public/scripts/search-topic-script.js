@@ -21,16 +21,9 @@ function searchTopic() {
 
   // Get new search results when given a topic and at least 1 country.
   if (topic.length !== 0 && countries.length !== 0) {
-    // Get search results from existing custom search data when search topic is
-    // in the top global trends.
-    let trendFilter = topTrends.filter(trends => 
-        trends.trendTopic.toLowerCase() === topic.toLowerCase());
-    if (trendFilter.length !== 0) {
-      console.log("in top trends")
-      // use data from custom search
-    } else {
-      fetch('/search/testTopic/'+JSON.stringify('[UK, US]'));
-    }
+    fetch('/search/' + topic + '/' + JSON.stringify(countries)).then(json => {
+      console.log(json);
+    });
   }
 }
 
