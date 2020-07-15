@@ -203,6 +203,8 @@ function generateRoutes() {
  */
 function createRoutePolyline(routeNum, routeLegs) {
   let routeCoordinates = [];
+  // Note: Routes Preferred has duration and distanceMeters attributes for each
+  // route, but Directions only has those for each leg of the route.
   let totalDuration = 0;  // Total duration of route in seconds.
   let totalDistance = 0;  // Total distance of route in meters.
 
@@ -211,9 +213,11 @@ function createRoutePolyline(routeNum, routeLegs) {
     console.log('num steps', legSteps.length);
 
     for (let j = 0; j < legSteps.length; j++) {
+      // Routes Preferred: .startLocation.LatLng
       routeCoordinates.push(legSteps[j].start_location);
     }
     if (i == routeLegs.length - 1) {
+        // Routes Preferred: .endLocation.LatLng
         routeCoordinates.push(legSteps[legSteps.length - 1].end_location);
     }
     totalDuration += parseInt(routeLegs[i].duration.value);

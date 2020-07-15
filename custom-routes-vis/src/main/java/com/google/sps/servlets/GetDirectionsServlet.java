@@ -40,6 +40,8 @@ public class GetDirectionsServlet extends HttpServlet {
   }
 
   public String getRoutesFromApi(String origin, String destination) throws IOException, MalformedURLException {
+    // TODO: Modify to use Routes Preferred API.
+    // Different parameter names: computeAlternativeRoutes, travelMode.
     URL directionsUrl = new URL("https://maps.googleapis.com/maps/api/directions/json?"
         + "origin=" + origin + "&destination=" + destination
         + "&alternatives=true"
