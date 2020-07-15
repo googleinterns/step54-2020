@@ -32,21 +32,41 @@ public class GetDirectionsServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String origin = request.getParameter("origin");
     String destination = request.getParameter("destination");
-    String directions = getRoutesFromApi(origin, destination);
+    String endpoint = request.getParameter("endpoint");
+    String apiKey = request.getParameter("apiKey");
+
+    String directions = getRoutesFromApi(origin, destination, endpoint, apiKey);
     System.out.println(directions);
 
     response.setContentType("application/json;");
     response.getWriter().println(directions);
   }
 
-  public String getRoutesFromApi(String origin, String destination) throws IOException, MalformedURLException {
-    // TODO: Modify to use Routes Preferred API.
-    // Different parameter names: computeAlternativeRoutes, travelMode.
-    URL directionsUrl = new URL("https://maps.googleapis.com/maps/api/directions/json?"
-        + "origin=" + origin + "&destination=" + destination
-        + "&alternatives=true"
-        + "&mode=driving"
-        + "&key=" + System. getenv("DIRECTIONS_API_KEY"));
+  public String getRoutesFromApi(String origin, String destination, String endpoint, String apiKey)
+     throws IOException, MalformedURLException {
+    String urlString;
+    String directionsApiKey = System.getenv("DIRECTIONS_API_KEY");
+    String key = apiKey == "" ? apiKey : directionsApiKey;
+
+    switch (endpoint) {
+      case "compute-routes":
+        urlString = "https://routespreferred.googleapis.com/v1:computeRoutes?"
+          + "travelMode=DRIVE"
+          + "&computeAlternativeRoutes=true";
+        break;
+      case "compute-routes-alpha":
+        urlString = "https://routespreferred.googleapis.com/v1alpha:computeCustomRoutes?"
+          + "travelMode=DRIVE";
+        break;
+      default:  // Default to use the Directions API.
+        urlString = "https://maps.googleapis.com/maps/api/directions/json?"
+          + "mode=driving"
+          + "&alternatives=true";
+        break;
+    }
+    String originDestination = "&origin=" + origin + "&destination=" + destination;
+    URL directionsUrl = new URL(urlString + originDestination + "&key=" + key);
+
     URLConnection connection = directionsUrl.openConnection();
     connection.setRequestProperty("Accept-Charset", "UTF-8");
 

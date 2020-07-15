@@ -20,19 +20,27 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-sm-3 offset-sm-1">
+      <div class="col-sm-2 offset-sm-1">
         <h5>Origin Coordinates:</h5>
         <div id='origin-coordinates'></div><br>
         <button type="button" class="btn btn-success" onclick="showMarker('origin')" id="show-origin-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('origin')" id="hide-origin-marker">Delete Marker</button><br>
       </div>
-      <div class="col-sm-3">
+      <div class="col-sm-2">
         <h5>Destination Coordinates:</h5>
         <div id='destination-coordinates'></div><br>
         <button type="button" class="btn btn-success" onclick="showMarker('destination')" id="show-destination-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('destination')" id="hide-destination-marker">Delete Marker</button><br>
       </div>
-      <div class="col-sm-4">
+      <div class="col-sm-3">
+        <select id="service-endpoint" class="form-control">
+          <option value="directions" selected>Directions API</option>
+          <option value="compute-routes">ComputeRoutes API(V1)</option>
+          <option value="compute-routes-alpha">ComputeCustomRoutes API(V1 alpha)</option>
+        </select>
+        <textarea id="api-key" class="form-control" placeholder="Defaults to use Directions API key" rows="1"></textarea>
+      </div>
+      <div class="col-sm-3">
         <div id="routes-options"></div>
         <button type="button" class="btn btn-primary hidden" onclick="generateRoutes()" id="generate-routes">Generate Routes</button><br>
         <div id="route-info"></div>

@@ -179,8 +179,12 @@ function generateRoutes() {
   let origin = startLatLng.lat() + ',' + startLatLng.lng();
   let destination = endLatLng.lat() + ',' + endLatLng.lng();
 
+  let serviceEndpoint = document.getElementById('service-endpoint').value;
+  let apiKey = document.getElementById('api-key').value;
+
   // Get the routes and display them on map.
-  fetch('/get-directions?origin=' + origin + '&destination=' + destination)
+  fetch('/get-directions?origin=' + origin + '&destination=' + destination
+      + '&endpoint=' + serviceEndpoint + '&apiKey=' + apiKey)
       .then(response => response.json()).then(directions => {
         console.log(directions.status);
         let routes = directions.routes;
@@ -259,5 +263,6 @@ function selectRouteDisplayDetails(routeNum, totalDuration, totalDistance) {
   let routeInfoElement = document.getElementById('route-info');
   routeInfoElement.innerText = 'Selected Route Info:\n' 
       + 'Duration: ' + totalDuration + ' seconds\n'
-      + 'Distance: ' + totalDistance + ' meters' 
+      + 'Distance: ' + totalDistance + ' meters\n'
+      + 'Route Token: ';
 }
