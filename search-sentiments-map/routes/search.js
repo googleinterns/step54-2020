@@ -65,7 +65,7 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
   // Request latest entity with a topic matching the given topic.
   const query = datastore.createQuery('CustomSearchTopic').order('timestamp', {
     descending: true,
-  }).filter('topic', topic).limit(1);
+  }).filter('lowercaseTopic', topic.toLowerCase()).limit(1);
   const [customSearchTopic] = await datastore.runQuery(query);
   // TODO(carmenbenitez): Handle capitalization differences. Change to last 12 hours
 
@@ -348,6 +348,7 @@ async function addTopicToDatastore(topic, countriesData) {
     key: customSearchTopicKey,
     data: {
       topic: topic,
+      lowercaseTopic: topic.toLowerCase(),
       countries: countriesData,
       timestamp: Date.now(),
     },

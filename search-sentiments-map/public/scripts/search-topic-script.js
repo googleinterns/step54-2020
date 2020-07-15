@@ -29,7 +29,7 @@ function searchTopic() {
 
 function countrySelectSetUp() {
   let container = document.getElementById('country-select');
-  fetch("country-code.json").then(response => response.json())
+  fetch("country-name.json").then(response => response.json())
       .then(json => {
     json.forEach(country => {
       container.innerHTML += 
