@@ -17,15 +17,17 @@
  * @param {?google.maps.MouseEvent} e Click event.
  */
 function onClickCountry(e) {
-  $('#region-info-modal').modal('show');
+  if (e.feature.getProperty('country_data') != null) {
+    $('#region-info-modal').modal('show');
 
-  // Update Modal with information for relevant country.
-  const countryName = e.feature.getProperty('name');
-  const countryId = e.feature.getId();
-  const countryData = e.feature.getProperty('country_data').toLocaleString();
-  document.getElementById('modal-title').innerText = countryName;
-  displayTopResults(countryId);
-  setCountryTrends(countryId);
+    // Update Modal with information for relevant country.
+    const countryName = e.feature.getProperty('name');
+    const countryId = e.feature.getId();
+    const countryData = e.feature.getProperty('country_data').toLocaleString();
+    document.getElementById('modal-title').innerText = countryName;
+    displayTopResults(countryId);
+    setCountryTrends(countryId);
+  }
 }
 
 /**

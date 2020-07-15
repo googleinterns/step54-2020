@@ -26,13 +26,13 @@ let mapStyle = [{
 let map;
 let infowindow;
 /* 
- * Hold the minimum and maximum values of the sentiment scores. By default, we
- * set them to hold the maximum and minimum possible integer values
- * respectively, so they can later be appropriately replaced by the actual
- * sentiment scores.
+ * Hold the minimum and maximum values of the sentiment scores.
+ * The sentiment API returns scores from -1.0 to 1.0.
  */
-let dataMin = Number.MAX_VALUE;
-let dataMax = Number.MIN_VALUE;
+
+ // TODO(ntarn@): Change this to 100 and -100 when sentiment scores rescaled.
+const DATAMIN = 1.0;
+const DATAMAX = -1.0;
 
 /** Loads the map with country polygons when page loads. */
 function initMap() {
@@ -44,6 +44,11 @@ function initMap() {
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
       .push(document.getElementById('legend'));
+  // Update and display the map legend.
+  document.getElementById('data-min').textContent =
+      DATAMIN.toLocaleString();
+  document.getElementById('data-max').textContent =
+      DATAMAX.toLocaleString();
 
   infowindow = new google.maps.InfoWindow({});
 
@@ -66,10 +71,6 @@ function loadMapOutline() {
 
 /** Loads the country sentiment score from Datastore. */
 function loadCountryData() {
-  // Reset min and max values to accurate get new min and max.
-  dataMin = Number.MAX_VALUE;
-  dataMax = Number.MIN_VALUE;
-  
   map.data.forEach(function (row) {
     const countryCode = row.getId();
     let topicData = getCurrentCustomSearchData();
@@ -79,25 +80,10 @@ function loadCountryData() {
     if (countryData.length != 0) {
       dataVariable = countryData[0].averageSentiment;
     } else {
-      console.log('Data does not exist for this countryCode:' + countryCode);
-    }
-
-    // Keep track of min and max values as we read them.
-    if (dataVariable < dataMin) {
-      dataMin = dataVariable;
-    }
-    if (dataVariable > dataMax) {
-      dataMax = dataVariable;
+      dataVariable = null;
     }
 
     row.setProperty('country_data', dataVariable);
-
-
-    // Update and display the map legend.
-    document.getElementById('data-min').textContent =
-        dataMin.toLocaleString();
-    document.getElementById('data-max').textContent =
-        dataMax.toLocaleString();
   });
 }
 
@@ -109,17 +95,22 @@ function loadCountryData() {
  * @returns {googe.maps.Data.StyleOptions} styling information for feature
  */
 function styleFeature(feature) {
-  let low = [5, 69, 54];  // Color of smallest datum.
-  let high = [151, 83, 34]; // Color of largest datum.
-
-  // Delta represents where the value sits between the min and max.
-  let delta = (feature.getProperty('country_data') - dataMin) /
-      (dataMax - dataMin);
-
+  let high = [5, 69, 54];  // Color of largest datum.
+  let low = [151, 83, 34]; // Color of smallest datum.
   let color = [];
-  for (let i = 0; i < 3; i++) {
-    // Calculate an integer color based on the delta.
-    color[i] = (high[i] - low[i]) * delta + low[i];
+
+  if (feature.getProperty('country_data') != null) {
+    // Delta represents where the value sits between the min and max.
+    let delta = (feature.getProperty('country_data') - DATAMIN) /
+        (DATAMAX - DATAMIN);
+
+    color = [];
+    for (let i = 0; i < 3; i++) {
+      // Calculate an integer color based on the delta.
+      color[i] = (high[i] - low[i]) * delta + low[i];
+    }
+  } else {
+    color = [62, 1, 83];
   }
 
   let outlineWeight = 0.5, zIndex = 1;
@@ -142,15 +133,17 @@ function styleFeature(feature) {
  * @param {?google.maps.MouseEvent} e Mouse-in event.
  */
 function mouseInToRegion(e) {
-  // Set the hover country so the setStyle function can change the border.
-  e.feature.setProperty('country', 'hover');
-
   // Add popup info window with country info.
-  const countryInfo = e.feature.getProperty('name') + ': ' +
-      e.feature.getProperty('country_data').toLocaleString();
-  infowindow.setContent(countryInfo);
-  infowindow.setPosition(e.latLng);
-  infowindow.open(map);
+  if (e.feature.getProperty('country_data') != null) {
+    // Set the hover country so the setStyle function can change the border.
+    e.feature.setProperty('country', 'hover');
+
+    countryInfo = e.feature.getProperty('name') + ': ' +
+        e.feature.getProperty('country_data').toLocaleString();
+    infowindow.setContent(countryInfo);
+    infowindow.setPosition(e.latLng);
+    infowindow.open(map);
+  }
 }
 
 /**
