@@ -272,7 +272,7 @@ async function formatCountryResults(searchResultsJson) {
         countryData.push(formattedResults);
         totalScore += formattedResults.score;
       }
-      let avgScore = 0;
+      let avgScore = null;
       if (currentSearchResults.length !== 0) {
         avgScore = totalScore / currentSearchResults.length;
       } 
