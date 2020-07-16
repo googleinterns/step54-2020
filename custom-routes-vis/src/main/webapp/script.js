@@ -25,7 +25,7 @@ const MarkerNames = {
 
 let originDestinationMarkers = [];
 let displayedRoutes = [];
-const routeColors = ['#ff0000', '#f7cb52', '#3299d1'];
+const routeColors = ['#ff0000', '#ede61a', '#3299d1'];
 let selectedRouteNum = 0;
 var map;
 
@@ -159,7 +159,6 @@ function hideMarker(markerName) {
 /** Removes all routes from the DOM. */
 function clearRoutes() {
   for (let i = 0; i < displayedRoutes.length; i++) {
-    console.log('removing route')
     displayedRoutes[i].setMap(null);
   }
   displayedRoutes = [];
@@ -167,7 +166,7 @@ function clearRoutes() {
 }
 
 /**
- * Generates routes from origin to destination by calling Directions API.
+ * Generates routes from origin to destination by calling the selected API.
  * Precondition: two markers exist in the originDestinationMarkers array.
  */
 function generateRoutes() {
@@ -186,48 +185,76 @@ function generateRoutes() {
   fetch('/get-directions?origin=' + origin + '&destination=' + destination
       + '&endpoint=' + serviceEndpoint + '&apiKey=' + apiKey)
       .then(response => response.json()).then(directions => {
+        // Log the response status from the Directions API.
+        // TODO(chenyuz): find equivalence for Routes Preferred API.
         console.log(directions.status);
+
         let routes = directions.routes;
         console.log('num routes:', routes.length);
 
         for (let routeNum = 0; routeNum < routes.length; routeNum++) {
-          let routeLegs = routes[routeNum].legs;
-          console.log('num legs', routeLegs.length);
-          createRoutePolyline(routeNum, routeLegs);
+          createRoutePolyline(routeNum, routes[routeNum], 
+              serviceEndpoint === 'directions');
         }
       });
 }
 
-/** 
+/**
  * Creates a polyline for a route on the map.
- * @param {num} routeNum The index of the route in the order as it is returned 
+ * @param {num} routeNum The index of the route in the order as it is returned
  * from the API.
- * @param {!Array} routeLegs JSON array containing all information of legs of 
- * the target route. We'll have more than one legs if waypoints are specified.
+ * @param {!JSON} routeJson JSON object containing all information of the target
+ * route.
+ * @param {bool} directionsApi Whether the route is obtained by the Directions
+ * API; if false, assume it is obtained by the Routes Preferred API.
  */
-function createRoutePolyline(routeNum, routeLegs) {
+function createRoutePolyline(routeNum, routeJson, directionsApi) {
+  let routeLegs = routeJson.legs;
   let routeCoordinates = [];
+
+  // Total duration of route in seconds.
+  let totalDuration = directionsApi ? 0 : routeJson.duration;
+  // Total distance of route in meters.
+  let totalDistance = directionsApi ? 0 : routeJson.distanceMeters;
   // Note: Routes Preferred has duration and distanceMeters attributes for each
   // route, but Directions only has those for each leg of the route.
-  let totalDuration = 0;  // Total duration of route in seconds.
-  let totalDistance = 0;  // Total distance of route in meters.
 
   for (let i = 0; i < routeLegs.length; i++) {
     let legSteps = routeLegs[i].steps;
     console.log('num steps', legSteps.length);
 
     for (let j = 0; j < legSteps.length; j++) {
-      // Routes Preferred: .startLocation.LatLng
-      routeCoordinates.push(legSteps[j].start_location);
+      if (directionsApi) {
+        routeCoordinates.push(legSteps[j].start_location);
+      } else {
+        routeCoordinates.push(legSteps[j].startLocation.LatLng);
+      }
     }
+
+    // Add the end location to the coordinates array.
     if (i == routeLegs.length - 1) {
-        // Routes Preferred: .endLocation.LatLng
+      if (directionsApi) {
         routeCoordinates.push(legSteps[legSteps.length - 1].end_location);
+      } else {
+        routeCoordinates.push(legSteps[legSteps.length - 1].endLocation.LatLng);
+      }
     }
-    totalDuration += parseInt(routeLegs[i].duration.value);
-    totalDistance += parseInt(routeLegs[i].distance.value);
+
+    if (directionsApi) {
+      totalDuration += parseInt(routeLegs[i].duration.value);
+      totalDistance += parseInt(routeLegs[i].distance.value);
+    }
   }
 
+  createRouteFromCoordinates(routeCoordinates, routeNum, totalDuration,
+      totalDistance);
+}
+
+/**
+ * Creates the route on the map and stores it in the routes array.
+ */
+function createRouteFromCoordinates(routeCoordinates, routeNum, totalDuration, 
+    totalDistance) {
   let route = new google.maps.Polyline({
     path: routeCoordinates,
     geodesic: true,

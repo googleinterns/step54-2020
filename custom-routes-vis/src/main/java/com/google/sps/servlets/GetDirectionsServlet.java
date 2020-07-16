@@ -16,9 +16,11 @@ package com.google.sps.servlets;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.HttpURLConnection;
 import java.util.Scanner;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -33,43 +35,82 @@ public class GetDirectionsServlet extends HttpServlet {
     String origin = request.getParameter("origin");
     String destination = request.getParameter("destination");
     String endpoint = request.getParameter("endpoint");
+
     String apiKey = request.getParameter("apiKey");
-
-    String directions = getRoutesFromApi(origin, destination, endpoint, apiKey);
-    System.out.println(directions);
-
-    response.setContentType("application/json;");
-    response.getWriter().println(directions);
-  }
-
-  public String getRoutesFromApi(String origin, String destination, String endpoint, String apiKey)
-     throws IOException, MalformedURLException {
-    String urlString;
     String directionsApiKey = System.getenv("DIRECTIONS_API_KEY");
-    String key = apiKey == "" ? apiKey : directionsApiKey;
+    String key = apiKey == "" ? apiKey : directionsApiKey;  // This works but it seems backwards to me.
+
+    URLConnection connection;
 
     switch (endpoint) {
       case "compute-routes":
-        urlString = "https://routespreferred.googleapis.com/v1:computeRoutes?"
-          + "travelMode=DRIVE"
-          + "&computeAlternativeRoutes=true";
+        connection = sendPostRequestToRoutesApi(origin, destination, false, key);
         break;
       case "compute-routes-alpha":
-        urlString = "https://routespreferred.googleapis.com/v1alpha:computeCustomRoutes?"
-          + "travelMode=DRIVE";
+        connection = sendPostRequestToRoutesApi(origin, destination, true, key);
         break;
       default:  // Default to use the Directions API.
-        urlString = "https://maps.googleapis.com/maps/api/directions/json?"
-          + "mode=driving"
-          + "&alternatives=true";
+        connection = sendGetRequestToDirectionsApi(origin, destination, key);
         break;
     }
-    String originDestination = "&origin=" + origin + "&destination=" + destination;
-    URL directionsUrl = new URL(urlString + originDestination + "&key=" + key);
 
+    response.setContentType("application/json;");
+    response.getWriter().println(readResponse(connection));
+  }
+
+  /** 
+   * Sends request to the Directions API and returns the connection.
+   * @param origin Origin of the requested routes in "lat,lng" format.
+   * @param destination Destination of the requested routes in "lat,lng" format.
+   * @param key The API key.
+   */
+  public URLConnection sendGetRequestToDirectionsApi(String origin, String destination, String key) 
+      throws IOException, MalformedURLException {
+    String originDestination = "&origin=" + origin + "&destination=" + destination;
+    URL directionsUrl = new URL("https://maps.googleapis.com/maps/api/directions/json?"
+          + "mode=driving"
+          + "&alternatives=true" + originDestination + "&key=" + key);
     URLConnection connection = directionsUrl.openConnection();
     connection.setRequestProperty("Accept-Charset", "UTF-8");
+    return connection;
+  }
 
+  /** 
+   * Sends request to the Routes Preferred API and returns the connection.
+   * @param origin Origin of the requested routes in "lat,lng" format.
+   * @param destination Destination of the requested routes in "lat,lng" format.
+   * @param alpha Whether to send the request to the alpha version of the API.
+   * @param key The API key.
+   */
+  public URLConnection sendPostRequestToRoutesApi(String origin, String destination, boolean alpha,
+      String apiKey) throws IOException, MalformedURLException {
+    URL routesUrl;
+    if (alpha) {
+      routesUrl = new URL("https://routespreferred.googleapis.com/v1alpha:computeCustomRoutes");
+    } else {
+      routesUrl = new URL("https://routespreferred.googleapis.com/v1:computeRoutes");
+    }
+
+    HttpURLConnection connection = (HttpURLConnection) routesUrl.openConnection();
+    connection.setRequestMethod("POST");
+    connection.setRequestProperty("Content-Type", "application/json; utf-8");
+    connection.setRequestProperty("Accept", "application/json");
+    connection.setDoOutput(true);
+
+    String requestParamsJson = "{"
+        + "\"origin\": {\"location: \"" + origin + "\"}," 
+        + "\"destination\": {\"location: \"" + destination + "\"},"
+        + "\"travelMode\": \"DIRVE\", \"computeAlternativeRoutes\": true}";
+    try(OutputStream os = connection.getOutputStream()) {
+      byte[] input = requestParamsJson.getBytes("utf-8");
+      os.write(input, 0, input.length);			
+    }
+
+    return connection;
+  }
+
+  /** Returns the response from the API connection. */
+  public String readResponse(URLConnection connection) throws IOException {
     InputStream response = connection.getInputStream();
     try (Scanner scanner = new Scanner(response)) {
       String responseBody = scanner.useDelimiter("\\A").next();
