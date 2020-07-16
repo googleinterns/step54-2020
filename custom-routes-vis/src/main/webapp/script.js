@@ -23,10 +23,13 @@ const MarkerNames = {
   DESTINATION: 'destination',
 };
 
+// Array holding origin and destination markers.
 let originDestinationMarkers = [];
+// Array holding routes displayed on the map.
 let displayedRoutes = [];
-const routeColors = ['#ff0000', '#eb8f1e', '#3299d1'];
-let selectedRouteNum = 0;
+// Colors of the routes displayed.
+const ROUTE_COLORS = ['#ff0000', '#eb8f1e', '#3299d1'];
+let selectedRouteNum = 0;  // The index of the route selected.
 var map;
 
 /** Creates the world map and markers. */
@@ -48,7 +51,7 @@ function initMapWithMarkers() {
  * Creates hidden marker that updates coordiantes on page when moved.
  * @param {string} containerId ID of container to update coordinates in.
  * @param {string} label Label to display on container.
- * @param {Object} title Title of marker.
+ * @param {string} title Title of marker.
  * @param {Object} latLng Default coordinates of where to place marker.
  */
 function createMarker(containerId, label, title, latLng) {
@@ -167,7 +170,7 @@ function clearRoutes() {
 
 /**
  * Generates routes from origin to destination by calling the selected API.
- * Precondition: two markers exist in the originDestinationMarkers array.
+ * Precondition: Two markers exist in the originDestinationMarkers array.
  */
 function generateRoutes() {
   clearRoutes();
@@ -186,7 +189,7 @@ function generateRoutes() {
       + '&endpoint=' + serviceEndpoint + '&apiKey=' + apiKey)
       .then(response => response.json()).then(directions => {
         // Log the response status from the Directions API.
-        // TODO(chenyuz): find equivalence for Routes Preferred API.
+        // TODO(chenyuz): Find equivalence for Routes Preferred API.
         console.log(directions.status);
 
         let routes = directions.routes;
@@ -201,11 +204,11 @@ function generateRoutes() {
 
 /**
  * Creates a polyline for a route on the map.
- * @param {num} routeNum The index of the route in the order as it is returned
- * from the API.
- * @param {!JSON} routeJson JSON object containing all information of the target
+ * @param {num} routeNum The index of the route in the order that it is returned
+ * from the selected API.
+ * @param {!Object} routeJson JSON object containing all information of the target
  * route.
- * @param {bool} directionsApi Whether the route is obtained by the Directions
+ * @param {boolean} directionsApi Whether the route is obtained by the Directions
  * API; if false, assume it is obtained by the Routes Preferred API.
  */
 function createRoutePolyline(routeNum, routeJson, directionsApi) {
@@ -213,53 +216,59 @@ function createRoutePolyline(routeNum, routeJson, directionsApi) {
   let routeCoordinates = [];
 
   // Total duration of route in seconds.
-  let totalDuration = directionsApi ? 0 : routeJson.duration;
+  let totalRouteDurationSec = directionsApi ? 0 : routeJson.duration;
   // Total distance of route in meters.
-  let totalDistance = directionsApi ? 0 : routeJson.distanceMeters;
+  let totalDistanceMeters = directionsApi ? 0 : routeJson.distanceMeters;
   // Note: Routes Preferred has duration and distanceMeters attributes for each
-  // route, but Directions only has those for each leg of the route.
+  // route, but Directions only has them for each leg of the route.
 
+  // Get all coordinates given by the steps of the legs of the route.
   for (let i = 0; i < routeLegs.length; i++) {
     let legSteps = routeLegs[i].steps;
     console.log('num steps', legSteps.length);
 
     for (let j = 0; j < legSteps.length; j++) {
-      if (directionsApi) {
-        routeCoordinates.push(legSteps[j].start_location);
-      } else {
-        routeCoordinates.push(legSteps[j].startLocation.LatLng);
-      }
+      directionsApi ?
+          routeCoordinates.push(legSteps[j].start_location) :
+          routeCoordinates.push(legSteps[j].startLocation.LatLng);
     }
 
     // Add the end location to the coordinates array.
     if (i == routeLegs.length - 1) {
-      if (directionsApi) {
-        routeCoordinates.push(legSteps[legSteps.length - 1].end_location);
-      } else {
-        routeCoordinates.push(legSteps[legSteps.length - 1].endLocation.LatLng);
-      }
+      directionsApi ?
+          routeCoordinates.push(legSteps[legSteps.length - 1].end_location) :
+          routeCoordinates.push(legSteps[legSteps.length - 1].endLocation.LatLng);
     }
 
     if (directionsApi) {
-      totalDuration += parseInt(routeLegs[i].duration.value);
-      totalDistance += parseInt(routeLegs[i].distance.value);
+      // Accumulate duration and distance because the total is not directly
+      // available in results from the Directions API.
+      totalRouteDurationSec += parseInt(routeLegs[i].duration.value);
+      totalDistanceMeters += parseInt(routeLegs[i].distance.value);
     }
   }
 
-  createRouteFromCoordinates(routeCoordinates, routeNum, totalDuration,
-      totalDistance);
+  createRouteFromCoordinates(routeCoordinates, routeNum, totalRouteDurationSec,
+      totalDistanceMeters);
 }
 
 /**
  * Creates the route on the map and stores it in the routes array.
+ * @param {Array} routeCoordinates The coordinates that the route goes through.
+ * @param {num} routeNum The index of the selected route in the routes array.
+ * @param {num} totalDuration The duration of the route in seconds.
+ * @param {num} totalDistance The distance of the route in meters.
  */
-function createRouteFromCoordinates(routeCoordinates, routeNum, totalDuration, 
+function createRouteFromCoordinates(
+    routeCoordinates, 
+    routeNum, 
+    totalDuration, 
     totalDistance) {
   let route = new google.maps.Polyline({
     path: routeCoordinates,
     geodesic: true,
-    strokeColor: routeColors[routeNum % 3],
-    strokeOpacity: 0.5,
+    strokeColor: ROUTE_COLORS[routeNum % 3],
+    strokeOpacity: 0.3,
     strokeWeight: 6,
   });
   route.setMap(map);
@@ -271,7 +280,6 @@ function createRouteFromCoordinates(routeCoordinates, routeNum, totalDuration,
   }
 
   route.addListener('click', function(event) {
-    console.log('route click');
     selectRouteDisplayDetails(routeNum, totalDuration, totalDistance);
   });
 }
@@ -281,9 +289,10 @@ function createRouteFromCoordinates(routeCoordinates, routeNum, totalDuration,
  * @param {num} routeNum The index of the selected route in the routes array.
  * @param {num} totalDuration The duration of the route in seconds.
  * @param {num} totalDistance The distance of the route in meters.
+ * TODO(carmenbenitez): Add in the route token returned from the Routes Preferred API.
  */
 function selectRouteDisplayDetails(routeNum, totalDuration, totalDistance) {
-  displayedRoutes[selectedRouteNum].setOptions({ strokeOpacity: 0.5, })
+  displayedRoutes[selectedRouteNum].setOptions({ strokeOpacity: 0.3, })
   selectedRouteNum = routeNum;
   displayedRoutes[routeNum].setOptions({ strokeOpacity: 1.0, });
 

@@ -38,11 +38,11 @@
           <option value="compute-routes">ComputeRoutes API(V1)</option>
           <option value="compute-routes-alpha">ComputeCustomRoutes API(V1 alpha)</option>
         </select>
-        <textarea id="api-key" class="form-control" placeholder="API key (defaults to use Directions API)" rows="1"></textarea>
+        <input id="api-key" class="form-control" placeholder="API Key (Defaults to use Directions API Key)"></input>
       </div>
       <div class="col-sm-3">
         <div id="routes-options"></div>
-        <button type="button" class="btn btn-primary hidden" onclick="generateRoutes()" id="generate-routes">Generate Routes</button><br>
+        <button id="generate-routes" type="button" class="btn btn-primary hidden" onclick="generateRoutes()">Generate Routes</button><br>
         <div id="route-info"></div>
       </div>
     </div>

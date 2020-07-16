@@ -17,40 +17,48 @@ package com.google.sps.servlets;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.HttpURLConnection;
 import java.util.Scanner;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/** Servlet that renders customized routes by calling a specified API. */
 @WebServlet("/get-directions")
 public class GetDirectionsServlet extends HttpServlet {
+  private static final String COMPUTE_ROUTES = "compute-routes";
+  private static final String COMPUTE_ROUTES_ALPHA = "compute-routes-alpha";
 
+  /** 
+   * Handles the request to get routes and responds with results from a call to a specified API. 
+   * The request specifies the origin, destination, service endpoint, and, optionally, an API
+   * key for the API request.
+   */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String origin = request.getParameter("origin");
     String destination = request.getParameter("destination");
     String endpoint = request.getParameter("endpoint");
 
-    String apiKey = request.getParameter("apiKey");
+    String requestApiKey = request.getParameter("apiKey");
     String directionsApiKey = System.getenv("DIRECTIONS_API_KEY");
-    String key = apiKey == "" ? apiKey : directionsApiKey;  // This works but it seems backwards to me.
+    String apiKey = requestApiKey.isEmpty() ? directionsApiKey : requestApiKey;
 
     URLConnection connection;
 
     switch (endpoint) {
-      case "compute-routes":
-        connection = sendPostRequestToRoutesApi(origin, destination, false, key);
+      case COMPUTE_ROUTES:
+        connection = connectToRoutesApi(origin, destination, false, apiKey);
         break;
-      case "compute-routes-alpha":
-        connection = sendPostRequestToRoutesApi(origin, destination, true, key);
+      case COMPUTE_ROUTES_ALPHA:
+        connection = connectToRoutesApi(origin, destination, true, apiKey);
         break;
       default:  // Default to use the Directions API.
-        connection = sendGetRequestToDirectionsApi(origin, destination, key);
+        connection = connectToDirectionsApi(origin, destination, apiKey);
         break;
     }
 
@@ -59,37 +67,34 @@ public class GetDirectionsServlet extends HttpServlet {
   }
 
   /** 
-   * Sends request to the Directions API and returns the connection.
+   * Sends GET request to the Directions API and returns the connection.
    * @param origin Origin of the requested routes in "lat,lng" format.
    * @param destination Destination of the requested routes in "lat,lng" format.
-   * @param key The API key.
+   * @param apiKey The API key.
    */
-  public URLConnection sendGetRequestToDirectionsApi(String origin, String destination, String key) 
+  public URLConnection connectToDirectionsApi(String origin, String destination, String apiKey) 
       throws IOException, MalformedURLException {
-    String originDestination = "&origin=" + origin + "&destination=" + destination;
     URL directionsUrl = new URL("https://maps.googleapis.com/maps/api/directions/json?"
-          + "mode=driving"
-          + "&alternatives=true" + originDestination + "&key=" + key);
+        + "origin=" + origin + "&destination=" + destination    
+        + "&mode=driving"
+        + "&alternatives=true" + "&key=" + apiKey);
     URLConnection connection = directionsUrl.openConnection();
     connection.setRequestProperty("Accept-Charset", "UTF-8");
     return connection;
   }
 
   /** 
-   * Sends request to the Routes Preferred API and returns the connection.
+   * Sends POST request to the Routes Preferred API and returns the connection.
    * @param origin Origin of the requested routes in "lat,lng" format.
    * @param destination Destination of the requested routes in "lat,lng" format.
-   * @param alpha Whether to send the request to the alpha version of the API.
-   * @param key The API key.
+   * @param shouldUseAlphaApi Whether to send the request to the alpha version of the API.
+   * @param apiKey The API key.
    */
-  public URLConnection sendPostRequestToRoutesApi(String origin, String destination, boolean alpha,
-      String apiKey) throws IOException, MalformedURLException {
-    URL routesUrl;
-    if (alpha) {
-      routesUrl = new URL("https://routespreferred.googleapis.com/v1alpha:computeCustomRoutes");
-    } else {
-      routesUrl = new URL("https://routespreferred.googleapis.com/v1:computeRoutes");
-    }
+  public URLConnection connectToRoutesApi(String origin, String destination, 
+      boolean shouldUseAlphaApi, String apiKey) throws IOException, MalformedURLException {
+    URL routesUrl = shouldUseAlphaApi ? 
+        new URL("https://routespreferred.googleapis.com/v1alpha:computeCustomRoutes") : 
+        new URL("https://routespreferred.googleapis.com/v1:computeRoutes");
 
     HttpURLConnection connection = (HttpURLConnection) routesUrl.openConnection();
     connection.setRequestMethod("POST");
@@ -97,10 +102,19 @@ public class GetDirectionsServlet extends HttpServlet {
     connection.setRequestProperty("Accept", "application/json");
     connection.setDoOutput(true);
 
+    // TODO(chenyuz): Check with the Routes Preferred team to make sure that the request JSON is
+    // correct.
+    // 1. The origin and destination waypoints are simplified here.
+    // 2. How do we add apiKey?
+    // 3. Are there other fields that we should add?
     String requestParamsJson = "{"
-        + "\"origin\": {\"location: \"" + origin + "\"}," 
-        + "\"destination\": {\"location: \"" + destination + "\"},"
-        + "\"travelMode\": \"DIRVE\", \"computeAlternativeRoutes\": true}";
+        + "\"origin\": {\"location\":  {\"latLng\": "
+        + "{\"latitude\": " + origin.split(",")[0] + ", \"longitude\": " + origin.split(",")[1] + "}}},"
+        + "\"destination\": {\"location\":  {\"latLng\": "
+        + "{\"latitude\": " + destination.split(",")[0]
+        + ", \"longitude\": " + destination.split(",")[1] + "}}},"
+        + "\"travelMode\": \"DRIVE\", \"computeAlternativeRoutes\": true}";
+
     try(OutputStream os = connection.getOutputStream()) {
       byte[] input = requestParamsJson.getBytes("utf-8");
       os.write(input, 0, input.length);			
@@ -109,7 +123,7 @@ public class GetDirectionsServlet extends HttpServlet {
     return connection;
   }
 
-  /** Returns the response from the API connection. */
+  /** Reads and returns the response from the API connection. */
   public String readResponse(URLConnection connection) throws IOException {
     InputStream response = connection.getInputStream();
     try (Scanner scanner = new Scanner(response)) {
