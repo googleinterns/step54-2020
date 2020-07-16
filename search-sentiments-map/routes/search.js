@@ -25,7 +25,7 @@ const datastore = new Datastore();
 const json = require('./../public/country-code.json');
 global.Headers = fetch.Headers;
 
-const SEVENDAYS = 7 * 24 * 60 * 60000;
+const STALE_SEARCH_RESULT_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
 
 /** 
  * Renders a JSON array of the top search results for all countries with API data
@@ -75,8 +75,8 @@ async function retrieveSearchResultFromDatastore(topic) {
  */
 function updateSearchResults() {
   retrieveGlobalTrends().then(async trends => {
-    // When testing, make i < 1 to test for only one trend and comment out
-    // await new Promise line to avoid 1 minute pauses.
+    // When testing ,use i < 1 to test for only one trend, and comment out
+    // `await new Promise` line to avoid 1 minute pauses.
     for (let i = 0; i < trends.length; i++) {
       await updateSearchResultsForTopic(trends[i].trendTopic);
       await new Promise(resolve => setTimeout(resolve, 60000));
@@ -214,7 +214,7 @@ function getSentiment(searchResult) {
   });
 }
 
-/** Deletes stale search results. Currently deletes after 7 days. */
+/** Deletes stale search results. */
 async function deleteAncientResults() {
   const query = datastore.createQuery('CustomSearchTopic').order('timestamp');
   const [searchResults] = await datastore.runQuery(query);
@@ -225,7 +225,8 @@ async function deleteAncientResults() {
   // Loop through sorted data beginnning with oldest results, delete if older
   // than a week. Stop when reach results from within a week.
   for (let i = 0; i < searchResults.length; i++) {
-    if (Date.now() - searchResults[i].timestamp > SEVENDAYS) {
+    if (Date.now() - searchResults[i].timestamp >
+        STALE_SEARCH_RESULT_THRESHOLD_7_DAYS_MS) {
       const searchResultKey = searchResults[i][datastore.KEY];
       await datastore.delete(searchResultKey);
       console.log(`Custom Search Result ${searchResultKey.id} deleted.`)
