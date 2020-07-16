@@ -159,23 +159,22 @@ async function formatCountryResults(searchResultsJson) {
   // Parse the JSON string and pass each search result to add to the
   // {@code countryData} object.
   let currentSearchResults = searchResultsJson.items;
-    let countryData = [];
-    let totalScore = 0;
-    if (currentSearchResults == undefined) {
-      return {score: 0, results: countryData};
-    } else {
-      for (let i = 0; i < currentSearchResults.length; i++) {
-        let formattedResults =
-            await formatSearchResults(currentSearchResults[i]);
-        countryData.push(formattedResults);
-        totalScore += formattedResults.score;
-      }
-      let avgScore = 0;
-      if (currentSearchResults.length !== 0) {
-        avgScore = totalScore / currentSearchResults.length;
-      } 
-      return {score: avgScore, results: countryData};
+  let countryData = [];
+  let totalScore = 0;
+  if (currentSearchResults == undefined) {
+    return {score: 0, results: countryData};
+  }
+    for (let i = 0; i < currentSearchResults.length; i++) {
+      let formattedResults =
+          await formatSearchResults(currentSearchResults[i]);
+      countryData.push(formattedResults);
+      totalScore += formattedResults.score;
     }
+    let avgScore = 0;
+    if (currentSearchResults.length !== 0) {
+      avgScore = totalScore / currentSearchResults.length;
+    } 
+    return {score: avgScore, results: countryData};
 }
 
 /**
