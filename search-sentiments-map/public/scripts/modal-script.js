@@ -66,7 +66,7 @@ function displayTopResults(countryCode) {
   let countryData = topicData.countries
       .filter(countries => countries.country === countryCode);
   // Handle case where there are no results.
-  if (countryData.length === 0) {
+  if (countryData.length === 0 || countryData[0].averageSentiment == -500) {
     resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
         date.toString() + '<i><br>';
   } else {

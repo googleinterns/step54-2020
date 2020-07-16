@@ -264,7 +264,8 @@ async function formatCountryResults(searchResultsJson) {
     let countryData = [];
     let totalScore = 0;
     if (currentSearchResults == undefined) {
-      return {score: 0, results: countryData};
+      // -500 is the score to signify there were no results.
+      return {score: -500, results: countryData};
     } else {
       for (let i = 0; i < currentSearchResults.length; i++) {
         let formattedResults =
@@ -272,7 +273,8 @@ async function formatCountryResults(searchResultsJson) {
         countryData.push(formattedResults);
         totalScore += formattedResults.score;
       }
-      let avgScore = null;
+      // -500 is the score to signify there were no results.
+      let avgScore = -500;
       if (currentSearchResults.length !== 0) {
         avgScore = totalScore / currentSearchResults.length;
       } 

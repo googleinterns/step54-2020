@@ -98,10 +98,18 @@ function styleFeature(feature) {
   let high = [5, 69, 54];  // Color of largest datum.
   let low = [151, 83, 34]; // Color of smallest datum.
   let color = [];
+  let countryData = feature.getProperty('country_data');
 
-  if (feature.getProperty('country_data') != null) {
+  if (countryData == null) {
+    // Set country color to be light grey if that country is disabled(occurs in
+    // user search).
+    color = [62, 1, 83];
+  } else if (countryData === -500) {
+    // Set country color to be dark grey if that coutnry has no results.
+    color = [0, 0, 31];  
+  } else if (countryData != null) {
     // Delta represents where the value sits between the min and max.
-    let delta = (feature.getProperty('country_data') - DATAMIN) /
+    let delta = (countryData - DATAMIN) /
         (DATAMAX - DATAMIN);
 
     color = [];
@@ -109,8 +117,6 @@ function styleFeature(feature) {
       // Calculate an integer color based on the delta.
       color[i] = (high[i] - low[i]) * delta + low[i];
     }
-  } else {
-    color = [62, 1, 83];
   }
 
   let outlineWeight = 0.5, zIndex = 1;
@@ -133,13 +139,18 @@ function styleFeature(feature) {
  * @param {?google.maps.MouseEvent} e Mouse-in event.
  */
 function mouseInToRegion(e) {
+  let countryData = e.feature.getProperty('country_data');
   // Add popup info window with country info.
-  if (e.feature.getProperty('country_data') != null) {
+  if (countryData != null) {
     // Set the hover country so the setStyle function can change the border.
     e.feature.setProperty('country', 'hover');
+    countryInfo = e.feature.getProperty('name') + ': ';
 
-    countryInfo = e.feature.getProperty('name') + ': ' +
-        e.feature.getProperty('country_data').toLocaleString();
+    // Display "N/A" on hover when countryData is -500, the value signifying
+    // there were no results.
+    countryInfo +=
+        ((countryData === -500) ? "N/A" : countryData.toLocaleString());
+
     infowindow.setContent(countryInfo);
     infowindow.setPosition(e.latLng);
     infowindow.open(map);
