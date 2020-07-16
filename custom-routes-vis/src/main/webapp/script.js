@@ -25,7 +25,7 @@ const MarkerNames = {
 
 let originDestinationMarkers = [];
 let displayedRoutes = [];
-const routeColors = ['#ff0000', '#ede61a', '#3299d1'];
+const routeColors = ['#ff0000', '#eb8f1e', '#3299d1'];
 let selectedRouteNum = 0;
 var map;
 
