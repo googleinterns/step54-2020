@@ -33,12 +33,35 @@
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('destination')" id="hide-destination-marker">Delete Marker</button><br>
       </div>
       <div class="col-sm-3">
-        <select id="service-endpoint" class="form-control">
+        <select id="service-endpoint" class="form-control" onchange="changeServiceEndpoint();">
           <option value="directions" selected>Directions API</option>
           <option value="compute-routes">ComputeRoutes API(V1)</option>
           <option value="compute-routes-alpha">ComputeCustomRoutes API(V1 alpha)</option>
         </select>
         <textarea id="api-key" class="form-control" placeholder="API key (defaults to use Directions API)" rows="1"></textarea>
+        <div id="rate-card-data" class="hidden">
+          <div class="row">
+            <label for="cost-per-minute" class="col-sm-5">Cost Per Minute:</label>
+            <div class="col-sm-7">
+              <input type="number" id="cost-per-minute" class="form-control"></input>
+            </div> 
+          </div>
+          <div class="row">
+            <label for="cost-per-km" class="col-sm-5">Cost Per km:</label>
+            <div class="col-sm-7">
+              <input type="number" id="cost-per-km" class="form-control"></input>
+            </div>
+          </div>
+          <div class="row">
+            <label for="include-tolls" class="col-sm-6">Include Tolls in Cost:</label>
+            <div class="col-sm-6">
+              <select id="include-tolls" class="form-control">
+                <option value="true" selected>True</option>
+                <option value="false">False</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="col-sm-3">
         <div id="routes-options"></div>
