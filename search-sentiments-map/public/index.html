@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8">
     <title>Search Sentiment Map</title>
-
     <!-- Font awesome icons. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!-- Bootstrap CSS. -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
+    <script src="scripts/current-data-script.js"></script>
     <script src="scripts/map-script.js"></script>
     <script src="scripts/modal-script.js"></script>
     <script src="scripts/trends-script.js"></script>
@@ -43,7 +43,6 @@
           </div>
         </div>
       </div>
-
       <h2 id="title">Sentiment Map for Google Search</h2>
       <div class="row">
         <div class="col-sm-9">
@@ -55,7 +54,6 @@
             <div id="data-max">max</div>
           </div>
         </div>
-
         <div class="col-sm-3">
           <div>
             <h3>Trending Search Topics</h3>
@@ -66,12 +64,12 @@
             <textarea class="form-control col-sm-9" id="search-topic" name="search-topic" placeholder="Search for a topic..." rows="1"></textarea>
             <br/>
             <div class="input-group-append">
-              <button type="submit"><i class="fa fa-search"></i></button>
+              <button onclick="" type="submit"><i class="fa fa-search"></i></button>
             </div>  
           </div>
         </div>
       </div>
-    </div>
+    </div>    
 
     <!-- JS required for Bootstrap. -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>

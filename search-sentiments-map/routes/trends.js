@@ -210,7 +210,7 @@ function getGlobalTrends(trendsByCountry) {
   for (let [topic, count] of trendCountsMap) {
     trendCountsArr.push({
       topic: topic,
-      count: count,  
+      count: count,
     })
   }
   // Sort trends in descending order of their counts.
