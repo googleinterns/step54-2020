@@ -286,7 +286,8 @@ function createRouteFromCoordinates(
 }
 
 /** 
- * Highlights the selected route and displays its duration and distance.
+ * Highlights the selected route and displays its formatted duration and 
+ * distance in miles.
  * @param {num} routeNum The index of the selected route in the routes array.
  * @param {num} totalDurationSec The duration of the route in seconds.
  * @param {num} totalDistanceMeters The distance of the route in meters.
@@ -316,12 +317,10 @@ function formatDuration(durationSec) {
       let durationHours = Math.floor(durationMin / 60);
       let remainderMin = durationMin % 60;
       return durationHours + ' h ' + remainderMin + ' min ' + remainderSec + ' s';
-    } else {
-      return durationMin + ' min ' + remainderSec + ' s';
     }
-  } else {
-    return durationSec + ' s';
+    return durationMin + ' min ' + remainderSec + ' s';
   }
+  return durationSec + ' s';
 }
 
 /** 
