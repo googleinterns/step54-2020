@@ -55,8 +55,6 @@ function setCountryTrends(countryCode) {
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displayTopResultsForCurrentTrend(countryCode) {
-  // TODO(chenyuz): Display the topic name somewhere on this tab.
-  let topic = getCurrentTrend();
   let dataByCountry = getCurrentCustomSearchData().dataByCountry;
   let date = new Date(getCurrentCustomSearchData().timestamp);
   let resultElement =  document.getElementById('search-results-tab');
@@ -69,12 +67,13 @@ function displayTopResultsForCurrentTrend(countryCode) {
     resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
         date.toString() + '<i><br>';
   } else {
-    // Get search results of the specified country.
-    let results = countryData[0].results;
-
+    resultElement.innerHTML += 'Popularity Score: ' + 
+        countryData[0].interest + '<br>';
     resultElement.innerHTML += 'Average Sentiment Score: ' + 
         countryData[0].averageSentiment + '<br>';
-
+    
+    // Get search results of the specified country.
+    let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
       resultElement.innerHTML += '<a href=' + results[i].link + '>' +
         results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'

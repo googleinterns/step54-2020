@@ -58,19 +58,22 @@ function initMap() {
 
 /** Loads the country boundary polygons from a GeoJSON source. */
 function loadMapOutline() {
-  // Load country data after finished loading in geojson.
-  map.data.loadGeoJson('countries.geojson', null, function () {
-    // Add function to initiate displayed data. Either display data for the top
-    // trend, or display nothing.
-  });
+  map.data.loadGeoJson('countries.geojson', null);
 }
 
 /** 
  * Gets the selected mode (sentiment or popularity) from the webpage and loads
- * data correspondingly. 
+ * data correspondingly.
  */
 function loadCountryDataByMode() {
-  let sentimentMode = document.getElementById('sentiment-popularity-check').checked;
+  let sentimentMode = !document.getElementById('sentiment-popularity-check').checked;
+  console.log('sentiment mode', sentimentMode);
+
+  const topicHeader = document.getElementById('topic-header');
+  topicHeader.innerText = sentimentMode ?
+      'Worldwide sentiments of search results for "' + getCurrentTrend() + '"' :
+      'Worldwide interests for "' + getCurrentTrend() + '"' ;
+
   loadCountryData(sentimentMode);
 }
 
