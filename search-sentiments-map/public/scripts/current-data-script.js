@@ -39,14 +39,10 @@ function getCurrentCustomSearchData() {
  * @param {string} trend New trend to get data for.
  */
 function setNewTrend(trend) {
-  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
-    topTrends = trends;
-    setTopTrends(); 
-  });
+  updateTrends();
 
-  // TODO(carmenbenitez): Uncommment if/else block to show data for other search
-  // results when custom search data for all current top trends is set up. 
-
+  // TODO(carmenbenitez): Uncommment if/else block to show data for other
+  // search results when custom search data for all current top trends is set up. 
   // if (trend != null){
   //   currentTrend = trend;
   // } else {
@@ -72,19 +68,27 @@ function setNewTrend(trend) {
  * @param {Array} countries Countries to get data for.
  */
 function setUserSearchTopic(topic, countries) {
-  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
-    topTrends = trends;
-    setTopTrends(); 
-  });
+  updateTrends();
 
   currentTrend = topic;
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = 
       'Worldwide sentiments of search results for "' + currentTrend + '"';
 
-  fetch('/search/' + topic + '/' + JSON.stringify(countries)).then(response => response.json())
+  fetch('/search/' + topic + '/' + JSON.stringify(countries))
+      .then(response => response.json())
       .then(topicResults => {
         currentCustomSearchData = topicResults;
         loadCountryData();
+  });
+}
+
+/**
+ * Fetches current top trends from back end and displays them on the website.
+ */
+function updateTrends() {
+  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
+    topTrends = trends;
+    setTopTrends(); 
   });
 }

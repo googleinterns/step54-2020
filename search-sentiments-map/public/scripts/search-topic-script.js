@@ -12,13 +12,14 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-
+/**
+ * Updates the current search topic for the given country and search topic.
+ */
 function searchTopic() {
   let topic = document.getElementById("search-topic").value;
   let topTrends = getTopTrends();
   // Maximum of 3 countries. If given more, only take first 3.
   let countries = $('#country-select').val().slice(0, 3);
-
 
   // Get new search results when given a topic and at least 1 country.
   if (topic.length !== 0 && countries.length !== 0) {
@@ -26,7 +27,9 @@ function searchTopic() {
   }
 }
 
-
+/**
+ * Creates the select for all of the countries in the relevant json.
+ */
 function countrySelectSetUp() {
   let container = document.getElementById('country-select');
   fetch("country-name.json").then(response => response.json())

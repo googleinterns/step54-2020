@@ -26,6 +26,9 @@ const json = require('./../public/country-code.json');
 global.Headers = fetch.Headers;
 
 const STALE_SEARCH_RESULT_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
+// TODO(carmenbenitez): Set this to be 12 hours when our data is
+// updated every 12 hours.
+const CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS = 24 * 60 * 60000;
 
 /** 
  * Renders a JSON array of the top search results for all countries with API
@@ -70,36 +73,37 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
     descending: true,
   }).filter('lowercaseTopic', topic.toLowerCase()).limit(1);
   const [customSearchTopic] = await datastore.runQuery(query);
-  // TODO(carmenbenitez): Handle capitalization differences. Change to last 12 hours
 
   let countriesDataToReturn = [];
   let timestamp;
   if (customSearchTopic.length !== 0 &&
-      Date.now() - customSearchTopic[0].timestamp < 7 * 24 * 60 * 60000) {
-      timestamp = customSearchTopic[0].timestamp;
-      let countriesToAddDataFor = [];
+      Date.now() - customSearchTopic[0].timestamp <
+      CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS) {
+        timestamp = customSearchTopic[0].timestamp;
+        let countriesToAddDataFor = [];
+        let countriesData = customSearchTopic[0].countries;
 
-      // Determine whether a country has existing data or data needs to be
-      // retrieved from Custom Search API for this country on this topic.
-      countries.forEach(country => {
-        let countryData = customSearchTopic[0].countries
-            .filter(countries => countries.country === country);
-        if (countryData.length === 0) {
-          countriesToAddDataFor.push(country);
-        } else {
-          countriesDataToReturn.push(countryData[0]);
+        // Determine whether a country has existing data or data needs to be
+        // retrieved from Custom Search API for this country on this topic.
+        countries.forEach(country => {
+          let countryData = countriesData
+              .filter(countries => countries.country === country);
+          if (countryData.length === 0) {
+            countriesToAddDataFor.push(country);
+          } else {
+            countriesDataToReturn.push(countryData[0]);
+          }
+        });
+
+        // Obtain custom search data for countries without current data.     
+        // Add new custom search data to existing entity and to the data to
+        // send back to front end.
+        if (countriesToAddDataFor.length !== 0) {
+          let newCountriesData = await getSearchResultsForArrayOfCountries(
+            countriesToAddDataFor, topic);
+          await addNewCountryData(newCountriesData, customSearchTopic[0]);
+          countriesDataToReturn = countriesDataToReturn.concat(newCountriesData);
         }
-      });
-
-      // Obtain custom search data for countries without current data.     
-      // Add new custom search data to existing entity and to the data to
-      // send back to front end.
-      if (countriesToAddDataFor.length !== 0) {
-        let newCountriesData = await getSearchResultsForArrayOfCountries(
-          countriesToAddDataFor, topic);
-        await addNewCountryData(newCountriesData, customSearchTopic[0]);
-        countriesDataToReturn = countriesDataToReturn.concat(newCountriesData);
-      }
   } else {
     // Get data for all of the requested countries when there is no existing
     // entity and create a new entity with this data.
