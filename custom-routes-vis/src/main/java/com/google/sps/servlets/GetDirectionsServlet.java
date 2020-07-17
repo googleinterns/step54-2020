@@ -76,8 +76,7 @@ public class GetDirectionsServlet extends HttpServlet {
       throws IOException, MalformedURLException {
     URL directionsUrl = new URL("https://maps.googleapis.com/maps/api/directions/json?"
         + "origin=" + origin + "&destination=" + destination    
-        + "&mode=driving"
-        + "&alternatives=true" + "&key=" + apiKey);
+        + "&mode=driving" + "&alternatives=true" + "&key=" + apiKey);
     URLConnection connection = directionsUrl.openConnection();
     connection.setRequestProperty("Accept-Charset", "UTF-8");
     return connection;
@@ -109,7 +108,8 @@ public class GetDirectionsServlet extends HttpServlet {
     // 3. Are there other fields that we should add?
     String requestParamsJson = "{"
         + "\"origin\": {\"location\":  {\"latLng\": "
-        + "{\"latitude\": " + origin.split(",")[0] + ", \"longitude\": " + origin.split(",")[1] + "}}},"
+        + "{\"latitude\": " + origin.split(",")[0]
+        + ", \"longitude\": " + origin.split(",")[1] + "}}},"
         + "\"destination\": {\"location\":  {\"latLng\": "
         + "{\"latitude\": " + destination.split(",")[0]
         + ", \"longitude\": " + destination.split(",")[1] + "}}},"

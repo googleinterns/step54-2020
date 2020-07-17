@@ -217,7 +217,7 @@ function createRoutePolyline(routeNum, routeJson, directionsApi) {
   let routeCoordinates = [];
 
   // Total duration of route in seconds.
-  let totalRouteDurationSec = directionsApi ? 0 : routeJson.duration;
+  let totalDurationSec = directionsApi ? 0 : routeJson.duration;
   // Total distance of route in meters.
   let totalDistanceMeters = directionsApi ? 0 : routeJson.distanceMeters;
   // Note: Routes Preferred has duration and distanceMeters attributes for each
@@ -244,12 +244,12 @@ function createRoutePolyline(routeNum, routeJson, directionsApi) {
     if (directionsApi) {
       // Accumulate duration and distance because the total is not directly
       // available in results from the Directions API.
-      totalRouteDurationSec += parseInt(routeLegs[i].duration.value);
+      totalDurationSec += parseInt(routeLegs[i].duration.value);
       totalDistanceMeters += parseInt(routeLegs[i].distance.value);
     }
   }
 
-  createRouteFromCoordinates(routeCoordinates, routeNum, totalRouteDurationSec,
+  createRouteFromCoordinates(routeCoordinates, routeNum, totalDurationSec,
       totalDistanceMeters);
 }
 
@@ -257,14 +257,14 @@ function createRoutePolyline(routeNum, routeJson, directionsApi) {
  * Creates the route on the map and stores it in the routes array.
  * @param {Array} routeCoordinates The coordinates that the route goes through.
  * @param {num} routeNum The index of the selected route in the routes array.
- * @param {num} totalDuration The duration of the route in seconds.
- * @param {num} totalDistance The distance of the route in meters.
+ * @param {num} totalDurationSec The duration of the route in seconds.
+ * @param {num} totalDistanceMeters The distance of the route in meters.
  */
 function createRouteFromCoordinates(
     routeCoordinates, 
     routeNum, 
-    totalDuration, 
-    totalDistance) {
+    totalDurationSec, 
+    totalDistanceMeters) {
   let route = new google.maps.Polyline({
     path: routeCoordinates,
     geodesic: true,
@@ -277,35 +277,35 @@ function createRouteFromCoordinates(
 
   // Select the first route as default.
   if (routeNum === 0) {
-    selectRouteDisplayDetails(0, totalDuration, totalDistance);
+    selectRouteDisplayDetails(0, totalDurationSec, totalDistanceMeters);
   }
 
   route.addListener('click', function(event) {
-    selectRouteDisplayDetails(routeNum, totalDuration, totalDistance);
+    selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMeters);
   });
 }
 
 /** 
  * Highlights the selected route and displays its duration and distance.
  * @param {num} routeNum The index of the selected route in the routes array.
- * @param {num} totalDuration The duration of the route in seconds.
- * @param {num} totalDistance The distance of the route in meters.
- * TODO(carmenbenitez): Add in the route token returned from the Routes Preferred API.
+ * @param {num} totalDurationSec The duration of the route in seconds.
+ * @param {num} totalDistanceMeters The distance of the route in meters.
+ * TODO(chenyuz): Add in the route token returned from the Routes Preferred API.
  */
-function selectRouteDisplayDetails(routeNum, totalDuration, totalDistance) {
+function selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMeters) {
   displayedRoutes[selectedRouteNum].setOptions({ strokeOpacity: 0.3, })
   selectedRouteNum = routeNum;
   displayedRoutes[routeNum].setOptions({ strokeOpacity: 1.0, });
 
   let routeInfoElement = document.getElementById('route-info');
   routeInfoElement.innerText = 'Selected Route Info:' +
-      '\nDuration: ' + formatDuration(totalDuration) +
-      '\nDistance: ' + formatDistance(totalDistance) +
+      '\nDuration: ' + formatDuration(totalDurationSec) +
+      '\nDistance: ' + formatDistance(totalDistanceMeters) +
       '\nRoute Token: ';
 }
 
 /** 
- * Formats the duration to be of the form "xx h xx min xx s."
+ * Formats and returns the duration in the form "xx h xx min xx s."
  * @param {num} durationSec The duration to be formatted in seconds.
  */
 function formatDuration(durationSec) {
@@ -325,7 +325,7 @@ function formatDuration(durationSec) {
 }
 
 /** 
- * Formats the distance to be in miles with 4 decimal places.
+ * Formats the distance and returns distance in miles with 4 decimal places.
  * @param {num} distanceMeters The distance in meters.
  */
 function formatDistance(distanceMeters) {
