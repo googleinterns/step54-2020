@@ -37,7 +37,7 @@ const DATAMAX = -1.0;
 /** Loads the map with country polygons when page loads. */
 function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
-    center: { lat: 29.246630, lng: 29.678410 },
+    center: {lat: 29.246630, lng: 29.678410},
     zoom: 3,
     styles: mapStyle,
     mapTypeControl: false,

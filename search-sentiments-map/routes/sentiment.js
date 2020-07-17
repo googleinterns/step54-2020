@@ -21,8 +21,9 @@ router.post('/', textParser, (req, res) => {
 });
 
 /** 
- *  Gets the sentiment score of an inputted search result title and snippet.
- *  @param {string} searchResultTitleSnippet The search result combined title and snippet.
+ *  Gets the sentiment score of a given search result title and snippet.
+ *  @param {string} searchResultTitleSnippet The concatenated title and snippet
+ *      of the search result.
  *  @return {number} The sentiment score of the combined title and snippet.
  *  TODO(ntarn): Export this method to use directly with search.js
  */
@@ -45,7 +46,9 @@ async function getSentimentScore(searchResultTitleSnippet) {
     console.log(`ntarn debug use api Sentiment score: ${sentiment.score}`);
 
     return sentiment.score;
-  } catch (err) { // Occurs when the language is not supported for document sentiment analysis.
+  } catch (err) {
+    // Occurs when the language is not supported for document sentiment
+    // analysis.
     console.error('ERROR:', err);
     return 0;
   }

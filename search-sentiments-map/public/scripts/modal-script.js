@@ -25,7 +25,7 @@ function onClickCountry(e) {
     const countryId = e.feature.getId();
     const countryData = e.feature.getProperty('country_data').toLocaleString();
     document.getElementById('modal-title').innerText = countryName;
-    displayTopResults(countryId);
+    displayTopResultsForCurrentTrend(countryId);
     setCountryTrends(countryId);
   }
 }
@@ -38,25 +38,25 @@ function setCountryTrends(countryCode) {
   const topTrendsTab = document.getElementById('top-trends-tab');
   topTrendsTab.innerHTML = '';
   fetch('/country-trends/' + countryCode).then(countryTrends =>
-    countryTrends.json()).then(trends => {
-      if (trends.length === 0) {
-        topTrendsTab.innerText = 
-            'Trends are not available for the selected country.';
-      } else {
-        trends.forEach(trend => {
-          const trendHeader = document.createElement('h5');
-          trendHeader.innerText = trend.topic;
-          topTrendsTab.appendChild(trendHeader);
-        });
-      }
-    });
+      countryTrends.json()).then(trends => {
+        if (trends.length === 0) {
+          topTrendsTab.innerText = 
+              'Trends are not available for the selected country.';
+        } else {
+          trends.forEach(trend => {
+            const trendHeader = document.createElement('h5');
+            trendHeader.innerText = trend.topic;
+            topTrendsTab.appendChild(trendHeader);
+          });
+        }
+      });
 }
 
 /** 
  * Displays the top results in a country for current search trend on modal. 
  * @param {string} countryCode Two letter country code for selected country.
  */
-function displayTopResults(countryCode) {
+function displayTopResultsForCurrentTrend(countryCode) {
   let topic = getCurrentTrend;
   let topicData = getCurrentCustomSearchData();
   let date = new Date(topicData.timestamp);
