@@ -83,8 +83,9 @@ function createMarker(containerId, label, title, latLng) {
  * @param {string} containerId ID of container to update coordinates in.
  */
 function updateCoordinates(lat, lng, containerId) {
+  // Show 6 decimal places of the lat and lng.
   document.getElementById(containerId).innerHTML = 
-      "Latitude: " + lat + "<br>Longitude: " + lng + "<br>";
+      "Latitude: " + lat.toFixed(6) + "<br>Longitude: " + lng.toFixed(6) + "<br>";
 }
 
 /**
@@ -297,8 +298,36 @@ function selectRouteDisplayDetails(routeNum, totalDuration, totalDistance) {
   displayedRoutes[routeNum].setOptions({ strokeOpacity: 1.0, });
 
   let routeInfoElement = document.getElementById('route-info');
-  routeInfoElement.innerText = 'Selected Route Info:\n' +
-      'Duration: ' + totalDuration + ' seconds\n' +
-      'Distance: ' + totalDistance + ' meters\n' +
-      'Route Token: ';
+  routeInfoElement.innerText = 'Selected Route Info:' +
+      '\nDuration: ' + formatDuration(totalDuration) +
+      '\nDistance: ' + formatDistance(totalDistance) +
+      '\nRoute Token: ';
+}
+
+/** 
+ * Formats the duration to be of the form "xx h xx min xx s."
+ * @param {num} durationSec The duration to be formatted in seconds.
+ */
+function formatDuration(durationSec) {
+  if (durationSec > 60) {
+    let durationMin = Math.floor(durationSec / 60);
+    let remainderSec = durationSec % 60;
+    if (durationMin > 60) {
+      let durationHours = Math.floor(durationMin / 60);
+      let remainderMin = durationMin % 60;
+      return durationHours + ' h ' + remainderMin + ' min ' + remainderSec + ' s';
+    } else {
+      return durationMin + ' min ' + remainderSec + ' s';
+    }
+  } else {
+    return durationSec + ' s';
+  }
+}
+
+/** 
+ * Formats the distance to be in miles with 4 decimal places.
+ * @param {num} distanceMeters The distance in meters.
+ */
+function formatDistance(distanceMeters) {
+  return (distanceMeters * 0.0006213712).toFixed(4) + ' miles';
 }
