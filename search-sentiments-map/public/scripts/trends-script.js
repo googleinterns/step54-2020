@@ -23,6 +23,7 @@ const NUM_SHOWN = 7;
 /** Displays the top trends on the DOM. */
 function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
+  trendsList.innerHTML = '';
   let trends = getTopTrends();
   
   for (let i = 0; i < trends.length; i++) {
