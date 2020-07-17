@@ -72,8 +72,10 @@ async function retrieveSearchResultFromDatastore(topic) {
 
 /** 
  * Updates daily search results (accumulated by day) in the Datastore.
+ * Deletes stale data from Datastore.
  */
 function updateSearchResults() {
+  await deleteAncientResults();
   retrieveGlobalTrends().then(async trends => {
     // When testing ,use i < 1 to test for only one trend, and comment out
     // `await new Promise` line to avoid 1 minute pauses.
@@ -98,14 +100,12 @@ async function retrieveGlobalTrends() {
 
 /** 
  * Updates search result data for all countries for a given topic.
- *   - Deletes stale data from Datastore.
  *   - Retrieves and formats search result data for each country.
  *   - Saves the search results for all countries to the datastore.
  * @param {string} query Search query.
  */
 async function updateSearchResultsForTopic(query) {
   let countriesData = [];
-  await deleteAncientResults();
 
   // TODO(carmenbenitez): Delete comment on for each when finished with this
   // function.
@@ -119,7 +119,7 @@ async function updateSearchResultsForTopic(query) {
     }
     // Update {@code countryData} within the functions called.
     const countryResults = await getCustomSearchResultsForCountry(
-        "country" + json[i].id, query);
+        json[i].id, query);
     // TODO(ntarn): Remove when done with sentiment chart feature debugging.
     console.log('ntarn debug country: ' + json[i].id + ' averageSentiment: ' +
         countryResults.score);
@@ -143,7 +143,7 @@ async function updateSearchResultsForTopic(query) {
  */
 async function getCustomSearchResultsForCountry(countryCode, query) {
   let response =
-    await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q=' + query + '&cr=' + countryCode + '&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
+    await fetch('https://www.googleapis.com/customsearch/v1?key=AIzaSyDszWv1aGP7Q1uOt74CqBpx87KpkhDR6Io&cx=017187910465527070415:o5pur9drtw0&q=' + query + '&cr=country' + countryCode + '&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults = await response.json();
   return await formatCountryResults(searchResults);
 }
@@ -166,14 +166,14 @@ async function formatCountryResults(searchResultsJson) {
   }
   for (let i = 0; i < currentSearchResults.length; i++) {
     let formattedResults =
-        await formatSearchResult(currentSearchResults[i]);
+        await formatSearchResults(currentSearchResults[i]);
     countryData.push(formattedResults);
     totalScore += formattedResults.score;
   }
   let avgScore = 0;
   if (currentSearchResults.length !== 0) {
     avgScore = totalScore / currentSearchResults.length;
-  }
+  } 
   return {score: avgScore, results: countryData};
 }
 
@@ -182,18 +182,17 @@ async function formatCountryResults(searchResultsJson) {
  * @param {Object} searchResult Object with information for one search result.
  * @return {Object} Formatted search result data in JSON form.
  */
-function formatSearchResult(searchResult) {
+function formatSearchResults(searchResult) {
   return getSentiment(searchResult)
       .then(response => response.json())
       .then((result) => {
-        searchResultData = {
+        return {
           title: searchResult.title,
           snippet: searchResult.snippet,
           htmlTitle: searchResult.htmlTitle,
           link: searchResult.link,
           score: result.score,
         };
-        return searchResultData;
       });
 }
 
