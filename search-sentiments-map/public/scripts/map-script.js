@@ -43,7 +43,7 @@ function initMap() {
     mapTypeControl: false,
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
-  .push(document.getElementById('legend'));
+      .push(document.getElementById('legend'));
 
   infowindow = new google.maps.InfoWindow({});
 
@@ -51,7 +51,7 @@ function initMap() {
   map.data.setStyle(styleFeature);
   map.data.addListener('mouseover', mouseInToRegion);
   map.data.addListener('mouseout', mouseOutOfRegion);
-  map.data.addListener('click', clickOnRegion);
+  map.data.addListener('click', onClickCountry);
 
   loadMapOutline();
 }
@@ -60,7 +60,8 @@ function initMap() {
 function loadMapOutline() {
   // Load country data after finished loading in geojson.
   map.data.loadGeoJson('countries.geojson', null, function () {
-    //loadCountryData();
+    // Add function to initiate displayed data. Either display data for the top
+    // trend, or display nothing.
   });
 }
 
@@ -83,10 +84,9 @@ function loadCountryData(sentimentMode=true) {
     let dataByCountry = getCurrentCustomSearchData().dataByCountry;
     let countryData = dataByCountry.filter(data => data.country === row.getId());
 
-    let dataVariable;
+    let dataVariable = 0;
     if (countryData.length == 0) {
-      console.log('No data for', row.getId());
-      dataVariable = 0;
+      console.log('Data does not exist for this countryCode:', row.getId());
     } else {
       dataVariable = 
           sentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
@@ -119,7 +119,7 @@ function loadCountryData(sentimentMode=true) {
  */
 function styleFeature(feature) {
   let low = [5, 69, 54];  // Color of smallest datum.
-  let high = [151, 83, 34];   // Color of largest datum.
+  let high = [151, 83, 34]; // Color of largest datum.
 
   // Delta represents where the value sits between the min and max.
   let delta = (feature.getProperty('country_data') - dataMin) /

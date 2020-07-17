@@ -24,15 +24,16 @@ const NUM_SHOWN = 7;
 function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
 
-  // Get the top 10 globally trending search topics from the backend.
+  // Get the globally trending search topics from the backend.
   fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
     for (let i = 0; i < trends.length; i++) {
       const trendElement = document.createElement('li');
       trendElement.innerText = `${trends[i].trendTopic}`;
-      // Display the number of countries where the trend is trending when hovered.
+      // Display the number of countries where the search topic is trending,
+      // when hovered.
       trendElement.title = `Trending in ${trends[i].count} countries`;
 
-      // Show some trending topics by default and hide the rest.
+      // Show a certain number of trending topics by default and hide the rest.
       trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
       trendElement.addEventListener('click', (event) => {
         setNewTrend(event.currentTarget.innerText);
@@ -40,7 +41,8 @@ function setTopTrends() {
       trendsList.append(trendElement);
     }
 
-    // Add an item to the list that toggles showing more or less topics.
+    // Add a toggle button to the list to show more or less topics depending
+    // on the number of topics displayed.
     if (trends.length > NUM_SHOWN) {
       const showMoreOrLessToggleItem = document.createElement('li');
       showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
@@ -57,8 +59,8 @@ function setTopTrends() {
 }
 
 /**
- * Shows the trending topics over the 7th if the user clicks on 'See More' and
- * hides those if the user clicks on 'See Less.'
+ * Shows more trending topics if the user clicks on 'See More' and hides those
+ * if the user clicks on 'See Less.'
  */
 function showMoreOrLess() {
   const showMoreOrLessToggleItem = document.getElementById(SHOW_MORE_OR_LESS_ID);

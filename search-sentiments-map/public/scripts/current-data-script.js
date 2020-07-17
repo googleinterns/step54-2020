@@ -12,15 +12,20 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+// The current trend a user is viewing.
 let currentTrend = '';
+
+// The custom search data for the trend that the user is viewing.
 let currentCustomSearchData = '';
 
-/** Returns current trend user is viewing. */
+/** Returns the current trend that the user is viewing. */
 function getCurrentTrend() {
   return currentTrend;
 }
 
-/** Returns current custom search data for trend user is viewing. */
+/** 
+ * Returns current custom search data for the trend that the user is viewing.
+ */
 function getCurrentCustomSearchData() {
   return currentCustomSearchData;
 }
