@@ -69,3 +69,7 @@
   text-align: left;
   -webkit-box-flex: 1;
 }
+
+#timeline-slider .slider-selection {
+	background: #BABABA;
+}

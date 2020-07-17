@@ -12,6 +12,7 @@
     <script src="scripts/map-script.js"></script>
     <script src="scripts/modal-script.js"></script>
     <script src="scripts/trends-script.js"></script>
+    <script src="scripts/timeline-script.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
   <body onload="initMap(); setTopTrends();">
@@ -67,6 +68,8 @@
               <button onclick="" type="submit"><i class="fa fa-search"></i></button>
             </div>  
           </div>
+          <label for="timeline-slider">See results from: </label>
+          <input id="timeline-slider" data-slider-id='timeline-slider' type="text" data-slider-min="0" data-slider-max="7" data-slider-step="1" data-slider-value="0"/>
         </div>
       </div>
     </div>    

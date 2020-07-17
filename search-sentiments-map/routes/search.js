@@ -34,9 +34,6 @@ const STALE_SEARCH_RESULT_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
 router.get('/:topic', (req, res) => {
   let topic = req.params.topic;
   retrieveSearchResultFromDatastore(topic).then(customSearchTopicJsonArray => {
-    // TODO(ntarn): Remove console.log statements when finished debugging.
-    console.log('ntarn debug: In the router.get method'); 
-    console.log(customSearchTopicJsonArray);
     res.setHeader('Content-Type', 'application/json');
     res.send(customSearchTopicJsonArray);
   });
@@ -61,9 +58,6 @@ async function retrieveSearchResultFromDatastore(topic) {
       countries: customSearchTopic[0].countries,
       timestamp: customSearchTopic[0].timestamp,
     };
-    // TODO(ntarn): Remove console.log statements when finished debugging.
-    console.log(`ntarn debug retrieved search result for topic: ${topic}` +  `example: ${customSearchTopic[0].countries[0].results[0]}`);
-    console.log(customSearchTopicJsonArray);
     return customSearchTopicJsonArray;
   } catch (err) {
     console.error('ERROR:', err);
@@ -74,7 +68,7 @@ async function retrieveSearchResultFromDatastore(topic) {
  * Updates daily search results (accumulated by day) in the Datastore.
  * Deletes stale data from Datastore.
  */
-function updateSearchResults() {
+async function updateSearchResults() {
   await deleteAncientResults();
   retrieveGlobalTrends().then(async trends => {
     // When testing ,use i < 1 to test for only one trend, and comment out
@@ -120,9 +114,6 @@ async function updateSearchResultsForTopic(query) {
     // Update {@code countryData} within the functions called.
     const countryResults = await getCustomSearchResultsForCountry(
         json[i].id, query);
-    // TODO(ntarn): Remove when done with sentiment chart feature debugging.
-    console.log('ntarn debug country: ' + json[i].id + ' averageSentiment: ' +
-        countryResults.score);
     countriesData.push({
       country: json[i].id,
       averageSentiment: countryResults.score,
