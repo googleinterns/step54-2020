@@ -306,8 +306,9 @@ function selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMete
 }
 
 /** 
- * Formats and returns the duration in the form "xx h xx min xx s."
- * @param {num} durationSec The duration to be formatted in seconds.
+ * Formats the duration to be of the form "xx h xx min xx s."
+ * @param {num} durationSec Duration in seconds.
+ * @return {string} The duration in the form "xx h xx min xx s."
  */
 function formatDuration(durationSec) {
   if (durationSec > 60) {
@@ -324,8 +325,9 @@ function formatDuration(durationSec) {
 }
 
 /** 
- * Formats the distance and returns distance in miles with 4 decimal places.
- * @param {num} distanceMeters The distance in meters.
+ * Formats the distance to be in miles with 4 decimal places.
+ * @param {num} distanceMeters Distance in meters.
+ * @return {string} The distance in miles to be displayed.
  */
 function formatDistance(distanceMeters) {
   return (distanceMeters * 0.0006213712).toFixed(4) + ' miles';
