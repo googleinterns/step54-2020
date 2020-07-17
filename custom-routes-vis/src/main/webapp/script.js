@@ -68,7 +68,7 @@ function createMarker(containerId, label, title, latLng) {
 
   marker.addListener('dragend', function(event) {
     updateCoordinates(event.latLng.lat(), event.latLng.lng(), containerId);
-    if (originDestinationMarkers.length == 2 
+    if (originDestinationMarkers.length === 2 
         && originDestinationMarkers[0].getVisible() 
         && originDestinationMarkers[1].getVisible()) {
       generateRoutes();
@@ -185,8 +185,8 @@ function generateRoutes() {
   let apiKey = document.getElementById('api-key').value;
 
   // Get the routes and display them on map.
-  fetch('/get-directions?origin=' + origin + '&destination=' + destination
-      + '&endpoint=' + serviceEndpoint + '&apiKey=' + apiKey)
+  fetch('/get-directions?origin=' + origin + '&destination=' + destination + 
+      '&endpoint=' + serviceEndpoint + '&apiKey=' + apiKey)
       .then(response => response.json()).then(directions => {
         // Log the response status from the Directions API.
         // TODO(chenyuz): Find equivalence for Routes Preferred API.
@@ -234,7 +234,7 @@ function createRoutePolyline(routeNum, routeJson, directionsApi) {
     }
 
     // Add the end location to the coordinates array.
-    if (i == routeLegs.length - 1) {
+    if (i === routeLegs.length - 1) {
       directionsApi ?
           routeCoordinates.push(legSteps[legSteps.length - 1].end_location) :
           routeCoordinates.push(legSteps[legSteps.length - 1].endLocation.LatLng);
@@ -275,7 +275,7 @@ function createRouteFromCoordinates(
   displayedRoutes.push(route);
 
   // Select the first route as default.
-  if (routeNum == 0) {
+  if (routeNum === 0) {
     selectRouteDisplayDetails(0, totalDuration, totalDistance);
   }
 
@@ -297,8 +297,8 @@ function selectRouteDisplayDetails(routeNum, totalDuration, totalDistance) {
   displayedRoutes[routeNum].setOptions({ strokeOpacity: 1.0, });
 
   let routeInfoElement = document.getElementById('route-info');
-  routeInfoElement.innerText = 'Selected Route Info:\n' 
-      + 'Duration: ' + totalDuration + ' seconds\n'
-      + 'Distance: ' + totalDistance + ' meters\n'
-      + 'Route Token: ';
+  routeInfoElement.innerText = 'Selected Route Info:\n' +
+      'Duration: ' + totalDuration + ' seconds\n' +
+      'Distance: ' + totalDistance + ' meters\n' +
+      'Route Token: ';
 }
