@@ -74,7 +74,7 @@ async function retrieveSearchResultFromDatastore(topic) {
  * Updates daily search results (accumulated by day) in the Datastore.
  * Deletes stale data from Datastore.
  */
-function updateSearchResults() {
+async function updateSearchResults() {
   await deleteAncientResults();
   retrieveGlobalTrends().then(async trends => {
     // When testing ,use i < 1 to test for only one trend, and comment out
