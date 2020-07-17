@@ -164,25 +164,25 @@ async function formatCountryResults(searchResultsJson) {
   if (currentSearchResults == undefined) {
     return {score: 0, results: countryData};
   }
-    for (let i = 0; i < currentSearchResults.length; i++) {
-      let formattedResults =
-          await formatSearchResults(currentSearchResults[i]);
-      countryData.push(formattedResults);
-      totalScore += formattedResults.score;
-    }
-    let avgScore = 0;
-    if (currentSearchResults.length !== 0) {
-      avgScore = totalScore / currentSearchResults.length;
-    } 
-    return {score: avgScore, results: countryData};
+  for (let i = 0; i < currentSearchResults.length; i++) {
+    let formattedResults =
+        await formatSearchResult(currentSearchResults[i]);
+    countryData.push(formattedResults);
+    totalScore += formattedResults.score;
+  }
+  let avgScore = 0;
+  if (currentSearchResults.length !== 0) {
+    avgScore = totalScore / currentSearchResults.length;
+  }
+  return {score: avgScore, results: countryData};
 }
 
 /**
  * Formats search result object.
  * @param {Object} searchResult Object with information for one search result.
  * @return {Object} Formatted search result data in JSON form.
-*/
-function formatSearchResults(searchResult) {
+ */
+function formatSearchResult(searchResult) {
   return getSentiment(searchResult)
       .then(response => response.json())
       .then((result) => {
