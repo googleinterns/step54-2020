@@ -304,7 +304,7 @@ function formatSearchResults(searchResult) {
           snippet: searchResult.snippet,
           htmlTitle: searchResult.htmlTitle,
           link: searchResult.link,
-          score: result.score,
+          score: 100*result.score,
         };
       });
 }

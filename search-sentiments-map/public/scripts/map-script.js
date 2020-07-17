@@ -31,8 +31,8 @@ let infowindow;
  */
 
  // TODO(ntarn@): Change this to 100 and -100 when sentiment scores rescaled.
-const DATAMIN = 1.0;
-const DATAMAX = -1.0;
+const DATAMIN = 100.0;
+const DATAMAX = -100.0;
 
 /** Loads the map with country polygons when page loads. */
 function initMap() {
