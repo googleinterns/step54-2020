@@ -17,15 +17,17 @@
  * @param {?google.maps.MouseEvent} e Click event.
  */
 function onClickCountry(e) {
-  $('#region-info-modal').modal('show');
+  if (e.feature.getProperty('country_data') != null) {
+    $('#region-info-modal').modal('show');
 
-  // Update Modal with information for relevant country.
-  const countryName = e.feature.getProperty('name');
-  const countryId = e.feature.getId();
-  //const countryData= e.feature.getProperty('country_data').toLocaleString();
-  document.getElementById('modal-title').innerText = countryName;
-  displayTopResultsForCurrentTrend(countryId);
-  setCountryTrends(countryId);
+    // Update Modal with information for relevant country.
+    const countryName = e.feature.getProperty('name');
+    const countryId = e.feature.getId();
+    //const countryData= e.feature.getProperty('country_data').toLocaleString();
+    document.getElementById('modal-title').innerText = countryName;
+    displayTopResultsForCurrentTrend(countryId);
+    setCountryTrends(countryId);
+  }
 }
 
 /**
@@ -62,7 +64,7 @@ function displayTopResultsForCurrentTrend(countryCode) {
 
   let countryData = dataByCountry.filter(data => data.country === countryCode);
 
-  if (countryData.length === 0) {
+  if (countryData.length === 0 || countryData[0].averageSentiment == -500) {
     // Handle case where there are no results.
     resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
         date.toString() + '<i><br>';
@@ -71,7 +73,7 @@ function displayTopResultsForCurrentTrend(countryCode) {
         countryData[0].interest + '<br>';
     resultElement.innerHTML += 'Average Sentiment Score: ' + 
         countryData[0].averageSentiment + '<br>';
-    
+
     // Get search results of the specified country.
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {

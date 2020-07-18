@@ -5,3 +5,10 @@ indexes:
   - name: topic
   - name: timestamp
     direction: desc
+
+
+- kind: CustomSearchTopic
+  properties:
+  - name: lowercaseTopic
+  - name: timestamp
+    direction: desc
