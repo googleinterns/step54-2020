@@ -79,32 +79,36 @@ function updateCoordinates(lat, lng, containerId) {
 
 /**
  * Updates the deep linking url to various test apps on the page.
- * TODO: Update Route Token if we get access to Routes Preferred API.
  */
 function updateDeepLinkingUrl() {
-  if (document.getElementById('origin-coordinates').innerHTML != '' && 
-      document.getElementById('destination-coordinates').innerHTML != '') {
+  var originPosition = originDestinationMarkers[0].position;
+  var destinationPosition = originDestinationMarkers[1]
+  if (document.getElementById('origin-coordinates').innerHTML !== '' && 
+      document.getElementById('destination-coordinates').innerHTML !== '') {
     document.getElementById(IOS_URL_ID).innerHTML =
-        '<a href=navsdkdemo://advanced?originLat=' + originDestinationMarkers[0].position.lat()
-        + '&originLng=' + originDestinationMarkers[0].position.lng() + '&destLat=' 
-        + originDestinationMarkers[1].position.lat() + '&destLng=' 
-        + originDestinationMarkers[1].position.lng() + '&routeToken=TOKEN>' 
-        + 'IOS Test App' + '</a>';
+        '<a href=navsdkdemo://advanced?originLat=' + originDestinationMarkers[0].position.lat() + 
+        '&originLng=' + originDestinationMarkers[0].position.lng() + '&destLat=' +
+        originDestinationMarkers[1].position.lat() + '&destLng=' +
+        // TODO: Update Route Token if we get access to Routes Preferred API.
+        originDestinationMarkers[1].position.lng() + '&routeToken=TOKEN>' +  
+        'IOS Test App' + '</a>';
     document.getElementById(V1_ANDROID_URL_ID).innerHTML =
-        '<a href=navsdk://fragmentactivity?originlat=' + originDestinationMarkers[0].position.lat() 
-        + '&originlng=' + originDestinationMarkers[0].position.lng() + '&destinationlat=' 
-        + originDestinationMarkers[1].position.lat() + '&destinationlng='
-        + originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' 
-        + 'Android V1 Test App' + '</a>';
+        '<a href=navsdk://fragmentactivity?originlat=' + originDestinationMarkers[0].position.lat() +
+        '&originlng=' + originDestinationMarkers[0].position.lng() + '&destinationlat=' +
+        originDestinationMarkers[1].position.lat() + '&destinationlng=' +
+        // TODO: Update Route Token if we get access to Routes Preferred API.
+        originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' +
+        'Android V1 Test App' + '</a>';
     document.getElementById(V2_ANDROID_URL_ID).innerHTML =
-        '<a href=navsdk://supportnavmapfragmentactivity?originlat=' 
-        + originDestinationMarkers[0].position.lat() + '&originlng='
-        + originDestinationMarkers[0].position.lng() + '&destinationlat=' 
-        + originDestinationMarkers[1].position.lat() + '&destinationlng='
-        + originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' 
-        + 'Android V2 Test App' + '</a>';
-  } else if (document.getElementById('origin-coordinates').innerHTML == '' || 
-      document.getElementById('destination-coordinates').innerHTML == '') { 
+        '<a href=navsdk://supportnavmapfragmentactivity?originlat=' +
+        originDestinationMarkers[0].position.lat() + '&originlng=' +
+        originDestinationMarkers[0].position.lng() + '&destinationlat=' +
+        originDestinationMarkers[1].position.lat() + '&destinationlng=' + 
+        // TODO: Update Route Token if we get access to Routes Preferred API.
+        originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' +
+        'Android V2 Test App' + '</a>';
+  } else if (document.getElementById('origin-coordinates').innerHTML === '' || 
+      document.getElementById('destination-coordinates').innerHTML === '') { 
     document.getElementById(IOS_URL_ID).innerHTML = '';
     document.getElementById(V1_ANDROID_URL_ID).innerHTML = '';
     document.getElementById(V2_ANDROID_URL_ID).innerHTML = '';
