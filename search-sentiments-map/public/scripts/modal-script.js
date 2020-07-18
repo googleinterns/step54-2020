@@ -26,6 +26,7 @@ function onClickCountry(e) {
   document.getElementById('modal-title').innerText = countryName;
   displayTopResultsForCurrentTrend(countryId);
   setCountryTrends(countryId);
+  displaySentimentChartForCurrentTrend(countryId);
 }
 
 /**
@@ -84,3 +85,70 @@ function displayTopResultsForCurrentTrend(countryCode) {
   }
 }
 
+
+/** 
+ * Displays the sentiment chart in a country for current search trend on modal. 
+ * @param {string} countryCode Two letter country code for selected country.
+ */
+function displaySentimentChartForCurrentTrend(countryCode) {
+  let topic = getCurrentTrend;
+  let topicData = getCurrentCustomSearchData();
+  let date = new Date(topicData.timestamp);
+
+  let countryData = topicData.countries
+      .filter(countries => countries.country === countryCode);
+
+  let chartElement = document.getElementById('sentiment-chart-tab');
+  chartElement.innerHTML = '';
+
+  // Handle case where there are no results.
+  if (countryData.length === 0) {
+    chartElement.innerHTML += 'No results.<br><i>Last updated on ' +
+        date.toString() + '<i><br>';
+  } else {
+    drawSentimentChart(chartElement);
+    let results = countryData[0].results;
+
+    chartElement.innerHTML += 'Average Sentiment Score: ' + 
+        countryData[0].averageSentiment + '<br>';
+
+    for (let i = 0; i < results.length; i++) {
+      charttElement.innerHTML += '<a href=' + results[i].link + '>' +
+        results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'
+        + 'Sentiment Score: ' + results[i].score + '<br>';
+    }
+    chartElement.innerHTML += '<i>Last updated on ' + date.toString() +
+      '<i><br>';
+  }
+}
+
+/** Creates a sentiment chart and adds it to the modal tab. 
+ *  @param {Object} chartElement Tab element to update with the sentiment chart.
+ */
+function drawSentimentChart(chartElement) {
+  var data = google.visualization.arrayToDataTable([
+      ["Search Result", "Density", { role: "style" }], //look at this styling.
+      ["Copper", -8.94, "#b87333"],
+      ["Silver", 10.49, "silver"],
+      ["Gold", 19.30, "gold"],
+      ["Platinum", 21.45, "color: #e5e4e2"]
+    ]);
+
+  var view = new google.visualization.DataView(data);
+  view.setColumns([0, 1,
+      { calc: "stringify",
+        sourceColumn: 1,
+        type: "string",
+        role: "annotation" },
+      2]);
+
+  var options = {
+    title: "Density of Precious Metals, in g/cm^3",
+    width: 600,
+    height: 400,
+    bar: {groupWidth: "55%"},
+    legend: { position: "none" },
+  };
+  var chart = new google.visualization.ColumnChart(chartElement);
+  chart.draw(view, options);
+}
