@@ -118,13 +118,13 @@ function styleFeature(feature) {
   let countryData = feature.getProperty('country_data');
 
   if (countryData == null) {
-    // Set country color to be light grey if that country is disabled(occurs in
+    // Set country color to be light grey if that country is disabled (occurs in
     // user search).
     color = [62, 1, 83];
   } else if (countryData === -500) {
     // Set country color to be dark grey if that coutnry has no results.
     color = [0, 0, 31];  
-  } else if (countryData != null) {
+  } else {
     // Delta represents where the value sits between the min and max.
     let delta = (countryData - DATAMIN) /
         (DATAMAX - DATAMIN);

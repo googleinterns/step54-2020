@@ -22,6 +22,7 @@ const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 const TRENDS_DATA_KIND = 'TrendsEntry';
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
+const RETRIEVE_RESULTS_TIME_MS = 80 * 60000;
 
 /** 
  * Renders a JSON array of the top 20 (or fewer) global search trends maintained
@@ -43,7 +44,9 @@ async function retrieveGlobalTrends() {
     descending: true,
   });
   const [trendsEntry] = await datastore.runQuery(query);
-  return trendsEntry[0].globalTrends;
+  // Returns the most recent trends with search results data retrieved.
+  return (Date.now() - trendsEntry[0].timestamp > RETRIEVE_RESULTS_TIME_MS) ?
+      trendsEntry[0].globalTrends : trendsEntry[1].globalTrends;
 }
 
 /** 

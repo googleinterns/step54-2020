@@ -17,7 +17,6 @@
  */
 function searchTopic() {
   let topic = document.getElementById("search-topic").value;
-  let topTrends = getTopTrends();
   // Maximum of 3 countries. If given more, only take first 3.
   let countries = $('#country-select').val().slice(0, 3);
 

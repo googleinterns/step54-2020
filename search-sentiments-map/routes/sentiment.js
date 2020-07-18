@@ -26,8 +26,6 @@ router.post('/', textParser, (req, res) => {
     response = {
       score: sentimentScore,
     };
-    // TODO(ntarn): Remove comment when done with feature.
-    console.log('ntarn debug: score' + response.score);
     res.end(JSON.stringify(response));
   }).catch(err => {
     console.log(err);
@@ -54,11 +52,6 @@ async function getSentimentScore(searchResultTitleSnippet) {
     // Detect the sentiment of the text.
     const [result] = await client.analyzeSentiment({ document: document });
     const sentiment = result.documentSentiment;
-
-    // TODO(ntarn): Remove console.log statements when finished with feature. 
-    console.log(`ntarn debug use api Text: ${text}`);
-    console.log(`ntarn debug use api Sentiment score: ${sentiment.score}`);
-
     return sentiment.score;
   } catch (err) {
     // Occurs when the language is not supported for document sentiment
