@@ -20,14 +20,12 @@ function onClickCountry(e) {
   $('#region-info-modal').modal('show');
 
   // Update Modal with information for relevant country.
-  const country = e.feature.getProperty('name');
-  const countryData= e.feature.getProperty('country_data').toLocaleString();
-  document.getElementById('modal-title').innerText = country;
-  document.getElementById('search-results-tab').innerText = 
-      country + ": " + countryData;
-
-  const countryCode = e.feature.getId();
-  setCountryTrends(countryCode);
+  const countryName = e.feature.getProperty('name');
+  const countryId = e.feature.getId();
+  const countryData = e.feature.getProperty('country_data').toLocaleString();
+  document.getElementById('modal-title').innerText = countryName;
+  displayTopResultsForCurrentTrend(countryId);
+  setCountryTrends(countryId);
 }
 
 /**
@@ -37,17 +35,52 @@ function onClickCountry(e) {
 function setCountryTrends(countryCode) {
   const topTrendsTab = document.getElementById('top-trends-tab');
   topTrendsTab.innerHTML = '';
-
-  fetch('/country-trends/' + countryCode).then(countryTrends => 
+  fetch('/country-trends/' + countryCode).then(countryTrends =>
       countryTrends.json()).then(trends => {
-    if (trends.length === 0) {
-      topTrendsTab.innerText = 'Trends are not available for the selected country.';
-    } else {
-      trends.forEach(trend => {
-        const trendHeader = document.createElement('h5');
-        trendHeader.innerText = trend.topic;
-        topTrendsTab.appendChild(trendHeader);
+        if (trends.length === 0) {
+          topTrendsTab.innerText = 
+              'Trends are not available for the selected country.';
+        } else {
+          trends.forEach(trend => {
+            const trendHeader = document.createElement('h5');
+            trendHeader.innerText = trend.topic;
+            topTrendsTab.appendChild(trendHeader);
+          });
+        }
       });
-    }
-  });
 }
+
+/** 
+ * Displays the top results in a country for current search trend on modal. 
+ * @param {string} countryCode Two letter country code for selected country.
+ */
+function displayTopResultsForCurrentTrend(countryCode) {
+  let topic = getCurrentTrend;
+  let topicData = getCurrentCustomSearchData();
+  let date = new Date(topicData.timestamp);
+  let resultElement = document.getElementById('search-results-tab');
+  resultElement.innerHTML = '';
+
+  let countryData = topicData.countries
+      .filter(countries => countries.country === countryCode);
+
+  // Handle case where there are no results.
+  if (countryData.length === 0) {
+    resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
+        date.toString() + '<i><br>';
+  } else {
+    let results = countryData[0].results;
+
+    resultElement.innerHTML += 'Average Sentiment Score: ' + 
+        countryData[0].averageSentiment + '<br>';
+
+    for (let i = 0; i < results.length; i++) {
+      resultElement.innerHTML += '<a href=' + results[i].link + '>' +
+        results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'
+        + 'Sentiment Score: ' + results[i].score + '<br>';
+    }
+    resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
+      '<i><br>';
+  }
+}
+
