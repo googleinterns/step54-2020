@@ -15,7 +15,7 @@
     <script src="scripts/search-topic-script.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
-  <body onload="initMap(); setTopTrends(); countrySelectSetUp();">
+  <body onload="initMap(); updateTrends(); countrySelectSetUp();">
     <div class="content">
       <!-- Bootstrap CSS. -->
       <div class="modal fade" id="region-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -69,7 +69,7 @@
               <button type="submit" class="btn btn-primary" onclick="searchTopic()">Search</button>
             </div>
             <label for="country-select">Choose countries to view results for (max 3): </label>
-            <select class="country-select" id="country-select" size="3" multiple></select>
+            <select class="country-select" id="country-select" size="8" multiple></select>
           </div>
           <div>
             <br><br>

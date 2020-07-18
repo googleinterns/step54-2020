@@ -40,7 +40,7 @@ function getCurrentCustomSearchData() {
  */
 function setNewTrend(trend) {
   currentTrend = trend;
-  updateTrends();
+  //updateTrends();
 
   fetch('/search/' + trend)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
@@ -57,16 +57,13 @@ function setNewTrend(trend) {
  * @param {Array} countries Countries to get data for.
  */
 function setUserSearchTopic(topic, countries) {
-  updateTrends();
-
   currentTrend = topic;
-  const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = 
-      'Worldwide sentiments of search results for "' + currentTrend + '"';
+  //updateTrends();
 
   fetch('/search/' + topic + '/' + JSON.stringify(countries))
       .then(response => response.json())
       .then(topicResults => {
+        console.log(topicResults);
         currentCustomSearchData = topicResults;
       }).then(() => {
           // Reload map with new sentiment or search interest data and relevant coloring.

@@ -6,8 +6,7 @@ indexes:
   - name: timestamp
     direction: desc
 
-
-- kind: CustomSearchTopic
+- kind: WorldDataByTopic
   properties:
   - name: lowercaseTopic
   - name: timestamp

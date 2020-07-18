@@ -95,7 +95,6 @@ function loadCountryData(sentimentMode=true) {
     let dataVariable;
     if (countryData.length == 0) {
       dataVariable = null;      
-      console.log('Data does not exist for this countryCode:', row.getId());
     } else {
       dataVariable = 
           sentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
@@ -103,12 +102,6 @@ function loadCountryData(sentimentMode=true) {
 
     row.setProperty('country_data', dataVariable);
   });
-
-  // Update and display the map legend.
-  document.getElementById('data-min').textContent =
-      dataMin.toLocaleString();
-  document.getElementById('data-max').textContent =
-      dataMax.toLocaleString();
 }
 
 /**

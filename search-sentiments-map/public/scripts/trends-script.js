@@ -25,7 +25,7 @@ function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
   trendsList.innerHTML = '';
   let trends = getTopTrends();
-  
+
   for (let i = 0; i < trends.length; i++) {
     const trendElement = document.createElement('li');
     trendElement.innerText = `${trends[i].trendTopic}`;
