@@ -68,7 +68,9 @@ function setNewTrend(trend) {
  */
 function setUserSearchTopic(topic, countries) {
   currentTrend = topic;
-  //updateTrends();
+  currentTimeRange = 0;
+  document.getElementById('timeline-slider').value = 0;
+  updateTrends(false);
 
   fetch('/search/' + topic + '/' + JSON.stringify(countries))
       .then(response => response.json())
@@ -81,6 +83,10 @@ function setUserSearchTopic(topic, countries) {
       });
 }
 
+/**
+ * Changes `currentTimeRange` parameter and updates trends for new time range.
+ * @param {number} timeRange The interval value for the time range.
+ */
 function changeTimeRange(timeRange) {
   currentTimeRange = timeRange;
   updateTrends();
@@ -88,10 +94,12 @@ function changeTimeRange(timeRange) {
 
 /**
  * Fetches current top trends from back end and displays them on the website.
+ * @param {boolean=} setNewTrendIsEnabled Boolean for whether or not to
+ *     call setNewTrend at the end of setTopTrends.
  */
-function updateTrends() {
+function updateTrends(setNewTrendIsEnabled = true) {
   fetch('/trends/' + currentTimeRange).then(globalTrends => globalTrends.json()).then(trends => {
     topTrends = trends;
-    setTopTrends(); 
+    setTopTrends(setNewTrendIsEnabled); 
   });
 }

@@ -20,8 +20,12 @@ const CLASSNAME_SHOWN = 'shown';
 const CLASSNAME_HIDDEN = 'hidden';
 const NUM_SHOWN = 7;
 
-/** Displays the top trends on the DOM. */
-function setTopTrends() {
+/** 
+ * Displays the top trends on the DOM.
+ * @param {boolean} setNewTrendIsEnabled Boolean for whether or not to
+ *     call setNewTrend at the end of setTopTrends.
+ */
+function setTopTrends(setNewTrendIsEnabled) {
   const trendsList = document.getElementById('trends-list');
   trendsList.innerHTML = '';
   let trends = getTopTrends();
@@ -53,8 +57,10 @@ function setTopTrends() {
     trendsList.append(showMoreOrLessToggleItem);
   }
 
-  // Set the map to display data on the top-ranking trend.
-  setNewTrend(trends[0].trendTopic);
+  if (setNewTrendIsEnabled) {
+    // Set the map to display data on the top-ranking trend.
+    setNewTrend(trends[0].trendTopic);
+  }
 }
 
 /**

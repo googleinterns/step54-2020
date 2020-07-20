@@ -38,7 +38,6 @@ const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
 router.get('/:topic&:timeRange', (req, res) => {
   let topic = req.params.topic;
   let timeRange = parseInt(req.params.timeRange);
-  console.log("HERE");
   retrieveSearchResultFromDatastore(topic, timeRange).then(topicDataJsonArray => {
     res.setHeader('Content-Type', 'application/json');
     res.send(topicDataJsonArray);

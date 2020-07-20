@@ -78,6 +78,8 @@ function loadCountryDataByMode() {
   topicHeader.innerText = sentimentMode ?
       'Worldwide sentiments of search results for "' + getCurrentTrend() + '"' :
       'Worldwide interests for "' + getCurrentTrend() + '"' ;
+  let timeRange =  getCurrentTimeRange() * 0.5;
+  topicHeader.innerText += ' from ' + timeRange + ' days ago';
 
   loadCountryData(sentimentMode);
 }
