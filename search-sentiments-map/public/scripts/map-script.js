@@ -44,7 +44,7 @@ const DATA_MIN = SCORE_SCALE_MULTIPLIER  *-1.0;
  * @enum {Array}
  */
 const CountryColorCodes = {
-  GREEN: [151, 83, 34],
+  GREEN: [114, 80, 39],//[151, 83, 34],
   RED: [5, 69, 54],
   DARK_GRAY: [0, 0, 31], 
   LIGHT_GRAY: [62, 1, 83],
@@ -123,8 +123,8 @@ function styleFeature(feature) {
     color = CountryColorCodes.DARK_GRAY;  
   } else if (countryData != null) {
     // Delta represents where the value sits between the min and max.
-    let delta = (countryData - DATA_MIN) /
-        (DATA_MAX - DATA_MIN);
+    let delta = (countryData - DATA_MAX) /
+        (DATA_MIN - DATA_MAX);
 
     color = [];
     // Calculate hsl color integer values based on the delta.
