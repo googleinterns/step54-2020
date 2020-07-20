@@ -31,8 +31,8 @@ let infowindow;
  */
 
  // TODO(ntarn@): Change this to 100 and -100 when sentiment scores rescaled.
-const DATAMIN = 100.0;
-const DATAMAX = -100.0;
+const DATAMAX = 100.0;
+const DATAMIN = -100.0;
 
 /** Loads the map with country polygons when page loads. */
 function initMap() {
@@ -128,8 +128,8 @@ function styleFeature(feature) {
     color = [0, 0, 31];  
   } else {
     // Delta represents where the value sits between the min and max.
-    let delta = (countryData - DATAMIN) /
-        (DATAMAX - DATAMIN);
+    let delta = (countryData - DATAMAX) /
+        (DATAMIN - DATAMAX);
 
     color = [];
     for (let i = 0; i < 3; i++) {
