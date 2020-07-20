@@ -45,14 +45,15 @@ router.get('/:timeRange', (req, res) => {
  *     countries.
  */
 async function retrieveGlobalTrendsForTimeRange(timeRange) {
+  let timeRangeLimit = TIME_RANGE_INTERVAL_12_HRS_MS * timeRange;
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp', {
     descending: true,
-  }).filter('timestamp', '<',
-      Date.now() - TIME_RANGE_INTERVAL_12_HRS_MS * timeRange);
+  }).filter('timestamp', '<', Date.now() - timeRangeLimit);
   const [trendsEntry] = await datastore.runQuery(query);
   // Returns the most recent trends with search results data retrieved.
-  return (Date.now() - trendsEntry[0].timestamp > RETRIEVE_RESULTS_TIME_MS) ?
-  trendsEntry[0].globalTrends : trendsEntry[1].globalTrends;
+  return 
+  (Date.now() - trendsEntry[0].timestamp >      RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
+      trendsEntry[0].globalTrends : trendsEntry[1].globalTrends;
 }
 
 /** 
