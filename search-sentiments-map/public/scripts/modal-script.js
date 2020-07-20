@@ -74,7 +74,7 @@ function displayTopResultsForCurrentTrend(countryCode) {
     resultElement.innerHTML += 'Average Sentiment Score: ' + 
         countryData[0].averageSentiment + '<br>';
 
-    // Get search results of the specified country.
+    // Get search results for the specified country.
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
       resultElement.innerHTML += '<a href=' + results[i].link + '>' +

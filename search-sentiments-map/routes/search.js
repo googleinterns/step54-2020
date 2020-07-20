@@ -31,6 +31,10 @@ const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
 // TODO(carmenbenitez): Set this to be 12 hours when our data is
 // updated every 12 hours.
 const CURRENT_DATA_THRESHOLD_24_HOURS_MS = 24 * 60 * 60000;
+const PAUSE_ONE_MIN_MS = 60000;
+const QUERIES_PER_MIN = 100;
+// Use -500 to signify where there is no search results or interest data.
+const SCORE_NO_RESULTS = -500;
 
 /** 
  * Renders a JSON array of the top search results for all countries with API
@@ -172,8 +176,8 @@ async function updateSearchResults() {
   let countries = countriesJson.map(country => country.id);
 
   retrieveGlobalTrends().then(async trends => {
-    // When testing ,use i < 1 to test for only one trend, and comment out
-    // `await new Promise` line to avoid 1 minute pauses.
+    // Note: when testing ,use i < 1 to test for only one trend, and comment 
+    // out `await new Promise` line to avoid 1 minute pauses.
     for (let i = 0; i < trends.length; i++) {
       let topic = trends[i].trendTopic;
       let countriesData = await getSearchResultsForCountriesForTopic(
@@ -181,10 +185,7 @@ async function updateSearchResults() {
       console.log('Creating WorldDataByTopic entity for', topic)
 
       addWorldDataByTopicToDatastore(topic, countriesData);
-
-      // 100 queries per minute limit for Custom Search API. Pause to prevent
-      // surpassing limit.
-      await new Promise(resolve => setTimeout(resolve, 60000));
+      await new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
     }
   });
 }
@@ -214,18 +215,18 @@ async function getSearchResultsForCountriesForTopic(countries, topic) {
   let countriesData = [];
   await searchInterestsModule.getGlobalSearchInterests(topic)
       .then(async (searchInterests) => {
-    // When testing, make i < 3 countries.
+    // Note: Use i < 3 countries when testing.
     for (let i = 0; i < countries.length; i++) {
       let countryCode = countries[i];
       let interest = searchInterests.filter(interestsByCountry => 
           interestsByCountry.geoCode === countryCode);
-      // -500 signifies that there is no interest data.
-      let interestScore = interest.length === 0 ? -500 : interest[0].value[0];
+      let interestScore = interest.length === 0 ? 
+          SCORE_NO_RESULTS : interest[0].value[0];
 
-      // Use 100 queries per minute limit for the Custom Search API, and include
-      // a pause of 1 minute to prevent surpassing limit.
-      if (i !== 0 && i % 100 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 60000));
+      // Use a limited number of queries per minute for the Custom Search API, 
+      // and include a pause to prevent surpassing limit.
+      if (i !== 0 && i % QUERIES_PER_MIN === 0) {
+        await new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
       }
       let countryResults = await getCustomSearchResultsForCountry(
           countryCode, topic);
@@ -272,8 +273,7 @@ async function formatCountryResults(searchResultsJson) {
   let countryData = [];
   let totalScore = 0;
   if (currentSearchResults == undefined) {
-    // -500 is the score to signify there were no results.
-    return {score: -500, results: countryData};
+    return {score: SCORE_NO_RESULTS, results: countryData};
   }
   for (let i = 0; i < currentSearchResults.length; i++) {
     let formattedResults =
@@ -281,8 +281,7 @@ async function formatCountryResults(searchResultsJson) {
     countryData.push(formattedResults);
     totalScore += formattedResults.score;
   }
-  // -500 is the score to signify there were no results.
-  let avgScore = -500;
+  let avgScore = SCORE_NO_RESULTS;
   if (currentSearchResults.length !== 0) {
     avgScore = totalScore / currentSearchResults.length;
   }
@@ -348,7 +347,7 @@ async function deleteAncientResults() {
 
 /** 
  * Creates Datastore item for given topic and country search results. 
- * @param {string} topic The seach topic the search results are for.
+ * @param {string} topic The search topic the search results are for.
  * @param {Object} countriesData Object holding all searchResults for all
  *      countries.
  * Example data structure for a `WorldDataByTopic` entity:

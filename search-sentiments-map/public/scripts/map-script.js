@@ -26,6 +26,7 @@ let mapStyle = [{
 let map;
 let infowindow;
 
+// Whether the map is currently in sentiment mode or popularity mode.
 let isSentimentMode = true;
 // The maximum and minimum values of the legend.
 const DATA_MIN_SENTIMENT = -100;
@@ -73,23 +74,22 @@ function loadMapOutline() {
 
 /** 
  * Gets the selected mode (sentiment or popularity) from the webpage and loads
- * data correspondingly.
+ * corresponding data.
  */
 function loadCountryDataByMode() {
   isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
 
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = isSentimentMode ?
-      'Worldwide sentiments of search results for "' + getCurrentTrend() + '"' :
-      'Worldwide interests for "' + getCurrentTrend() + '"' ;
+      'Worldwide sentiment scores of search results for "' + getCurrentTrend() + '"' :
+      'Worldwide search interest scores for "' + getCurrentTrend() + '"' ;
   updateLegends();
   loadCountryData();
 }
 
 /** 
- * Loads the sentiments or search interests for all countries from Datastore. 
- * @param {boolean=} sentimentMode Whether the result to obtain is the sentiments 
- * (search interest otherwise).
+ * Loads the sentiments or search interests for all countries from Datastore 
+ * depending on what mode has been specified.
  */
 function loadCountryData() {
   map.data.forEach(function(row) {
