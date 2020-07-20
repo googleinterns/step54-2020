@@ -60,7 +60,6 @@ function displayTopResultsForCurrentTrend(countryCode) {
   resultElement.innerHTML = '';
 
   let countryData = dataByCountry.filter(data => data.country === countryCode);
-
   if (countryData.length === 0) {
     // Handle case where there are no results.
     resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
@@ -70,7 +69,7 @@ function displayTopResultsForCurrentTrend(countryCode) {
         countryData[0].interest + '<br>';
     resultElement.innerHTML += 'Average Sentiment Score: ' + 
         countryData[0].averageSentiment + '<br>';
-    
+
     // Get search results for the specified country.
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {

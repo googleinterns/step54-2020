@@ -13,6 +13,7 @@
 // the License.
 
 const googleTrends = require('google-trends-api');
+const POPULARITY_TIMERANGE_7_DAYS_MS = 7 * 24 * 60 * 60000;
 
 /** 
  * Calls the API to get the popularity of the given topic in countries across
@@ -24,7 +25,7 @@ async function getGlobalSearchInterests(topic) {
   let interestByRegion;
   await googleTrends.interestByRegion({
     keyword: topic,
-    startTime: new Date(Date.now() - 7 * 24 * 60 * 60000),
+    startTime: new Date(Date.now() - POPULARITY_TIMERANGE_7_DAYS_MS),
     resolution: 'COUNTRY',
   }).then((res) => {
     interestByRegion = JSON.parse(res).default.geoMapData;

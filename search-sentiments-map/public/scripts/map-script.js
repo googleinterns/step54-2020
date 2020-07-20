@@ -67,7 +67,6 @@ function loadMapOutline() {
  */
 function loadCountryDataByMode() {
   let isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
-  console.log('sentiment mode', isSentimentMode);
 
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = isSentimentMode ?
@@ -89,7 +88,7 @@ function loadCountryData(isSentimentMode = true) {
     let countryData = dataByCountry.filter(data => data.country === row.getId());
 
     let dataVariable = 0;
-    if (countryData.length == 0) {
+    if (countryData.length === 0) {
       console.log('Data does not exist for this countryCode:', row.getId());
     } else {
       dataVariable = 
