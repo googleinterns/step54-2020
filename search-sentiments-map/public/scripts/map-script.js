@@ -36,8 +36,8 @@ const NO_RESULTS_DEFAULT_SCORE = -500;
  * The sentiment API returns scores from -1.0 to 1.0. Our value is these max
  * and min scores multiplied by our score multiplier.
  */
-const DATA_MIN = SCORE_SCALE_MULTIPLIER * 1.0;
-const DATA_MAX = SCORE_SCALE_MULTIPLIER  *-1.0;
+const DATA_MAX = SCORE_SCALE_MULTIPLIER * 1.0;
+const DATA_MIN = SCORE_SCALE_MULTIPLIER  *-1.0;
 
 /**
  * HSL color codes for country colorings.
@@ -92,11 +92,9 @@ function loadCountryData() {
     let topicData = getCurrentCustomSearchData();
     let countryData = topicData.countries
       .filter(countries => countries.country === countryCode);
-    let dataVariable = 0;
+    let dataVariable = null;
     if (countryData.length != 0) {
       dataVariable = countryData[0].averageSentiment;
-    } else {
-      dataVariable = null;
     }
 
     row.setProperty('country_data', dataVariable);
@@ -129,8 +127,8 @@ function styleFeature(feature) {
         (DATA_MAX - DATA_MIN);
 
     color = [];
+    // Calculate hsl color integer values based on the delta.
     for (let i = 0; i < 3; i++) {
-      // Calculate an integer color based on the delta.
       color[i] = (high[i] - low[i]) * delta + low[i];
     }
   }
