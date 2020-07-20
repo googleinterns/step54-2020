@@ -290,7 +290,7 @@ async function formatCountryResults(searchResultsJson) {
 
 /**
  * Formats search result object.
- * @param {Object} searchResult Object with information for one search result.
+ * @param {!Object} searchResult Object with information for one search result.
  * @return {Object} Formatted search result data in JSON form.
  */
 function formatSearchResult(searchResult) {

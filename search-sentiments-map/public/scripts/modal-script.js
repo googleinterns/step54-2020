@@ -69,17 +69,17 @@ function displayTopResultsForCurrentTrend(countryCode) {
     resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
         date.toString() + '<i><br>';
   } else {
-    resultElement.innerHTML += 'Popularity Score: ' + 
-        countryData[0].interest + '<br>';
-    resultElement.innerHTML += 'Average Sentiment Score: ' + 
-        countryData[0].averageSentiment + '<br>';
+    resultElement.innerHTML += '<b>Topic Popularity Score: ' + 
+        countryData[0].interest + '</b><br>';
+    resultElement.innerHTML += '<b>Average Sentiment Score: ' + 
+        countryData[0].averageSentiment.toFixed(1) + '</b><br>';
 
     // Get search results for the specified country.
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
       resultElement.innerHTML += '<a href=' + results[i].link + '>' +
         results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'
-        + 'Sentiment Score: ' + results[i].score + '<br>';
+        + '<i>Sentiment Score: ' + results[i].score.toFixed(1) + '</i><br>';
     }
     resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
       '<i><br>';

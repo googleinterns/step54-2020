@@ -56,9 +56,7 @@ function initMap() {
   loadMapOutline();
 }
 
-/** 
- * Update the map legend's max and min values. 
- */
+/** Update the map legend's max and min values. */
 function updateLegends() {
   let dataMin = isSentimentMode ? DATA_MIN_SENTIMENT : DATA_MIN_POPULARITY;
   document.getElementById('data-min').textContent =
@@ -113,7 +111,7 @@ function loadCountryData() {
  * callback passed to data.setStyle() and is called for each row in the data
  * set.
  * @param {google.maps.Data.Feature} feature
- * @returns {googe.maps.Data.StyleOptions} styling information for feature
+ * @return {googe.maps.Data.StyleOptions} Styling information for feature.
  */
 function styleFeature(feature) {
   let low = [5, 69, 54];  // HSL color (red) of smallest datum.
@@ -126,7 +124,7 @@ function styleFeature(feature) {
     // user search).
     color = [62, 1, 83];
   } else if (countryData === -500) {
-    // Set country color to be dark grey if that coutnry has no results.
+    // Set country color to be dark grey if that country has no results.
     color = [0, 0, 31];  
   } else {
     let dataMin = isSentimentMode ? DATA_MIN_SENTIMENT : DATA_MIN_POPULARITY;  
