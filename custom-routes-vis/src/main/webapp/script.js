@@ -213,8 +213,8 @@ function generateRoutes() {
  * API; if false, assume it is obtained by the Routes Preferred API.
  */
 function createRoutePolyline(routeNum, routeJson, directionsApi) {
-  let routeLegs = routeJson.legs;
-  let routeCoordinates = [];
+  let encodedPolyline = routeJson.overview_polyline.points;
+  let routeCoordinates = google.maps.geometry.encoding.decodePath(encodedPolyline);
 
   // Total duration of route in seconds.
   let totalDurationSec = directionsApi ? 0 : routeJson.duration;
@@ -223,27 +223,11 @@ function createRoutePolyline(routeNum, routeJson, directionsApi) {
   // Note: Routes Preferred has duration and distanceMeters attributes for each
   // route, but Directions only has them for each leg of the route.
 
-  // Get all coordinates given by the steps of the legs of the route.
-  for (let i = 0; i < routeLegs.length; i++) {
-    let legSteps = routeLegs[i].steps;
-    console.log('num steps', legSteps.length);
-
-    for (let j = 0; j < legSteps.length; j++) {
-      directionsApi ?
-          routeCoordinates.push(legSteps[j].start_location) :
-          routeCoordinates.push(legSteps[j].startLocation.LatLng);
-    }
-
-    // Add the end location to the coordinates array.
-    if (i === routeLegs.length - 1) {
-      directionsApi ?
-          routeCoordinates.push(legSteps[legSteps.length - 1].end_location) :
-          routeCoordinates.push(legSteps[legSteps.length - 1].endLocation.LatLng);
-    }
-
-    if (directionsApi) {
-      // Accumulate duration and distance because the total is not directly
-      // available in results from the Directions API.
+  if (directionsApi) {
+    // Accumulate duration and distance because the total is not directly
+    // available in results from the Directions API.
+    let routeLegs = routeJson.legs;
+    for (let i = 0; i < routeLegs.length; i++) {
       totalDurationSec += parseInt(routeLegs[i].duration.value);
       totalDistanceMeters += parseInt(routeLegs[i].distance.value);
     }
