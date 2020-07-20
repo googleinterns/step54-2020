@@ -18,9 +18,17 @@ let currentTrend = '';
 // The custom search data for the trend that the user is viewing.
 let currentCustomSearchData = '';
 
+// The current time range for the data that the user is viewing.
+let currentTimeRange = '';
+
 /** Returns the current trend that the user is viewing. */
 function getCurrentTrend() {
   return currentTrend;
+}
+
+/** Returns the current time range for the data that the user is viewing. */
+function getCurrentTimeRange() {
+  return currentTimeRange;
 }
 
 /** 
@@ -51,3 +59,7 @@ function setNewTrend(trend) {
       });
 }
 
+function changeTimeRange(timeRange) {
+  currentTimeRange = timeRange;
+  
+}

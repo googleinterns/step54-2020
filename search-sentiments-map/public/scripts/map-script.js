@@ -74,11 +74,6 @@ function loadCountryData() {
     let dataVariable = 0;
     if (countryData.length != 0) {
       dataVariable = countryData[0].averageSentiment;
-      // TODO(ntarn): Remove console.log statements when finished debugging.
-      console.log('ntarn debug loadCountryData: ' + 'country' +
-          countryData[0].country + ' averageSentiment: ' + dataVariable);
-    } else {
-      console.log('Data does not exist for this countryCode:' + countryCode);
     }
 
     // Keep track of min and max values as we read them.
