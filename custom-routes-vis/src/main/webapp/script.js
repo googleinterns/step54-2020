@@ -28,6 +28,7 @@ let originDestinationMarkers = [];
 // Array holding routes displayed on the map.
 let displayedRoutes = [];
 // Colors of the routes displayed.
+// Colors in the array are red, orange, and blue, respectively.
 const ROUTE_COLORS = ['#ff0000', '#eb8f1e', '#3299d1'];
 let selectedRouteNum = 0;  // The index of the route selected.
 var map;

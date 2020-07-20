@@ -35,8 +35,9 @@ public class GetDirectionsServlet extends HttpServlet {
 
   /** 
    * Handles the request to get routes and responds with results from a call to a specified API. 
-   * The request specifies the origin, destination, service endpoint, and, optionally, an API
-   * key for the API request.
+   * @param request Servlet request that specifies the origin, destination, service endpoint, and,
+   * optionally, an API key for the API request.
+   * @param response Servlet response that sends back the JSON response from the API.
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -46,6 +47,7 @@ public class GetDirectionsServlet extends HttpServlet {
 
     String requestApiKey = request.getParameter("apiKey");
     String directionsApiKey = System.getenv("DIRECTIONS_API_KEY");
+    // Use the Directions API key if no API key is specified.
     String apiKey = requestApiKey.isEmpty() ? directionsApiKey : requestApiKey;
 
     URLConnection connection;
