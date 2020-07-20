@@ -51,8 +51,8 @@ async function retrieveGlobalTrendsForTimeRange(timeRange) {
   }).filter('timestamp', '<', Date.now() - timeRangeLimit);
   const [trendsEntry] = await datastore.runQuery(query);
   // Returns the most recent trends with search results data retrieved.
-  return 
-  (Date.now() - trendsEntry[0].timestamp >      RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
+  return (Date.now() - trendsEntry[0].timestamp > 
+      RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
       trendsEntry[0].globalTrends : trendsEntry[1].globalTrends;
 }
 
