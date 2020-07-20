@@ -16,7 +16,7 @@
     <script src="scripts/search-topic-script.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
-  <body onload="initMap(); updateTrends(); countrySelectSetUp();">
+  <body onload="initMap(); changeTimeRange(0); countrySelectSetUp();">
     <div class="content">
       <!-- Bootstrap CSS. -->
       <div class="modal fade" id="region-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -55,11 +55,21 @@
             <div class="color-key"></div>
             <div id="data-min">min</div>
           </div>
-          <label class="switch">
-            <input id="sentiment-popularity-check" type="checkbox" onclick="loadCountryDataByMode()">
-            <span class="slider"></span>
-          </label>
-          <span id="switch-info">Switch between Sentiment Mode & Popularity Mode.</span>
+          <div class="row">
+            <div class="col-sm-8">
+              <label class="switch">
+                <input id="sentiment-popularity-check" type="checkbox" onclick="loadCountryDataByMode()">
+                <span class="slider"></span>
+              </label>
+              <span id="switch-info">Switch between Sentiment Mode & Popularity Mode.</span>
+            </div>
+            <div class="col-sm-4">
+              <div class="timeline-slider-container">
+                <label id="timeline-slider-label" for="timeline-slider">See results from 0 days ago</label>
+                <input type="range" min="0" max="7" value="0" class="timeline-slider" id="timeline-slider" oninput=sliderChange()>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="col-sm-3">
           <div id="search-box">
@@ -75,10 +85,6 @@
             <h3>Trending Search Topics</h3>
             <ul id="trends-list">
             </ul>
-          </div>
-          <div class="timeline-slider-container">
-            <label id="timeline-slider-label" for="timeline-slider">See results from 0 days ago</label>
-            <input type="range" min="0" max="7" value="0" class="timeline-slider" id="timeline-slider" oninput=sliderChange()>
           </div>
          </div>
         </div>

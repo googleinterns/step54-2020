@@ -52,7 +52,7 @@ function setNewTrend(trend) {
   currentTrend = trend;
   //updateTrends();
 
-  fetch('/search/' + trend)
+  fetch('/search/' + trend + '&' + currentTimeRange)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
         currentCustomSearchData = topicData;
       }).then(() => {
@@ -83,13 +83,14 @@ function setUserSearchTopic(topic, countries) {
 
 function changeTimeRange(timeRange) {
   currentTimeRange = timeRange;
+  updateTrends();
 }
 
 /**
  * Fetches current top trends from back end and displays them on the website.
  */
 function updateTrends() {
-  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
+  fetch('/trends/' + currentTimeRange).then(globalTrends => globalTrends.json()).then(trends => {
     topTrends = trends;
     setTopTrends(); 
   });

@@ -20,5 +20,5 @@ function sliderChange() {
   document.getElementById('timeline-slider-label').innerText =
       'See results from ' + sliderVal + ' days ago';
 
-  changeTimeRange(sliderVal);
+  changeTimeRange(parseInt(sliderVal));
 }

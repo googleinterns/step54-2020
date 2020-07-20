@@ -90,9 +90,9 @@
   opacity: 1;
 }
 
-.timeline-slider::-webkit-timeline-slider-thumb {
+.timeline-slider::-webkit-slider-thumb {
   appearance: none;
-  background: #4CAF50;
+  background: #2196F3;
   cursor: pointer;
   height: 25px;
   width: 25px;
@@ -100,7 +100,7 @@
 }
 
 .timeline-slider::-moz-range-thumb {
-  background: #4CAF50;
+  background: #2196F3;
   cursor: pointer;
   height: 25px;
   width: 25px;

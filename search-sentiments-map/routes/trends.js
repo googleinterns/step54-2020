@@ -23,13 +23,16 @@ const datastore = new Datastore();
 const TRENDS_DATA_KIND = 'TrendsEntry';
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
 const RETRIEVE_RESULTS_TIME_MS = 80 * 60000;
+// Time interval between data updates.
+const TIME_RANGE_INTERVAL_12_HRS_MS = 12 * 60 * 60000;
 
 /** 
  * Renders a JSON array of the top 20 (or fewer) global search trends maintained
- * for the current 12-hour range.
+ * for the specfied 12-hour range.
  */
-router.get('/', (req, res) => {
-  retrieveGlobalTrends().then(globalTrends => {
+router.get('/:timeRange', (req, res) => {
+  let timeRange = parseInt(req.params.timeRange);
+  retrieveGlobalTrendsForTimeRange(timeRange).then(globalTrends => {
     res.setHeader('Content-Type', 'application/json');
     res.send(globalTrends);
   });
@@ -37,21 +40,25 @@ router.get('/', (req, res) => {
 
 /** 
  * Get the global trends from the most recent Datastore entry.
- * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
+ * @param {number} timeRange The interval value for the time range.
+ * @return {!Array<JSON>} A JSON array of global trends and their originating
+ *     countries.
  */
-async function retrieveGlobalTrends() {
+async function retrieveGlobalTrendsForTimeRange(timeRange) {
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp', {
     descending: true,
-  });
+  }).filter('timestamp', '<',
+      Date.now() - TIME_RANGE_INTERVAL_12_HRS_MS * timeRange);
   const [trendsEntry] = await datastore.runQuery(query);
   // Returns the most recent trends with search results data retrieved.
   return (Date.now() - trendsEntry[0].timestamp > RETRIEVE_RESULTS_TIME_MS) ?
-      trendsEntry[0].globalTrends : trendsEntry[1].globalTrends;
+  trendsEntry[0].globalTrends : trendsEntry[1].globalTrends;
 }
 
 /** 
- * Updates Datastore storage of daily search trends and corresponding search results
- * for the countries where trends are available using the Google Trends API.
+ * Updates Datastore storage of daily search trends and corresponding search
+ * results for the countries where trends are available using the Google Trends
+ * API.
  */
 async function updateDailyTrends() {
   const countryJson = require('./../public/countries-with-trends.json');

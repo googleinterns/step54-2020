@@ -28,17 +28,18 @@ const countriesJson = require('./../public/country-code.json');
 global.Headers = fetch.Headers;
 
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
-// TODO(carmenbenitez): Set this to be 12 hours when our data is
-// updated every 12 hours.
-const CURRENT_DATA_THRESHOLD_24_HOURS_MS = 24 * 60 * 60000;
+// Time interval between data updates.
+const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
 
 /** 
  * Renders a JSON array of the top search results for all countries with API
  * data obtained every 12 hours for the specified topic.
  */
-router.get('/:topic', (req, res) => {
+router.get('/:topic&:timeRange', (req, res) => {
   let topic = req.params.topic;
-  retrieveSearchResultFromDatastore(topic).then(topicDataJsonArray => {
+  let timeRange = parseInt(req.params.timeRange);
+  console.log("HERE");
+  retrieveSearchResultFromDatastore(topic, timeRange).then(topicDataJsonArray => {
     res.setHeader('Content-Type', 'application/json');
     res.send(topicDataJsonArray);
   });
@@ -58,15 +59,21 @@ router.get('/:topic/:countries', (req, res) => {
 });
 
 /** 
- * Returns a JSON-formatted array of search results for all countries retrieved
- * from the Datastore.
+ * Returns a JSON-formatted array of search results from specified time range
+ * for all countries retrieved from the Datastore.
  * @param {string} topic Search topic to get data for.
+ * @param {number} timeRange The interval value for the time range.
+ * @return {Object} A JSON array of search results for all countries for
+ *     given topic.
  */
-async function retrieveSearchResultFromDatastore(topic) {
+async function retrieveSearchResultFromDatastore(topic, timeRange) {
   // Request latest entity with a topic matching the given topic.
-  const query = datastore.createQuery(WORLD_DATA_KIND).order('timestamp', {
-    descending: true,
-  }).filter('topic', topic).limit(1);
+  const query = datastore.createQuery(WORLD_DATA_KIND)
+      .order('timestamp', {descending: true})
+      .limit(1)
+      .filter('topic', topic)
+      .filter('timestamp', '<',
+          Date.now() - CURRENT_DATA_TIME_RANGE_12_HOURS_MS * timeRange);
 
   try {
     const [worldDataByTopic] = await datastore.runQuery(query);
@@ -103,7 +110,7 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
   let timestamp;
   if (worldDataByTopic.length !== 0 &&
       Date.now() - worldDataByTopic[0].timestamp <
-      CURRENT_DATA_THRESHOLD_24_HOURS_MS) {
+      CURRENT_DATA_TIME_RANGE_12_HOURS_MS) {
         timestamp = worldDataByTopic[0].timestamp;
         let countriesToAddDataFor = [];
         let countriesData = worldDataByTopic[0].dataByCountry;
@@ -144,10 +151,6 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
       timestamp: timestamp,
       dataByCountry: countriesDataToReturn,
     };
-<<<<<<< HEAD
-    return customSearchTopicJsonArray;
-=======
->>>>>>> 431725241e3d94d792bc507a567e1e2466dbd608
   } catch (err) {
     console.error('ERROR:', err);
   }
@@ -242,7 +245,6 @@ async function getSearchResultsForCountriesForTopic(countries, topic) {
     }
   });
   return countriesData;
->>>>>>> 431725241e3d94d792bc507a567e1e2466dbd608
 }
 
 /** 
