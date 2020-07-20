@@ -41,7 +41,8 @@ function setNewTrend(trend) {
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
     currentCustomSearchData = topicData;
   }).then(() => {
-    // Reload map with new sentiment or search interest data and relevant coloring.
+    // Reload map with either new sentiment or search interest data and relevant
+    // coloring.
     loadCountryDataByMode();
   });
 }

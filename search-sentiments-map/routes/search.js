@@ -28,6 +28,8 @@ const countriesJson = require('./../public/country-code.json');
 global.Headers = fetch.Headers;
 
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
+const PAUSE_ONE_MIN_MS = 60000;
+const QUERIES_PER_MIN = 100;
 
 /** 
  * Renders a JSON array of the top search results for all countries with API data
@@ -71,11 +73,11 @@ async function retrieveSearchResultFromDatastore(topic) {
 async function updateSearchResults() {
   await deleteAncientResults();
   retrieveGlobalTrends().then(async trends => {
-    // When testing ,use i < 1 to test for only one trend, and comment out
-    // `await new Promise` line to avoid 1 minute pauses.
+    // Note: when testing ,use i < 1 to test for only one trend, and comment 
+    // out `await new Promise` line to avoid 1 minute pauses.
     for (let i = 0; i < trends.length; i++) {
       await updateSearchResultsForTopic(trends[i].trendTopic);
-      await new Promise(resolve => setTimeout(resolve, 60000));
+      await new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
     }
   });
 }
@@ -102,17 +104,17 @@ async function updateSearchResultsForTopic(query) {
   let countriesData = [];
   await searchInterestsModule.getGlobalSearchInterests(query)
       .then(async (searchInterests) => {
-    // When testing, make i < 3 countries.
+    // Note: Use i < 3 countries when testing.
     for (let i = 0; i < countriesJson.length; i++) {
       let countryCode = countriesJson[i].id;
       let interest = searchInterests.filter(interestsByCountry => 
           interestsByCountry.geoCode === countryCode);
       let interestScore = interest.length === 0 ? 0 : interest[0].value[0];
 
-      // Use 100 queries per minute limit for the Custom Search API, and include
-      // a pause of 1 minute to prevent surpassing limit.
-      if (i !== 0 && i % 100 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 60000));
+      // Use a limited number of queries per minute for the Custom Search API, 
+      // and include a pause to prevent surpassing limit.
+      if (i !== 0 && i % QUERIES_PER_MIN === 0) {
+        await new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
       }
       let countryResults = await getCustomSearchResultsForCountry(
           countryCode, query);

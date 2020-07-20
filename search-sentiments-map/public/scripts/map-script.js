@@ -63,26 +63,27 @@ function loadMapOutline() {
 
 /** 
  * Gets the selected mode (sentiment or popularity) from the webpage and loads
- * data correspondingly.
+ * corresponding data.
  */
 function loadCountryDataByMode() {
-  let sentimentMode = !document.getElementById('sentiment-popularity-check').checked;
-  console.log('sentiment mode', sentimentMode);
+  let isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
+  console.log('sentiment mode', isSentimentMode);
 
   const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = sentimentMode ?
+  topicHeader.innerText = isSentimentMode ?
       'Worldwide sentiments of search results for "' + getCurrentTrend() + '"' :
       'Worldwide interests for "' + getCurrentTrend() + '"' ;
 
-  loadCountryData(sentimentMode);
+  loadCountryData(isSentimentMode);
 }
 
 /** 
- * Loads the sentiments or search interests for all countries from Datastore. 
- * @param {boolean=} sentimentMode Whether the result to obtain is the sentiments 
- * (search interest otherwise).
+ * Loads the sentiments or search interests for all countries from Datastore 
+ * depending on what mode has been specified.
+ * @param {boolean=} isSentimentMode Whether the result to obtain is the sentiment
+ * data. Search interest data will be loaded otherwise.
  */
-function loadCountryData(sentimentMode=true) {
+function loadCountryData(isSentimentMode = true) {
   map.data.forEach(function(row) {
     let dataByCountry = getCurrentCustomSearchData().dataByCountry;
     let countryData = dataByCountry.filter(data => data.country === row.getId());
@@ -92,7 +93,7 @@ function loadCountryData(sentimentMode=true) {
       console.log('Data does not exist for this countryCode:', row.getId());
     } else {
       dataVariable = 
-          sentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
+          isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
     }
 
     // Keep track of min and max values as we read them.
