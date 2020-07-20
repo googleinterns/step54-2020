@@ -70,8 +70,8 @@ function loadCountryDataByMode() {
 
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = isSentimentMode ?
-      'Worldwide sentiments of search results for "' + getCurrentTrend() + '"' :
-      'Worldwide interests for "' + getCurrentTrend() + '"' ;
+      'Worldwide sentiment scores of search results for "' + getCurrentTrend() + '"' :
+      'Worldwide search interest scores for "' + getCurrentTrend() + '"' ;
 
   loadCountryData(isSentimentMode);
 }

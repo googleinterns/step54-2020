@@ -235,7 +235,7 @@ async function deleteAncientResults() {
 
 /** 
  * Creates Datastore item for given topic and country search results. 
- * @param {string} topic The seach topic the search results are for.
+ * @param {string} topic The search topic the search results are for.
  * @param {Object} countriesData Object holding all searchResults for all
  *      countries.
  * Example data structure for a `WorldDataByTopic` entity:
