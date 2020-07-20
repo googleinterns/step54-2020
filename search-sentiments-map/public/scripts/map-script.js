@@ -25,14 +25,12 @@ let mapStyle = [{
 }];
 let map;
 let infowindow;
-/* 
- * Hold the minimum and maximum values of the sentiment scores.
- * The sentiment API returns scores from -1.0 to 1.0.
- */
 
- // TODO(ntarn@): Change this to 100 and -100 when sentiment scores rescaled.
-const DATAMIN = 100.0;
-const DATAMAX = -100.0;
+let isSentimentMode = true;
+// The maximum and minimum values of the legend.
+const DATA_MIN_SENTIMENT = -100;
+const DATA_MIN_POPULARITY = 0;
+const DATA_MAX = 100;
 
 /** Loads the map with country polygons when page loads. */
 function initMap() {
@@ -44,11 +42,7 @@ function initMap() {
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
       .push(document.getElementById('legend'));
-  // Update and display the map legend.
-  document.getElementById('data-min').textContent =
-      DATAMIN.toLocaleString();
-  document.getElementById('data-max').textContent =
-      DATAMAX.toLocaleString();
+  updateLegends(true);
 
   infowindow = new google.maps.InfoWindow({});
 
@@ -61,6 +55,17 @@ function initMap() {
   loadMapOutline();
 }
 
+/** 
+ * Update the map legend's max and min values. 
+ */
+function updateLegends() {
+  let dataMin = isSentimentMode ? DATA_MIN_SENTIMENT : DATA_MIN_POPULARITY;
+  document.getElementById('data-min').textContent =
+      dataMin.toLocaleString();
+  document.getElementById('data-max').textContent =
+      DATA_MAX.toLocaleString();
+}
+
 /** Loads the country boundary polygons from a GeoJSON source. */
 function loadMapOutline() {
   map.data.loadGeoJson('countries.geojson', null);
@@ -71,15 +76,14 @@ function loadMapOutline() {
  * data correspondingly.
  */
 function loadCountryDataByMode() {
-  let sentimentMode = !document.getElementById('sentiment-popularity-check').checked;
-  console.log('sentiment mode', sentimentMode);
+  isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
 
   const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = sentimentMode ?
+  topicHeader.innerText = isSentimentMode ?
       'Worldwide sentiments of search results for "' + getCurrentTrend() + '"' :
       'Worldwide interests for "' + getCurrentTrend() + '"' ;
-
-  loadCountryData(sentimentMode);
+  updateLegends();
+  loadCountryData();
 }
 
 /** 
@@ -87,7 +91,7 @@ function loadCountryDataByMode() {
  * @param {boolean=} sentimentMode Whether the result to obtain is the sentiments 
  * (search interest otherwise).
  */
-function loadCountryData(sentimentMode=true) {
+function loadCountryData() {
   map.data.forEach(function(row) {
     let dataByCountry = getCurrentCustomSearchData().dataByCountry;
     let countryData = dataByCountry.filter(data => data.country === row.getId());
@@ -97,7 +101,7 @@ function loadCountryData(sentimentMode=true) {
       dataVariable = null;      
     } else {
       dataVariable = 
-          sentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
+          isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
     }
 
     row.setProperty('country_data', dataVariable);
@@ -112,8 +116,8 @@ function loadCountryData(sentimentMode=true) {
  * @returns {googe.maps.Data.StyleOptions} styling information for feature
  */
 function styleFeature(feature) {
-  let high = [5, 69, 54];  // Color of largest datum.
-  let low = [151, 83, 34]; // Color of smallest datum.
+  let low = [5, 69, 54];  // HSL color (red) of smallest datum.
+  let high = [151, 83, 34]; // HSL color (green) of largest datum.
   let color = [];
   let countryData = feature.getProperty('country_data');
 
@@ -125,9 +129,9 @@ function styleFeature(feature) {
     // Set country color to be dark grey if that coutnry has no results.
     color = [0, 0, 31];  
   } else {
+    let dataMin = isSentimentMode ? DATA_MIN_SENTIMENT : DATA_MIN_POPULARITY;  
     // Delta represents where the value sits between the min and max.
-    let delta = (countryData - DATAMIN) /
-        (DATAMAX - DATAMIN);
+    let delta = (countryData - dataMin) / (DATA_MAX - dataMin);
 
     color = [];
     for (let i = 0; i < 3; i++) {
