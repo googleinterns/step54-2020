@@ -35,8 +35,8 @@ router.get('/:topic', (req, res) => {
   let topic = req.params.topic;
   retrieveSearchResultFromDatastore(topic).then(customSearchTopicJsonArray => {
     // TODO(ntarn): Remove console.log statements when finished debugging.
-    console.log('ntarn debug: In the router.get method'); 
-    console.log(customSearchTopicJsonArray);
+    // console.log('ntarn debug: In the router.get method'); 
+    // console.log(customSearchTopicJsonArray);
     res.setHeader('Content-Type', 'application/json');
     res.send(customSearchTopicJsonArray);
   });
@@ -62,8 +62,8 @@ async function retrieveSearchResultFromDatastore(topic) {
       timestamp: customSearchTopic[0].timestamp,
     };
     // TODO(ntarn): Remove console.log statements when finished debugging.
-    console.log(`ntarn debug retrieved search result for topic: ${topic}` +  `example: ${customSearchTopic[0].countries[0].results[0]}`);
-    console.log(customSearchTopicJsonArray);
+    // console.log(`ntarn debug retrieved search result for topic: ${topic}` +  `example: ${customSearchTopic[0].countries[0].results[0]}`);
+    // console.log(customSearchTopicJsonArray);
     return customSearchTopicJsonArray;
   } catch (err) {
     console.error('ERROR:', err);
