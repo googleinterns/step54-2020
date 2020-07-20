@@ -12,23 +12,30 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+const MAX_SELECTED_COUNTRIES = 3;
+
 /**
  * Updates the current search topic for the given country and search topic.
  */
 function searchTopic() {
   let topic = document.getElementById("search-topic").value;
   let topTrends = getTopTrends();
-  // Maximum of 3 countries. If given more, only take first 3.
-  let countries = $('#country-select').val().slice(0, 3);
+  // The list of selected countries. If given more than the maximum number of
+  // countries, then discount additional countries.
+  let selectedCountriesList =
+      $('#country-select').val().slice(0, MAX_SELECTED_COUNTRIES);
 
-  // Get new search results when given a topic and at least 1 country.
-  if (topic.length !== 0 && countries.length !== 0) {
-    setUserSearchTopic(topic, countries);
+  // Check whether there is at least 1 selected country and the topic is not
+  // blank.
+  if (topic.length === 0 && selectedCountriesList.length === 0) {
+    return;
   }
+
+  setUserSearchTopic(topic, selectedCountriesList);
 }
 
 /**
- * Creates the select for all of the countries in the relevant json.
+ * Creates the selector for all of the countries in the relevant json.
  */
 function countrySelectSetUp() {
   let container = document.getElementById('country-select');

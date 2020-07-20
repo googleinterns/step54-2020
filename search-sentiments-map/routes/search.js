@@ -25,10 +25,16 @@ const datastore = new Datastore();
 const json = require('./../public/country-code.json');
 global.Headers = fetch.Headers;
 
+
+// Multiplier for sentiment scores.
+const SCORE_SCALE_MULTIPLIER = 100;
+// The default score assigned to countries with not search results.
+const NO_RESULTS_DEFAULT_SCORE = -500;
 const STALE_SEARCH_RESULT_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
-// TODO(carmenbenitez): Set this to be 12 hours when our data is
+// TODO(carmenbenitez): Set this to be 12 hours when we want data to be
 // updated every 12 hours.
 const CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS = 24 * 60 * 60000;
+const PAUSE_TO_PREVENT_REACHING_QUOTA_1_MIN_MS = 60000;
 
 /** 
  * Renders a JSON array of the top search results for all countries with API
@@ -44,7 +50,8 @@ router.get('/:topic', (req, res) => {
 
 /** 
  * Renders a JSON array of the top search results for requested countries with
- * API data from within the last 12 hours for the specified topic.
+ * API data from within the last
+ * `CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS` for the specified topic.
  */
 router.get('/:topic/:countries', (req, res) => {
   let topic = req.params.topic;
@@ -84,7 +91,7 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
         let countriesData = customSearchTopic[0].countries;
 
         // Determine whether a country has existing data or data needs to be
-        // retrieved from Custom Search API for this country on this topic.
+        // retrieved from Custom Search API for this topic.
         countries.forEach(country => {
           let countryData = countriesData
               .filter(countries => countries.country === country);
@@ -97,7 +104,7 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
 
         // Obtain custom search data for countries without current data.     
         // Add new custom search data to existing entity and to the data to
-        // send back to front end.
+        // send back to the frontend.
         if (countriesToAddDataFor.length !== 0) {
           let newCountriesData = await getSearchResultsForArrayOfCountries(
             countriesToAddDataFor, topic);
@@ -121,13 +128,13 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
     };
     return customSearchTopicJsonArray;
   } catch (err) {
-    console.error('ERROR:', err);
+    console.error('ERROR: ', err);
   }
 }
 
 /** 
- * Retrieves search result data for given countries for a given topic. Returns
- * this data.
+ * Retrieves search result data for given countries for a given topic and 
+ * returns it.
  * @param {Array} countries Array of 2 letter country codes for search results
  *     to be written in.
  * @param {string} topic Search query.
@@ -149,14 +156,14 @@ async function getSearchResultsForArrayOfCountries(countries, topic) {
 }
 
 /** 
- * Adds country data for specific topic to a CustomSearchTopic entity.
+ * Adds country data for specific topic to a `CustomSearchTopic` entity.
  * @param {string} countriesData Search results for countries to add to the
  *     Datastore.
- * @param {Object} customSearchEntity Entity we are adding search results to.
+ * @param {Object} customSearchEntity The entity we are adding search results to.
  */
 async function addNewCountryData(countriesData, customSearchEntity) {
   // Do not update timestamp to make sure the oldest data is from within the
-  // last 12 hours. 
+  // last `CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS` hours. 
   customSearchEntity.countries =
       customSearchEntity.countries.concat(countriesData);
   await datastore.save(customSearchEntity);
@@ -171,7 +178,7 @@ async function retrieveSearchResultFromDatastore(topic) {
   // Request latest entity with a topic matching the given topic.
   const query = datastore.createQuery('CustomSearchTopic').order('timestamp', {
     descending: true,
-  }).filter('topic', topic).limit(1);
+  }).filter('lowercaseTopic', topic.toLowerCase()).limit(1);
 
   try {
     const [customSearchTopic] = await datastore.runQuery(query);
@@ -182,7 +189,7 @@ async function retrieveSearchResultFromDatastore(topic) {
     };
     return customSearchTopicJsonArray;
   } catch (err) {
-    console.error('ERROR:', err);
+    console.error('ERROR: ', err);
   }
 }
 
@@ -199,7 +206,8 @@ async function updateSearchResults() {
       updateSearchResultsForTopic(trends[i].trendTopic);
       // 100 queries per minute limit for Custom Search API. Pause to prevent
       // surpassing limit.
-      await new Promise(resolve => setTimeout(resolve, 60000));
+      await new Promise(resolve =>
+          setTimeout(resolve, PAUSE_TO_PREVENT_REACHING_QUOTA_1_MIN_MS));
     }
   });
 }
@@ -233,9 +241,10 @@ async function updateSearchResultsForTopic(query) {
     // Use 100 queries per minute limit for the Custom Search API, and include
     // a pause of 1 minute to prevent surpassing limit.
     if (i !== 0 && i % 100 === 0) {
-      await new Promise(resolve => setTimeout(resolve, 60000));
+      await new Promise(resolve =>
+          setTimeout(resolve, PAUSE_TO_PREVENT_REACHING_QUOTA_1_MIN_MS));
     }
-    // Update {@code countryData} within the functions called.
+    // Update `countryData` within the functions called.
     const countryResults =
         await getCustomSearchResultsForCountry(json[i].id, query);
     countriesData.push({
@@ -272,13 +281,12 @@ async function getCustomSearchResultsForCountry(countryCode, query) {
  */
 async function formatCountryResults(searchResultsJson) {
   // Parse the JSON string and pass each search result to add to the
-  // {@code countryData} object.
+  // `countryData` object.
   let currentSearchResults = searchResultsJson.items;
     let countryData = [];
     let totalScore = 0;
     if (currentSearchResults == undefined) {
-      // -500 is the score to signify there were no results.
-      return {score: -500, results: countryData};
+      return {score: NO_RESULTS_DEFAULT_SCORE, results: countryData};
     }
     for (let i = 0; i < currentSearchResults.length; i++) {
       let formattedResults =
@@ -286,8 +294,7 @@ async function formatCountryResults(searchResultsJson) {
       countryData.push(formattedResults);
       totalScore += formattedResults.score;
     }
-    // -500 is the score to signify there were no results.
-    let avgScore = -500;
+    let avgScore = NO_RESULTS_DEFAULT_SCORE;
     if (currentSearchResults.length !== 0) {
       avgScore = totalScore / currentSearchResults.length;
     } 
@@ -308,7 +315,7 @@ function formatSearchResults(searchResult) {
           snippet: searchResult.snippet,
           htmlTitle: searchResult.htmlTitle,
           link: searchResult.link,
-          score: 100*result.score,
+          score: SCORE_SCALE_MULTIPLIER * result.score,
         };
       });
 }
@@ -374,7 +381,7 @@ async function addCustomSearchTopicEntityToDatastore(topic, countriesData) {
     await datastore.save(entity);
     console.log(`Custom Search Result ${customSearchTopicKey.id} created successfully.`);
   } catch (err) {
-    console.error('ERROR:', err);
+    console.error('ERROR: ', err);
   }
 }
 

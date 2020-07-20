@@ -25,14 +25,30 @@ let mapStyle = [{
 }];
 let map;
 let infowindow;
+
+// Multiplier for sentiment scores.
+const SCORE_SCALE_MULTIPLIER = 100;
+// The default score assigned to countries with not search results.
+const NO_RESULTS_DEFAULT_SCORE = -500;
+
 /* 
  * Hold the minimum and maximum values of the sentiment scores.
- * The sentiment API returns scores from -1.0 to 1.0.
+ * The sentiment API returns scores from -1.0 to 1.0. Our value is these max
+ * and min scores multiplied by our score multiplier.
  */
+const DATA_MIN = SCORE_SCALE_MULTIPLIER * 1.0;
+const DATA_MAX = SCORE_SCALE_MULTIPLIER  *-1.0;
 
- // TODO(ntarn@): Change this to 100 and -100 when sentiment scores rescaled.
-const DATAMIN = 100.0;
-const DATAMAX = -100.0;
+/**
+ * HSL color codes for country colorings.
+ * @enum {Array}
+ */
+const CountryColorCodes = {
+  GREEN: [151, 83, 34],
+  RED: [5, 69, 54],
+  DARK_GRAY: [0, 0, 31], 
+  LIGHT_GRAY: [62, 1, 83],
+};
 
 /** Loads the map with country polygons when page loads. */
 function initMap() {
@@ -46,9 +62,9 @@ function initMap() {
       .push(document.getElementById('legend'));
   // Update and display the map legend.
   document.getElementById('data-min').textContent =
-      DATAMIN.toLocaleString();
+      DATA_MIN.toLocaleString();
   document.getElementById('data-max').textContent =
-      DATAMAX.toLocaleString();
+      DATA_MAX.toLocaleString();
 
   infowindow = new google.maps.InfoWindow({});
 
@@ -71,7 +87,7 @@ function loadMapOutline() {
 
 /** Loads the country sentiment score from Datastore. */
 function loadCountryData() {
-  map.data.forEach(function (row) {
+  map.data.forEach(function(row) {
     const countryCode = row.getId();
     let topicData = getCurrentCustomSearchData();
     let countryData = topicData.countries
@@ -95,22 +111,22 @@ function loadCountryData() {
  * @returns {googe.maps.Data.StyleOptions} styling information for feature
  */
 function styleFeature(feature) {
-  let high = [5, 69, 54];  // Color of largest datum.
-  let low = [151, 83, 34]; // Color of smallest datum.
+  let high = CountryColorCodes.RED;
+  let low = CountryColorCodes.GREEN;
   let color = [];
   let countryData = feature.getProperty('country_data');
 
   if (countryData == null) {
-    // Set country color to be light grey if that country is disabled(occurs in
+    // Set country color to be light gray if that country is disabled(occurs in
     // user search).
-    color = [62, 1, 83];
-  } else if (countryData === -500) {
-    // Set country color to be dark grey if that coutnry has no results.
-    color = [0, 0, 31];  
+    color = CountryColorCodes.LIGHT_GRAY;
+  } else if (countryData === NO_RESULTS_DEFAULT_SCORE) {
+    // Set country color to be dark gray if that country has no results.
+    color = CountryColorCodes.DARK_GRAY;  
   } else if (countryData != null) {
     // Delta represents where the value sits between the min and max.
-    let delta = (countryData - DATAMIN) /
-        (DATAMAX - DATAMIN);
+    let delta = (countryData - DATA_MIN) /
+        (DATA_MAX - DATA_MIN);
 
     color = [];
     for (let i = 0; i < 3; i++) {
@@ -142,14 +158,16 @@ function mouseInToRegion(e) {
   let countryData = e.feature.getProperty('country_data');
   // Add popup info window with country info.
   if (countryData != null) {
-    // Set the hover country so the setStyle function can change the border.
+    // Set the hover country so the `setStyle` function can change the
+    // border.
     e.feature.setProperty('country', 'hover');
     countryInfo = e.feature.getProperty('name') + ': ';
 
-    // Display "N/A" on hover when countryData is -500, the value signifying
-    // there were no results.
+    // Display "N/A" on hover when `countryData` is the no results
+    // default score.
     countryInfo +=
-        ((countryData === -500) ? "N/A" : countryData.toLocaleString());
+        ((countryData === NO_RESULTS_DEFAULT_SCORE) ?
+            "N/A" : countryData.toLocaleString());
 
     infowindow.setContent(countryInfo);
     infowindow.setPosition(e.latLng);

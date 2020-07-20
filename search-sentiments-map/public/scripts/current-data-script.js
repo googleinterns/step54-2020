@@ -17,6 +17,8 @@ let currentTrend = '';
 
 // The custom search data for the trend that the user is viewing.
 let currentCustomSearchData = '';
+
+// The current top trends.
 let topTrends = '';
 
 /** Returns the current trend that the user is viewing. */
@@ -24,25 +26,27 @@ function getCurrentTrend() {
   return currentTrend;
 }
 
-/** Returns current trend user is viewing. */
+/** Returns current trend that the user is viewing. */
 function getTopTrends() {
   return topTrends;
 }
 
-/** Returns current custom search data for trend user is viewing. */
+/** Returns current custom search data for trend that user is viewing. */
 function getCurrentCustomSearchData() {
   return currentCustomSearchData;
 }
 
 /** 
- * Retrieves relevant data for new trend and reconstructs map with new data.
+ * Retrieves relevant data for new trend and reconstructs the map with new
+ * data.
  * @param {string} trend New trend to get data for.
  */
 function setNewTrend(trend) {
   updateTrends();
 
   // TODO(carmenbenitez): Uncommment if/else block to show data for other
-  // search results when custom search data for all current top trends is set up. 
+  // search results when custom search data for all current top trends is set
+  // up. 
   // if (trend != null){
   //   currentTrend = trend;
   // } else {
@@ -84,7 +88,7 @@ function setUserSearchTopic(topic, countries) {
 }
 
 /**
- * Fetches current top trends from back end and displays them on the website.
+ * Fetches current top trends from the backend and displays them on the website.
  */
 function updateTrends() {
   fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
