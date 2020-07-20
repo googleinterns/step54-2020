@@ -17,15 +17,17 @@
  * @param {?google.maps.MouseEvent} e Click event.
  */
 function onClickCountry(e) {
-  $('#region-info-modal').modal('show');
+  if (e.feature.getProperty('country_data') != null) {
+    $('#region-info-modal').modal('show');
 
-  // Update Modal with information for relevant country.
-  const countryName = e.feature.getProperty('name');
-  const countryId = e.feature.getId();
-  const countryData = e.feature.getProperty('country_data').toLocaleString();
-  document.getElementById('modal-title').innerText = countryName;
-  displayTopResultsForCurrentTrend(countryId);
-  setCountryTrends(countryId);
+    // Update Modal with information for relevant country.
+    const countryName = e.feature.getProperty('name');
+    const countryId = e.feature.getId();
+    //const countryData= e.feature.getProperty('country_data').toLocaleString();
+    document.getElementById('modal-title').innerText = countryName;
+    displayTopResultsForCurrentTrend(countryId);
+    setCountryTrends(countryId);
+  }
 }
 
 /**
@@ -55,25 +57,25 @@ function setCountryTrends(countryCode) {
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displayTopResultsForCurrentTrend(countryCode) {
-  let topic = getCurrentTrend;
-  let topicData = getCurrentCustomSearchData();
-  let date = new Date(topicData.timestamp);
-  let resultElement = document.getElementById('search-results-tab');
+  let dataByCountry = getCurrentCustomSearchData().dataByCountry;
+  let date = new Date(getCurrentCustomSearchData().timestamp);
+  let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
 
-  let countryData = topicData.countries
-      .filter(countries => countries.country === countryCode);
+  let countryData = dataByCountry.filter(data => data.country === countryCode);
 
-  // Handle case where there are no results.
-  if (countryData.length === 0) {
+  if (countryData.length === 0 || countryData[0].averageSentiment == -500) {
+    // Handle case where there are no results.
     resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
         date.toString() + '<i><br>';
   } else {
-    let results = countryData[0].results;
-
+    resultElement.innerHTML += 'Popularity Score: ' + 
+        countryData[0].interest + '<br>';
     resultElement.innerHTML += 'Average Sentiment Score: ' + 
         countryData[0].averageSentiment + '<br>';
 
+    // Get search results of the specified country.
+    let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
       resultElement.innerHTML += '<a href=' + results[i].link + '>' +
         results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'
@@ -83,4 +85,3 @@ function displayTopResultsForCurrentTrend(countryCode) {
       '<i><br>';
   }
 }
-

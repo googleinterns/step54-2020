@@ -26,13 +26,13 @@ let mapStyle = [{
 let map;
 let infowindow;
 /* 
- * Hold the minimum and maximum values of the sentiment scores. By default, we
- * set them to hold the maximum and minimum possible integer values
- * respectively, so they can later be appropriately replaced by the actual
- * sentiment scores.
+ * Hold the minimum and maximum values of the sentiment scores.
+ * The sentiment API returns scores from -1.0 to 1.0.
  */
-let dataMin = Number.MAX_VALUE;
-let dataMax = Number.MIN_VALUE;
+
+ // TODO(ntarn@): Change this to 100 and -100 when sentiment scores rescaled.
+const DATAMIN = 100.0;
+const DATAMAX = -100.0;
 
 /** Loads the map with country polygons when page loads. */
 function initMap() {
@@ -44,6 +44,11 @@ function initMap() {
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
       .push(document.getElementById('legend'));
+  // Update and display the map legend.
+  document.getElementById('data-min').textContent =
+      DATAMIN.toLocaleString();
+  document.getElementById('data-max').textContent =
+      DATAMAX.toLocaleString();
 
   infowindow = new google.maps.InfoWindow({});
 
@@ -58,39 +63,44 @@ function initMap() {
 
 /** Loads the country boundary polygons from a GeoJSON source. */
 function loadMapOutline() {
-  // Load country data after finished loading in geojson.
-  map.data.loadGeoJson('countries.geojson', null, function () {
-    setNewTrend();
-  });
+  map.data.loadGeoJson('countries.geojson', null);
 }
 
-/** Loads the country sentiment score from Datastore. */
-function loadCountryData() {
-  map.data.forEach(function (row) {
-    const countryCode = row.getId();
-    let topicData = getCurrentCustomSearchData();
-    let countryData = topicData.countries
-      .filter(countries => countries.country === countryCode);
-    let dataVariable = 0;
-    if (countryData.length != 0) {
-      dataVariable = countryData[0].averageSentiment;
-    }
+/** 
+ * Gets the selected mode (sentiment or popularity) from the webpage and loads
+ * data correspondingly.
+ */
+function loadCountryDataByMode() {
+  let sentimentMode = !document.getElementById('sentiment-popularity-check').checked;
+  console.log('sentiment mode', sentimentMode);
 
-    // Keep track of min and max values as we read them.
-    if (dataVariable < dataMin) {
-      dataMin = dataVariable;
-    }
-    if (dataVariable > dataMax) {
-      dataMax = dataVariable;
+  const topicHeader = document.getElementById('topic-header');
+  topicHeader.innerText = sentimentMode ?
+      'Worldwide sentiments of search results for "' + getCurrentTrend() + '"' :
+      'Worldwide interests for "' + getCurrentTrend() + '"' ;
+
+  loadCountryData(sentimentMode);
+}
+
+/** 
+ * Loads the sentiments or search interests for all countries from Datastore. 
+ * @param {boolean=} sentimentMode Whether the result to obtain is the sentiments 
+ * (search interest otherwise).
+ */
+function loadCountryData(sentimentMode=true) {
+  map.data.forEach(function(row) {
+    let dataByCountry = getCurrentCustomSearchData().dataByCountry;
+    let countryData = dataByCountry.filter(data => data.country === row.getId());
+
+    let dataVariable;
+    if (countryData.length == 0) {
+      dataVariable = null;      
+    } else {
+      dataVariable = 
+          sentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
     }
 
     row.setProperty('country_data', dataVariable);
-
-    // Update and display the map legend.
-    document.getElementById('data-min').textContent =
-        dataMin.toLocaleString();
-    document.getElementById('data-max').textContent =
-        dataMax.toLocaleString();
   });
 }
 
@@ -102,17 +112,28 @@ function loadCountryData() {
  * @returns {googe.maps.Data.StyleOptions} styling information for feature
  */
 function styleFeature(feature) {
-  let low = [5, 69, 54];  // Color of smallest datum.
-  let high = [151, 83, 34]; // Color of largest datum.
-
-  // Delta represents where the value sits between the min and max.
-  let delta = (feature.getProperty('country_data') - dataMin) /
-      (dataMax - dataMin);
-
+  let high = [5, 69, 54];  // Color of largest datum.
+  let low = [151, 83, 34]; // Color of smallest datum.
   let color = [];
-  for (let i = 0; i < 3; i++) {
-    // Calculate an integer color based on the delta.
-    color[i] = (high[i] - low[i]) * delta + low[i];
+  let countryData = feature.getProperty('country_data');
+
+  if (countryData == null) {
+    // Set country color to be light grey if that country is disabled (occurs in
+    // user search).
+    color = [62, 1, 83];
+  } else if (countryData === -500) {
+    // Set country color to be dark grey if that coutnry has no results.
+    color = [0, 0, 31];  
+  } else {
+    // Delta represents where the value sits between the min and max.
+    let delta = (countryData - DATAMIN) /
+        (DATAMAX - DATAMIN);
+
+    color = [];
+    for (let i = 0; i < 3; i++) {
+      // Calculate an integer color based on the delta.
+      color[i] = (high[i] - low[i]) * delta + low[i];
+    }
   }
 
   let outlineWeight = 0.5, zIndex = 1;
@@ -135,15 +156,22 @@ function styleFeature(feature) {
  * @param {?google.maps.MouseEvent} e Mouse-in event.
  */
 function mouseInToRegion(e) {
-  // Set the hover country so the setStyle function can change the border.
-  e.feature.setProperty('country', 'hover');
-
+  let countryData = e.feature.getProperty('country_data');
   // Add popup info window with country info.
-  const countryInfo = e.feature.getProperty('name') + ': ' +
-      e.feature.getProperty('country_data').toLocaleString();
-  infowindow.setContent(countryInfo);
-  infowindow.setPosition(e.latLng);
-  infowindow.open(map);
+  if (countryData != null) {
+    // Set the hover country so the setStyle function can change the border.
+    e.feature.setProperty('country', 'hover');
+    countryInfo = e.feature.getProperty('name') + ': ';
+
+    // Display "N/A" on hover when countryData is -500, the value signifying
+    // there were no results.
+    countryInfo +=
+        ((countryData === -500) ? "N/A" : countryData.toLocaleString());
+
+    infowindow.setContent(countryInfo);
+    infowindow.setPosition(e.latLng);
+    infowindow.open(map);
+  }
 }
 
 /**

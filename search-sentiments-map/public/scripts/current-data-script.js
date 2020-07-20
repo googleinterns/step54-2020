@@ -17,6 +17,7 @@ let currentTrend = '';
 
 // The custom search data for the trend that the user is viewing.
 let currentCustomSearchData = '';
+let topTrends = '';
 
 // The current time range for the data that the user is viewing.
 let currentTimeRange = '';
@@ -31,6 +32,11 @@ function getCurrentTimeRange() {
   return currentTimeRange;
 }
 
+/** Returns top trends for timeRange that the user is viewing. */
+function getTopTrends() {
+  return topTrends;
+}
+
 /** 
  * Returns current custom search data for the trend that the user is viewing.
  */
@@ -43,23 +49,48 @@ function getCurrentCustomSearchData() {
  * @param {string} trend New trend to get data for.
  */
 function setNewTrend(trend) {
-  // TODO(carmenbenitez): Add if/else block to show data for other search
-  // results when custom search data for all current top trends is set up. 
-  currentTrend = 'The Old Guard';
-  
-  const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = 
-      'Worldwide sentiments of search results for "' + currentTrend + '"';
+  currentTrend = trend;
+  //updateTrends();
 
-  // Reload map with new sentiment data and relevant coloring.
-  fetch('/search/' + currentTrend)
-      .then(resultsJsonArray => resultsJsonArray.json()).then(topicResults => {
+  fetch('/search/' + trend)
+      .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
+        currentCustomSearchData = topicData;
+      }).then(() => {
+        // Reload map with new sentiment or search interest data and relevant coloring.
+        loadCountryDataByMode();
+      });
+}
+
+/** 
+ * Retrieves relevant data for new trend and reconstructs map with new data.
+ * @param {string} topic New topic to get data for.
+ * @param {Array} countries Countries to get data for.
+ */
+function setUserSearchTopic(topic, countries) {
+  currentTrend = topic;
+  //updateTrends();
+
+  fetch('/search/' + topic + '/' + JSON.stringify(countries))
+      .then(response => response.json())
+      .then(topicResults => {
+        console.log(topicResults);
         currentCustomSearchData = topicResults;
-        loadCountryData();
+      }).then(() => {
+          // Reload map with new sentiment or search interest data and relevant coloring.
+          loadCountryDataByMode();
       });
 }
 
 function changeTimeRange(timeRange) {
   currentTimeRange = timeRange;
-  
+}
+
+/**
+ * Fetches current top trends from back end and displays them on the website.
+ */
+function updateTrends() {
+  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
+    topTrends = trends;
+    setTopTrends(); 
+  });
 }

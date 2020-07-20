@@ -70,11 +70,11 @@
   -webkit-box-flex: 1;
 }
 
-.slidecontainer {
+.timeline-slide-container {
   width: 100%;
 }
 
-.slider {
+.timeline-slider {
   appearance: none;
   background: #d3d3d3;
   height: 25px;
@@ -86,11 +86,11 @@
   -webkit-transition: .2s;
 }
 
-.slider:hover {
+.timeline-slider:hover {
   opacity: 1;
 }
 
-.slider::-webkit-slider-thumb {
+.timeline-slider::-webkit-timeline-slider-thumb {
   appearance: none;
   background: #4CAF50;
   cursor: pointer;
@@ -99,9 +99,48 @@
   -webkit-appearance: none;
 }
 
-.slider::-moz-range-thumb {
+.timeline-slider::-moz-range-thumb {
   background: #4CAF50;
   cursor: pointer;
   height: 25px;
   width: 25px;
+}
+
+/* The switch - the box around the slider. */
+.switch {
+  margin-top: 20px;
+  position: relative;
+  display: inline-block;
+  width: 100px;
+  height: 40px;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #2196F3;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 32px;
+  width: 46px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(46px);
+  -ms-transform: translateX(46px);
+  transform: translateX(46px);
 }
