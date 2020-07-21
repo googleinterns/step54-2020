@@ -1,7 +1,10 @@
 .content {
   font-size: 18px;
-  margin: auto;
-  padding: 30px;
+}
+
+#map {
+  height: 100vh;
+  width: 100vw;
 }
 
 i {
@@ -12,11 +15,14 @@ i {
   text-align: center;
 }
 
-#map {
-  height: 80vh;
+#right-div {
+  height: 60vh;
+  position: absolute;
+  right: 30px;
+  top: 40px;
 }
 
-#search-box {
+#search-div {
   margin: 20px;
 }
 
@@ -84,7 +90,7 @@ i {
   display: inline-block;
   height: 40px;
   margin-top: 20px;
-  position: relative;
+  position: absolute;
   width: 100px;
 }
 
@@ -116,4 +122,10 @@ input:checked + .slider:before {
   transform: translateX(46px);
   -ms-transform: translateX(46px);
   -webkit-transform: translateX(46px);
+}
+
+#top-left-div {
+  position: absolute;
+  top: 50px;
+  left: 40px;
 }
