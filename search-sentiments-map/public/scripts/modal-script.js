@@ -12,9 +12,6 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-// The default score assigned to countries with no search results.
-const NO_RESULTS_DEFAULT_SCORE = -500;
-
 /**
  * Displays the information modal when a country on the map is clicked.
  * @param {?google.maps.MouseEvent} e Click event.

@@ -56,14 +56,22 @@
           </div>
         </div>
         <div class="col-sm-3">
-          <div id="search-box">
-            <div class="input-group">
+          <form onsubmit="return false">
+            <div id="search-box">
               <input type="text" class="form-control" id="search-topic" name="search-topic" placeholder="Search for a topic">
-              <button type="submit" class="btn btn-primary" onclick="searchTopic()">Search</button>
+              <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle" type="button" 
+                        id="dropdownMenu1" data-toggle="dropdown" 
+                        aria-haspopup="true" aria-expanded="true">
+                  Countries to view results for(max 3)<span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="dropdownMenu1" id="country-select-dropdown" ></ul>
+              </div>
+              <button type="submit" id="submit-user-search" class="btn btn-primary" onclick="searchTopic()" data-container="body" data-toggle="popover" data-placement="bottom" data-content="">
+                Search
+              </button>
             </div>
-            <label for="country-select">Choose countries to view results for (max 3): </label>
-            <select class="country-select" id="country-select" size="3" multiple></select>
-          </div>
+          </form>
           <div>
             <br><br>
             <h3>Trending Search Topics</h3>
