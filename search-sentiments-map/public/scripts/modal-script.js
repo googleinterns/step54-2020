@@ -24,7 +24,6 @@ function onClickCountry(e) {
   // Update Modal with information for relevant country.
   const countryName = e.feature.getProperty('name');
   const countryId = e.feature.getId();
-  const countryData = e.feature.getProperty('country_data').toLocaleString();
   document.getElementById('modal-title').innerText = countryName;
   displayTopResultsForCurrentTrend(countryId);
   setCountryTrends(countryId);
@@ -58,25 +57,24 @@ function setCountryTrends(countryCode) {
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displayTopResultsForCurrentTrend(countryCode) {
-  let topic = getCurrentTrend;
-  let topicData = getCurrentCustomSearchData();
-  let date = new Date(topicData.timestamp);
-  let resultElement = document.getElementById('search-results-tab');
+  let dataByCountry = getCurrentCustomSearchData().dataByCountry;
+  let date = new Date(getCurrentCustomSearchData().timestamp);
+  let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
 
-  let countryData = topicData.countries
-      .filter(countries => countries.country === countryCode);
-
-  // Handle case where there are no results.
+  let countryData = dataByCountry.filter(data => data.country === countryCode);
   if (countryData.length === 0) {
+    // Handle case where there are no results.
     resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
         date.toString() + '<i><br>';
   } else {
-    let results = countryData[0].results;
-
+    resultElement.innerHTML += 'Popularity Score: ' + 
+        countryData[0].interest + '<br>';
     resultElement.innerHTML += 'Average Sentiment Score: ' + 
         countryData[0].averageSentiment + '<br>';
 
+    // Get search results for the specified country.
+    let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
       // i + 1 shows the index for each search result. 
       resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
@@ -89,20 +87,18 @@ function displayTopResultsForCurrentTrend(countryCode) {
   }
 }
 
-
 /** 
  * Displays sentiment chart of search results for the current country on the modal.
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displaySentimentChartForCurrentTrend(countryCode) {
-  let topic = getCurrentTrend();
-  let topicData = getCurrentCustomSearchData();
-  let date = new Date(topicData.timestamp);
+  // let topic = getCurrentTrend();
+  let dataByCountry = getCurrentCustomSearchData().dataByCountry;
+  let countryData = dataByCountry.filter(data => data.country === countryCode);
+  // let topicData = getCurrentCustomSearchData();
+  let date = new Date(getCurrentCustomSearchData().timestamp);
   let chartElement = document.getElementById('sentiment-chart-tab');
   chartElement.innerHTML = '';
-
-  let countryData = topicData.countries
-      .filter(countries => countries.country === countryCode);
 
   // Handle case where there are no results.
   if (countryData.length === 0 ||
@@ -144,9 +140,9 @@ function drawSentimentChart(chartElement, results) {
 
   let options = {
     title: "Sentiment Scores of Search Results",
-    width: 475,
+    width: 800,
     height: 400,
-    bar: {groupWidth: "75%"},
+    bar: {groupWidth: "55%"},
     legend: {position: "none"},
     hAxis: {
       title: 'Search Results Index',
