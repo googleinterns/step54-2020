@@ -23,13 +23,14 @@ function getTopTrends() {
   return topTrends;
 }
 
-/** Returns current custom search data for trend user is viewing. */
+/** Returns current custom search data for trend that user is viewing. */
 function getCurrentSearchData() {
   return currentSearchData;
 }
 
 /** 
- * Retrieves relevant data for new trend and reconstructs map with new data.
+ * Retrieves relevant data for new trend and reconstructs the map with new
+ * data.
  * @param {string} trend New trend to get data for.
  */
 function setNewTrend(trend) {
@@ -59,7 +60,7 @@ function setUserSearchTopic(topic, countries) {
 }
 
 /**
- * Fetches current top trends from back end and displays them on the website.
+ * Fetches current top trends from the backend and displays them on the website.
  */
 function updateTrends() {
   fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {

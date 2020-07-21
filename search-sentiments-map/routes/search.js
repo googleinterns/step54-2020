@@ -31,10 +31,14 @@ const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
 // TODO(carmenbenitez): Set this to be 12 hours when our data is
 // updated every 12 hours.
 const CURRENT_DATA_THRESHOLD_24_HOURS_MS = 24 * 60 * 60000;
-const PAUSE_ONE_MIN_MS = 60000;
+const PAUSE_TO_PREVENT_REACHING_QUOTA_1_MIN_MS = 60000;
 const QUERIES_PER_MIN = 100;
-// Use -500 to signify where there is no search results or interest data.
-const SCORE_NO_RESULTS = -500;
+
+// Multiplier for sentiment scores.
+const SCORE_SCALE_MULTIPLIER = 100;
+// The default score assigned to countries with not search results or interest
+// data.
+const NO_RESULTS_DEFAULT_SCORE = -500;
 
 /** 
  * Renders a JSON array of the top search results for all countries with API
@@ -50,7 +54,8 @@ router.get('/:topic', (req, res) => {
 
 /** 
  * Renders a JSON array of the top search results for requested countries with
- * API data from within the last 12 hours for the specified topic.
+ * API data from within the last
+ * `CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS` for the specified topic.
  */
 router.get('/:topic/:countries', (req, res) => {
   let topic = req.params.topic;
@@ -113,7 +118,7 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
         let countriesData = worldDataByTopic[0].dataByCountry;
 
         // Determine whether a country has existing data or data needs to be
-        // retrieved from Custom Search API for this country on this topic.
+        // retrieved from Custom Search API for this topic.
         countries.forEach(country => {
           let countryData = countriesData
               .filter(countries => countries.country === country);
@@ -126,7 +131,7 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
 
         // Obtain custom search data for countries without current data.     
         // Add new custom search data to existing entity and to the data to
-        // send back to front end.
+        // send back to the frontend.
         if (countriesToAddDataFor.length !== 0) {
           let newCountriesData = await getSearchResultsForCountriesForTopic(
               countriesToAddDataFor, topic);
@@ -149,7 +154,7 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
       dataByCountry: countriesDataToReturn,
     };
   } catch (err) {
-    console.error('ERROR:', err);
+    console.error('ERROR: ', err);
   }
 }
 
@@ -161,7 +166,7 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
  */
 async function addNewCountryData(countriesData, worldDataEntity) {
   // Do not update timestamp to make sure the oldest data is from within the
-  // last 12 hours.
+  // last `CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS` hours.
   worldDataEntity.dataByCountry =
       worldDataEntity.dataByCountry.concat(countriesData);
   await datastore.save(worldDataEntity);
@@ -180,12 +185,15 @@ async function updateSearchResults() {
     // out `await new Promise` line to avoid 1 minute pauses.
     for (let i = 0; i < trends.length; i++) {
       let topic = trends[i].trendTopic;
+      console.log('Creating WorldDataByTopic entity for', topic)
       let countriesData = await getSearchResultsForCountriesForTopic(
           countries, topic);
-      console.log('Creating WorldDataByTopic entity for', topic)
-
       addWorldDataByTopicToDatastore(topic, countriesData);
-      await new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
+
+      // 100 queries per minute limit for Custom Search API. Pause to prevent
+      // surpassing limit.
+      await new Promise(resolve =>
+          setTimeout(resolve, PAUSE_TO_PREVENT_REACHING_QUOTA_1_MIN_MS));
     }
   });
 }
@@ -226,7 +234,8 @@ async function getSearchResultsForCountriesForTopic(countries, topic) {
       // Use a limited number of queries per minute for the Custom Search API, 
       // and include a pause to prevent surpassing limit.
       if (i !== 0 && i % QUERIES_PER_MIN === 0) {
-        await new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
+        await new Promise(resolve => 
+            setTimeout(resolve, PAUSE_TO_PREVENT_REACHING_QUOTA_1_MIN_MS));
       }
       let countryResults = await getCustomSearchResultsForCountry(
           countryCode, topic);
@@ -273,7 +282,7 @@ async function formatCountryResults(searchResultsJson) {
   let countryData = [];
   let totalScore = 0;
   if (currentSearchResults == undefined) {
-    return {score: SCORE_NO_RESULTS, results: countryData};
+    return {score: NO_RESULTS_DEFAULT_SCORE, results: countryData};
   }
   for (let i = 0; i < currentSearchResults.length; i++) {
     let formattedResults =
@@ -281,7 +290,7 @@ async function formatCountryResults(searchResultsJson) {
     countryData.push(formattedResults);
     totalScore += formattedResults.score;
   }
-  let avgScore = SCORE_NO_RESULTS;
+  let avgScore = NO_RESULTS_DEFAULT_SCORE;
   if (currentSearchResults.length !== 0) {
     avgScore = totalScore / currentSearchResults.length;
   }
@@ -302,7 +311,7 @@ function formatSearchResult(searchResult) {
           snippet: searchResult.snippet,
           htmlTitle: searchResult.htmlTitle,
           link: searchResult.link,
-          score: 100*result.score,
+          score: SCORE_SCALE_MULTIPLIER * result.score,
         };
       });
 }
@@ -386,7 +395,7 @@ async function addWorldDataByTopicToDatastore(topic, countriesData) {
     await datastore.save(entity);
     console.log(`Custom Search Result ${worldDataByTopicKey.id} created successfully.`);
   } catch (err) {
-    console.error('ERROR:', err);
+    console.error('ERROR: ', err);
   }
 }
 

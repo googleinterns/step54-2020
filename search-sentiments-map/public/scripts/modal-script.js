@@ -78,7 +78,8 @@ function displayTopResultsForCurrentTrend(countryCode) {
 
   let countryData = dataByCountry.filter(data => data.country === countryCode);
 
-  if (countryData.length === 0 || countryData[0].averageSentiment == -500) {
+  if (countryData.length === 0 ||
+      countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
     // Handle case where there are no results.
     resultElement.innerHTML += 'No results.<br>';
   } else {
