@@ -20,13 +20,12 @@ const MAX_SELECTED_COUNTRIES = 3;
 function searchTopic() {
   let topic = document.getElementById("search-topic").value;
   let topTrends = getTopTrends();
-  // The list of selected countries. If given more than the maximum number of
-  // countries, then discount additional countries.
+  // The list of selected countries. If given more than the maximum permitted
+  // number of countries, then ignore the extras.
   let selectedCountriesList =
       $('#country-select').val().slice(0, MAX_SELECTED_COUNTRIES);
 
-  // Check whether there is at least 1 selected country and the topic is not
-  // blank.
+  // Make sure there is at least 1 selected country and a non-empty topic.
   if (topic.length === 0 && selectedCountriesList.length === 0) {
     return;
   }

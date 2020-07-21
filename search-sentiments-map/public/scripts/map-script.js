@@ -28,7 +28,7 @@ let infowindow;
 
 // Multiplier for sentiment scores.
 const SCORE_SCALE_MULTIPLIER = 100;
-// The default score assigned to countries with not search results.
+// The default score assigned to countries with no search results.
 const NO_RESULTS_DEFAULT_SCORE = -500;
 
 /* 
@@ -37,14 +37,14 @@ const NO_RESULTS_DEFAULT_SCORE = -500;
  * and min scores multiplied by our score multiplier.
  */
 const DATA_MAX = SCORE_SCALE_MULTIPLIER * 1.0;
-const DATA_MIN = SCORE_SCALE_MULTIPLIER  *-1.0;
+const DATA_MIN = SCORE_SCALE_MULTIPLIER  * -1.0;
 
 /**
  * HSL color codes for country colorings.
  * @enum {Array}
  */
 const CountryColorCodes = {
-  GREEN: [114, 80, 39],//[151, 83, 34],
+  GREEN: [114, 80, 39],
   RED: [5, 69, 54],
   DARK_GRAY: [0, 0, 31], 
   LIGHT_GRAY: [62, 1, 83],
@@ -109,8 +109,8 @@ function loadCountryData() {
  * @returns {googe.maps.Data.StyleOptions} styling information for feature
  */
 function styleFeature(feature) {
-  let high = CountryColorCodes.RED;
-  let low = CountryColorCodes.GREEN;
+  let high = CountryColorCodes.GREEN;
+  let low = CountryColorCodes.RED;
   let color = [];
   let countryData = feature.getProperty('country_data');
 
@@ -123,8 +123,8 @@ function styleFeature(feature) {
     color = CountryColorCodes.DARK_GRAY;  
   } else if (countryData != null) {
     // Delta represents where the value sits between the min and max.
-    let delta = (countryData - DATA_MAX) /
-        (DATA_MIN - DATA_MAX);
+    let delta = (countryData - DATA_MIN) /
+        (DATA_MAX - DATA_MIN);
 
     color = [];
     // Calculate hsl color integer values based on the delta.
@@ -161,8 +161,8 @@ function mouseInToRegion(e) {
     e.feature.setProperty('country', 'hover');
     countryInfo = e.feature.getProperty('name') + ': ';
 
-    // Display "N/A" on hover when `countryData` is the no results
-    // default score.
+    // Display "N/A" on hover when there are no results and thererfore the
+    // sentiment score is the no results default score.
     countryInfo +=
         ((countryData === NO_RESULTS_DEFAULT_SCORE) ?
             "N/A" : countryData.toLocaleString());

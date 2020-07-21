@@ -12,6 +12,9 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+// The default score assigned to countries with no search results.
+const NO_RESULTS_DEFAULT_SCORE = -500;
+
 /**
  * Displays the information modal when a country on the map is clicked.
  * @param {?google.maps.MouseEvent} e Click event.
@@ -66,7 +69,8 @@ function displayTopResultsForCurrentTrend(countryCode) {
   let countryData = topicData.countries
       .filter(countries => countries.country === countryCode);
   // Handle case where there are no results.
-  if (countryData.length === 0 || countryData[0].averageSentiment === -500) {
+  if (countryData.length === 0 ||
+      countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
     resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
         date.toString() + '<i><br>';
   } else {
