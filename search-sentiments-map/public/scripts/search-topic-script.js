@@ -14,6 +14,7 @@
 
 // Maximum number of countries to get search results for.
 const MAX_SELECTED_COUNTRIES = 3;
+// Countries selected on dropdown.
 let countryList = [];
 
 /**
