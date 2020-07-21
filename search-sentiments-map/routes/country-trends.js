@@ -39,7 +39,7 @@ router.get('/:country', (req, res) => {
 async function retrieveCountryTrends(country) {
   const query = datastore.createQuery('TrendsEntry').order('timestamp', {
     descending: true,
-  }).limit(1);
+  }).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
   const entry = 
       (Date.now() - trendsEntry[0].timestamp > RETRIEVE_RESULTS_TIME_MS) ? 

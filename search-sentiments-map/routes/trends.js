@@ -44,7 +44,7 @@ router.get('/', (req, res) => {
 async function retrieveGlobalTrends() {
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp', {
     descending: true,
-  });
+  }).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
   return {
     timestamp: trendsEntry[0].timestamp,
