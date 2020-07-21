@@ -26,6 +26,9 @@ let mapStyle = [{
 let map;
 let infowindow;
 
+// Whether the map is currently in sentiment mode or popularity mode.
+let isSentimentMode = true;
+
 // Multiplier for sentiment scores.
 const SCORE_SCALE_MULTIPLIER = 100;
 // The default score assigned to countries with no search results.
@@ -37,7 +40,8 @@ const NO_RESULTS_DEFAULT_SCORE = -500;
  * and min scores multiplied by our score multiplier.
  */
 const DATA_MAX = SCORE_SCALE_MULTIPLIER * 1.0;
-const DATA_MIN = SCORE_SCALE_MULTIPLIER  * -1.0;
+const DATA_MIN_SENTIMENT = SCORE_SCALE_MULTIPLIER  * -1.0;
+const DATA_MIN_POPULARITY = 0;
 
 /**
  * HSL color codes for country colorings.
@@ -60,11 +64,7 @@ function initMap() {
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
       .push(document.getElementById('legend'));
-  // Update and display the map legend.
-  document.getElementById('data-min').textContent =
-      DATA_MIN.toLocaleString();
-  document.getElementById('data-max').textContent =
-      DATA_MAX.toLocaleString();
+  updateLegends(true);
 
   infowindow = new google.maps.InfoWindow({});
 
@@ -77,24 +77,49 @@ function initMap() {
   loadMapOutline();
 }
 
-/** Loads the country boundary polygons from a GeoJSON source. */
-function loadMapOutline() {
-  // Load country data after finished loading in geojson.
-  map.data.loadGeoJson('countries.geojson', null, function () {
-    setNewTrend();
-  });
+/** Update the map legend's max and min values. */
+function updateLegends() {
+  let dataMin = isSentimentMode ? DATA_MIN_SENTIMENT : DATA_MIN_POPULARITY;
+  document.getElementById('data-min').textContent =
+      dataMin.toLocaleString();
+  document.getElementById('data-max').textContent =
+      DATA_MAX.toLocaleString();
 }
 
-/** Loads the country sentiment score from Datastore. */
+/** Loads the country boundary polygons from a GeoJSON source. */
+function loadMapOutline() {
+  map.data.loadGeoJson('countries.geojson', null);
+}
+
+/** 
+ * Gets the selected mode (sentiment or popularity) from the webpage and loads
+ * corresponding data.
+ */
+function loadCountryDataByMode() {
+  isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
+
+  const topicHeader = document.getElementById('topic-header');
+  topicHeader.innerText = isSentimentMode ?
+      'Worldwide sentiment scores of search results for "' + getCurrentSearchData().topic + '"' :
+      'Worldwide search interest scores for "' + getCurrentSearchData().topic + '"' ;
+  updateLegends();
+  loadCountryData();
+}
+
+/** 
+ * Loads the sentiments or search interests for all countries from Datastore 
+ * depending on what mode has been specified.
+ */
 function loadCountryData() {
   map.data.forEach(function(row) {
-    const countryCode = row.getId();
-    let topicData = getCurrentCustomSearchData();
-    let countryData = topicData.countries
-      .filter(countries => countries.country === countryCode);
+    let dataByCountry = getCurrentSearchData().dataByCountry;
+    let countryData = dataByCountry
+        .filter(data => data.country === row.getId());
+
     let dataVariable = null;
     if (countryData.length != 0) {
-      dataVariable = countryData[0].averageSentiment;
+      dataVariable = 
+          isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
     }
 
     row.setProperty('country_data', dataVariable);
@@ -106,25 +131,25 @@ function loadCountryData() {
  * callback passed to data.setStyle() and is called for each row in the data
  * set.
  * @param {google.maps.Data.Feature} feature
- * @returns {googe.maps.Data.StyleOptions} styling information for feature
+ * @return {googe.maps.Data.StyleOptions} Styling information for feature.
  */
 function styleFeature(feature) {
-  let high = CountryColorCodes.GREEN;
   let low = CountryColorCodes.RED;
+  let high = CountryColorCodes.GREEN;
   let color = [];
   let countryData = feature.getProperty('country_data');
 
   if (countryData == null) {
-    // Set country color to be light gray if that country is disabled(occurs in
+    // Set country color to be light grey if that country is disabled (occurs in
     // user search).
     color = CountryColorCodes.LIGHT_GRAY;
   } else if (countryData === NO_RESULTS_DEFAULT_SCORE) {
-    // Set country color to be dark gray if that country has no results.
+    // Set country color to be dark grey if that country has no results.
     color = CountryColorCodes.DARK_GRAY;  
-  } else if (countryData != null) {
+  } else {
+    let dataMin = isSentimentMode ? DATA_MIN_SENTIMENT : DATA_MIN_POPULARITY;  
     // Delta represents where the value sits between the min and max.
-    let delta = (countryData - DATA_MIN) /
-        (DATA_MAX - DATA_MIN);
+    let delta = (countryData - dataMin) / (DATA_MAX - dataMin);
 
     color = [];
     // Calculate hsl color integer values based on the delta.

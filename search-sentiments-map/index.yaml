@@ -1,6 +1,6 @@
 indexes:
 
-- kind: CustomSearchTopic
+- kind: WorldDataByTopic
   properties:
   - name: lowercaseTopic
   - name: timestamp

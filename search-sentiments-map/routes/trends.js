@@ -20,7 +20,10 @@ const router = express.Router();  // Using Router to divide the app into modules
 const googleTrends = require('google-trends-api');
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
+
 const TRENDS_DATA_KIND = 'TrendsEntry';
+const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
+const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
 
 /** 
  * Renders a JSON array of the top 20 (or fewer) global search trends maintained
@@ -35,14 +38,21 @@ router.get('/', (req, res) => {
 
 /** 
  * Get the global trends from the most recent Datastore entry.
- * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
+ * @return {!Array<JSON>} A JSON array of global trends and their originating 
+ * countries.
  */
 async function retrieveGlobalTrends() {
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp', {
     descending: true,
-  });
+  }).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
-  return trendsEntry[0].globalTrends;
+  return {
+    timestamp: trendsEntry[0].timestamp,
+    // Returns the most recent trends with search results data retrieved.
+    globalTrends: 
+        (Date.now() - trendsEntry[0].timestamp > RETRIEVE_RESULTS_TIME_MS) ?
+        trendsEntry[0].globalTrends : trendsEntry[1].globalTrends,
+  }
 }
 
 /** 
@@ -156,7 +166,7 @@ async function deleteAncientTrend() {
   if (trendsEntries.length === 0) {
     return;  // Nothing to delete.
   }
-  if (Date.now() - trendsEntries[0].timestamp > 7 * 24 * 60 * 60000) {
+  if (Date.now() - trendsEntries[0].timestamp > STALE_DATA_THRESHOLD_7_DAYS_MS) {
     const trendsEntryKey = trendsEntries[0][datastore.KEY];
     await datastore.delete(trendsEntryKey);
     console.log(`TrendsEntry ${trendsEntryKey.id} deleted.`);

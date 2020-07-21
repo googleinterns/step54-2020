@@ -24,23 +24,25 @@ const NUM_SHOWN = 7;
 function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
   trendsList.innerHTML = '';
-  let trends = getTopTrends();
-  
+  let trends = getTopTrends().globalTrends;
+
   for (let i = 0; i < trends.length; i++) {
     const trendElement = document.createElement('li');
     trendElement.innerText = `${trends[i].trendTopic}`;
-    // Display the number of countries where the trend is trending when hovered.
+    // Display the number of countries where the search topic is trending,
+    // when hovered.
     trendElement.title = `Trending in ${trends[i].count} countries`;
 
-    // Show some trending topics by default and hide the rest.
+    // Show a certain number of trending topics by default and hide the rest.
     trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
     trendElement.addEventListener('click', (event) => {
-      showResultForTopic(event);
+      setNewTrend(event.currentTarget.innerText);
     })
     trendsList.append(trendElement);
   }
 
-  // Add an item to the list that toggles showing more or less topics.
+  // Add a toggle button to the list to show more or less topics depending
+  // on the number of topics displayed.
   if (trends.length > NUM_SHOWN) {
     const showMoreOrLessToggleItem = document.createElement('li');
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
@@ -50,6 +52,11 @@ function setTopTrends() {
     });
     trendsList.append(showMoreOrLessToggleItem);
   }
+  document.getElementById('trends-timestamp').innerText = 
+      'Last Updated: ' + new Date(getTopTrends().timestamp);
+
+  // Set the map to display data on the top-ranking trend.
+  setNewTrend(trends[0].trendTopic);
 }
 
 /**
@@ -70,13 +77,4 @@ function showMoreOrLess() {
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
   }
-}
-
-/** 
- * Update the title of the displayed trend when a topic is selected.
- * TODO(chenyuz): Show sentiment scores for all countries on the selected topic.
- */
-function showResultForTopic(event) {
-  const searchTopic = event.currentTarget.innerText;
-  setNewTrend(searchTopic);
 }

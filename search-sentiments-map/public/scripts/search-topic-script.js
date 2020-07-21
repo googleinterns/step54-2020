@@ -34,7 +34,7 @@ function searchTopic() {
     return;
   }
 
-  getUserSearchTopic(topic, countryList);
+  setUserSearchTopic(topic, countryList);
 }
 
 /**

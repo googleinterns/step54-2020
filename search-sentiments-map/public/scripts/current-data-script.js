@@ -12,28 +12,20 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-// The current trend a user is viewing.
-let currentTrend = '';
-
-// The custom search data for the trend that the user is viewing.
-let currentCustomSearchData = '';
-
-// The current top trends.
+// JSON object for the data that is currently displayed, including topic,
+// timestamp, and custom search data by country.
+let currentSearchData = '';
+// JSON object for the trends that are currently displayed and their timestamp.
 let topTrends = '';
 
-/** Returns the current trend that the user is viewing. */
-function getCurrentTrend() {
-  return currentTrend;
-}
-
-/** Returns current trend that the user is viewing. */
+/** Returns current trend user is viewing. */
 function getTopTrends() {
   return topTrends;
 }
 
 /** Returns current custom search data for trend that user is viewing. */
-function getCurrentCustomSearchData() {
-  return currentCustomSearchData;
+function getCurrentSearchData() {
+  return currentSearchData;
 }
 
 /** 
@@ -42,27 +34,12 @@ function getCurrentCustomSearchData() {
  * @param {string} trend New trend to get data for.
  */
 function setNewTrend(trend) {
-  updateTrends();
-
-  // TODO(carmenbenitez): Uncommment if/else block to show data for other
-  // search results when custom search data for all current top trends is set
-  // up. 
-  // if (trend != null){
-  //   currentTrend = trend;
-  // } else {
-  //   currentTrend = topTrends[0];
-  // }
-  currentTrend = "The Old Guard";
-  
-  const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = 
-      'Worldwide sentiments of search results for "' + currentTrend + '"';
-
-  // Reload map with new sentiment data and relevant coloring.
-  fetch('/search/' + currentTrend)
-      .then(resultsJsonArray => resultsJsonArray.json()).then(topicResults => {
-        currentCustomSearchData = topicResults;
-        loadCountryData();
+  fetch('/search/' + trend)
+      .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
+        currentSearchData = topicData;
+      }).then(() => {
+        // Reload map with new sentiment or search interest data and relevant coloring.
+        loadCountryDataByMode();
       });
 }
 
@@ -72,19 +49,14 @@ function setNewTrend(trend) {
  * @param {Array} countries Countries to get data for.
  */
 function setUserSearchTopic(topic, countries) {
-  updateTrends();
-
-  currentTrend = topic;
-  const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = 
-      'Worldwide sentiments of search results for "' + currentTrend + '"';
-
   fetch('/search/' + topic + '/' + JSON.stringify(countries))
       .then(response => response.json())
       .then(topicResults => {
-        currentCustomSearchData = topicResults;
-        loadCountryData();
-  });
+        currentSearchData = topicResults;
+      }).then(() => {
+          // Reload map with new sentiment or search interest data and relevant coloring.
+          loadCountryDataByMode();
+      });
 }
 
 /**
