@@ -35,19 +35,14 @@ function getCurrentCustomSearchData() {
  * @param {string} trend New trend to get data for.
  */
 function setNewTrend(trend) {
-  // TODO(carmenbenitez): Add if/else block to show data for other search
-  // results when custom search data for all current top trends is set up. 
-  currentTrend = 'The Old Guard';
-  
-  const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = 
-      'Worldwide sentiments of search results for "' + currentTrend + '"';
+  currentTrend = trend;
 
-  // Reload map with new sentiment data and relevant coloring.
-  fetch('/search/' + currentTrend)
-      .then(resultsJsonArray => resultsJsonArray.json()).then(topicResults => {
-        currentCustomSearchData = topicResults;
-        loadCountryData();
-      });
+  fetch('/search/' + trend)
+      .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
+    currentCustomSearchData = topicData;
+  }).then(() => {
+    // Reload map with either new sentiment or search interest data and relevant
+    // coloring.
+    loadCountryDataByMode();
+  });
 }
-

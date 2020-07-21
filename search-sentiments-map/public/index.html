@@ -12,13 +12,13 @@
     <script src="scripts/map-script.js"></script>
     <script src="scripts/modal-script.js"></script>
     <script src="scripts/trends-script.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
   <body onload="initMap(); setTopTrends();">
     <div class="content">
       <!-- Bootstrap CSS. -->
       <div class="modal fade" id="region-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title" id="modal-title"></h4>
@@ -53,7 +53,14 @@
             <div class="color-key"></div>
             <div id="data-max">max</div>
           </div>
+
+          <label class="switch">
+            <input id="sentiment-popularity-check" type="checkbox" onclick="loadCountryDataByMode()">
+            <span class="slider"></span>
+          </label>
+          <span id="switch-info">Switch between Sentiment Mode & Popularity Mode.</span>
         </div>
+
         <div class="col-sm-3">
           <div>
             <h3>Trending Search Topics</h3>
