@@ -25,14 +25,34 @@ let mapStyle = [{
 }];
 let map;
 let infowindow;
+
+// Whether the map is currently in sentiment mode or popularity mode.
+let isSentimentMode = true;
+
+// Multiplier for sentiment scores.
+const SCORE_SCALE_MULTIPLIER = 100;
+// The default score assigned to countries with no search results.
+const NO_RESULTS_DEFAULT_SCORE = -500;
+
 /* 
  * Hold the minimum and maximum values of the sentiment scores.
- * The sentiment API returns scores from -1.0 to 1.0.
+ * The sentiment API returns scores from -1.0 to 1.0. Our value is these max
+ * and min scores multiplied by our score multiplier.
  */
+const DATA_MAX = SCORE_SCALE_MULTIPLIER * 1.0;
+const DATA_MIN_SENTIMENT = SCORE_SCALE_MULTIPLIER  * -1.0;
+const DATA_MIN_POPULARITY = 0;
 
- // TODO(ntarn@): Change this to 100 and -100 when sentiment scores rescaled.
-const DATAMAX = 100.0;
-const DATAMIN = -100.0;
+/**
+ * HSL color codes for country colorings.
+ * @enum {Array}
+ */
+const CountryColorCodes = {
+  GREEN: [114, 80, 39],
+  RED: [5, 69, 54],
+  DARK_GRAY: [0, 0, 31], 
+  LIGHT_GRAY: [62, 1, 83],
+};
 
 /** Loads the map with country polygons when page loads. */
 function initMap() {
@@ -44,11 +64,9 @@ function initMap() {
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
       .push(document.getElementById('legend'));
-  // Update and display the map legend.
-  document.getElementById('data-min').textContent =
-      DATAMIN.toLocaleString();
-  document.getElementById('data-max').textContent =
-      DATAMAX.toLocaleString();
+  map.controls[google.maps.ControlPosition.BOTTOM_RIGHT]
+      .push(document.getElementById('timeline-slider-div'));
+  updateLegends(true);
 
   infowindow = new google.maps.InfoWindow({});
 
@@ -61,6 +79,15 @@ function initMap() {
   loadMapOutline();
 }
 
+/** Update the map legend's max and min values. */
+function updateLegends() {
+  let dataMin = isSentimentMode ? DATA_MIN_SENTIMENT : DATA_MIN_POPULARITY;
+  document.getElementById('data-min').textContent =
+      dataMin.toLocaleString();
+  document.getElementById('data-max').textContent =
+      DATA_MAX.toLocaleString();
+}
+
 /** Loads the country boundary polygons from a GeoJSON source. */
 function loadMapOutline() {
   map.data.loadGeoJson('countries.geojson', null);
@@ -68,38 +95,33 @@ function loadMapOutline() {
 
 /** 
  * Gets the selected mode (sentiment or popularity) from the webpage and loads
- * data correspondingly.
+ * corresponding data.
  */
 function loadCountryDataByMode() {
-  let sentimentMode = !document.getElementById('sentiment-popularity-check').checked;
-  console.log('sentiment mode', sentimentMode);
+  isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
 
   const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = sentimentMode ?
-      'Worldwide sentiments of search results for "' + getCurrentTrend() + '"' :
-      'Worldwide interests for "' + getCurrentTrend() + '"' ;
-  let timeRange =  getCurrentTimeRange() * 0.5;
-  topicHeader.innerText += ' from ' + timeRange + ' days ago';
-
-  loadCountryData(sentimentMode);
+  topicHeader.innerText = isSentimentMode ?
+      'Worldwide sentiment scores of search results for "' + getCurrentSearchData().topic + '"' :
+      'Worldwide search interest scores for "' + getCurrentSearchData().topic + '"' ;
+  updateLegends();
+  loadCountryData();
 }
 
 /** 
- * Loads the sentiments or search interests for all countries from Datastore. 
- * @param {boolean=} sentimentMode Whether the result to obtain is the sentiments 
- * (search interest otherwise).
+ * Loads the sentiments or search interests for all countries from Datastore 
+ * depending on what mode has been specified.
  */
-function loadCountryData(sentimentMode=true) {
+function loadCountryData() {
   map.data.forEach(function(row) {
-    let dataByCountry = getCurrentCustomSearchData().dataByCountry;
-    let countryData = dataByCountry.filter(data => data.country === row.getId());
+    let dataByCountry = getCurrentSearchData().dataByCountry;
+    let countryData = dataByCountry
+        .filter(data => data.country === row.getId());
 
-    let dataVariable;
-    if (countryData.length == 0) {
-      dataVariable = null;      
-    } else {
+    let dataVariable = null;
+    if (countryData.length != 0) {
       dataVariable = 
-          sentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
+          isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
     }
 
     row.setProperty('country_data', dataVariable);
@@ -111,29 +133,29 @@ function loadCountryData(sentimentMode=true) {
  * callback passed to data.setStyle() and is called for each row in the data
  * set.
  * @param {google.maps.Data.Feature} feature
- * @returns {googe.maps.Data.StyleOptions} styling information for feature
+ * @return {googe.maps.Data.StyleOptions} Styling information for feature.
  */
 function styleFeature(feature) {
-  let high = [5, 69, 54];  // Color of largest datum.
-  let low = [151, 83, 34]; // Color of smallest datum.
+  let low = CountryColorCodes.RED;
+  let high = CountryColorCodes.GREEN;
   let color = [];
   let countryData = feature.getProperty('country_data');
 
   if (countryData == null) {
     // Set country color to be light grey if that country is disabled (occurs in
     // user search).
-    color = [62, 1, 83];
-  } else if (countryData === -500) {
-    // Set country color to be dark grey if that coutnry has no results.
-    color = [0, 0, 31];  
+    color = CountryColorCodes.LIGHT_GRAY;
+  } else if (countryData === NO_RESULTS_DEFAULT_SCORE) {
+    // Set country color to be dark grey if that country has no results.
+    color = CountryColorCodes.DARK_GRAY;  
   } else {
+    let dataMin = isSentimentMode ? DATA_MIN_SENTIMENT : DATA_MIN_POPULARITY;  
     // Delta represents where the value sits between the min and max.
-    let delta = (countryData - DATAMAX) /
-        (DATAMIN - DATAMAX);
+    let delta = (countryData - dataMin) / (DATA_MAX - dataMin);
 
     color = [];
+    // Calculate hsl color integer values based on the delta.
     for (let i = 0; i < 3; i++) {
-      // Calculate an integer color based on the delta.
       color[i] = (high[i] - low[i]) * delta + low[i];
     }
   }
@@ -161,14 +183,16 @@ function mouseInToRegion(e) {
   let countryData = e.feature.getProperty('country_data');
   // Add popup info window with country info.
   if (countryData != null) {
-    // Set the hover country so the setStyle function can change the border.
+    // Set the hover country so the {@code setStyle} function can change the
+    // border.
     e.feature.setProperty('country', 'hover');
     countryInfo = e.feature.getProperty('name') + ': ';
 
-    // Display "N/A" on hover when countryData is -500, the value signifying
-    // there were no results.
+    // Display "N/A" on hover when there are no results and thererfore the
+    // sentiment score is the no results default score.
     countryInfo +=
-        ((countryData === -500) ? "N/A" : countryData.toLocaleString());
+        ((countryData === NO_RESULTS_DEFAULT_SCORE) ?
+            "N/A" : countryData.toLocaleString());
 
     infowindow.setContent(countryInfo);
     infowindow.setPosition(e.latLng);

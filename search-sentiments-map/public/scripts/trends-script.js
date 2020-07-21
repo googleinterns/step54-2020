@@ -28,7 +28,7 @@ const NUM_SHOWN = 7;
 function setTopTrends(setNewTrendIsEnabled) {
   const trendsList = document.getElementById('trends-list');
   trendsList.innerHTML = '';
-  let trends = getTopTrends();
+  let trends = getTopTrends().globalTrends;
 
   for (let i = 0; i < trends.length; i++) {
     const trendElement = document.createElement('li');
@@ -56,6 +56,8 @@ function setTopTrends(setNewTrendIsEnabled) {
     });
     trendsList.append(showMoreOrLessToggleItem);
   }
+  document.getElementById('trends-timestamp').innerText = 
+      'Last Updated: ' + new Date(getTopTrends().timestamp);
 
   if (setNewTrendIsEnabled) {
     // Set the map to display data on the top-ranking trend.

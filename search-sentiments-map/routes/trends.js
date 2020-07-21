@@ -20,9 +20,10 @@ const router = express.Router();  // Using Router to divide the app into modules
 const googleTrends = require('google-trends-api');
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
+
 const TRENDS_DATA_KIND = 'TrendsEntry';
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
-const RETRIEVE_RESULTS_TIME_MS = 80 * 60000;
+const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
 // Time interval between data updates.
 const TIME_RANGE_INTERVAL_12_HRS_MS = 12 * 60 * 60000;
 
@@ -48,12 +49,16 @@ async function retrieveGlobalTrendsForTimeRange(timeRange) {
   let timeRangeLimit = TIME_RANGE_INTERVAL_12_HRS_MS * timeRange;
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp', {
     descending: true,
-  }).filter('timestamp', '<', Date.now() - timeRangeLimit);
+  }).filter('timestamp', '<', Date.now() - timeRangeLimit).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
-  // Returns the most recent trends with search results data retrieved.
-  return (Date.now() - trendsEntry[0].timestamp > 
-      RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
-      trendsEntry[0].globalTrends : trendsEntry[1].globalTrends;
+  return {
+    timestamp: trendsEntry[0].timestamp,
+    // Returns the most recent trends with search results data retrieved.
+    globalTrends: 
+        (Date.now() - trendsEntry[0].timestamp > 
+        RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
+        trendsEntry[0].globalTrends : trendsEntry[1].globalTrends,
+  }
 }
 
 /** 

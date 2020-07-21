@@ -12,11 +12,10 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-// The current trend a user is viewing.
-let currentTrend = '';
-
-// The custom search data for the trend that the user is viewing.
-let currentCustomSearchData = '';
+// JSON object for the data that is currently displayed, including topic,
+// timestamp, and custom search data by country.
+let currentSearchData = '';
+// JSON object for the trends that are currently displayed and their timestamp.
 let topTrends = '';
 
 // The current time range for the data that the user is viewing.
@@ -40,12 +39,13 @@ function getTopTrends() {
 /** 
  * Returns current custom search data for the trend that the user is viewing.
  */
-function getCurrentCustomSearchData() {
-  return currentCustomSearchData;
+function getCurrentSearchData() {
+  return currentSearchData;
 }
 
 /** 
- * Retrieves relevant data for new trend and reconstructs map with new data.
+ * Retrieves relevant data for new trend and reconstructs the map with new
+ * data.
  * @param {string} trend New trend to get data for.
  */
 function setNewTrend(trend) {
@@ -54,9 +54,10 @@ function setNewTrend(trend) {
 
   fetch('/search/' + trend + '&' + currentTimeRange)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
-        currentCustomSearchData = topicData;
+        currentSearchData = topicData;
       }).then(() => {
-        // Reload map with new sentiment or search interest data and relevant coloring.
+        // Reload map with new sentiment or search interest data and relevant
+        // coloring.
         loadCountryDataByMode();
       });
 }
@@ -75,11 +76,13 @@ function setUserSearchTopic(topic, countries) {
   fetch('/search/' + topic + '/' + JSON.stringify(countries))
       .then(response => response.json())
       .then(topicResults => {
-        console.log(topicResults);
-        currentCustomSearchData = topicResults;
+        currentSearchData = topicResults;
       }).then(() => {
-          // Reload map with new sentiment or search interest data and relevant coloring.
+          // Reload map with new sentiment or search interest data and relevant
+          // coloring.
           loadCountryDataByMode();
+          document.getElementById('submit-user-topic').innerHTML = 'Submit';
+          document.getElementById('submit-user-topic').disabled = false;
       });
 }
 

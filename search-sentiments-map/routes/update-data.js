@@ -23,8 +23,8 @@ router.get('/', async (req, res) => {
   console.log('Updating Search Results Data.');
   // TODO(carmenbenitez, ntarn, chenyuz): Uncomment out for testing or for
   // final deploy.
-  // await trends.updateTrendsFunction();
-  // search.updateSearchResults();
+  await trends.updateTrendsFunction();
+  search.updateSearchResults();
 });
 
 module.exports.router = router;
