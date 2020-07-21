@@ -133,9 +133,9 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
     // Add new custom search data to existing entity and to the data to
     // send back to the frontend.
     if (countriesToAddDataFor.length !== 0) {
-      let newCountriesData = await getSearchResultsForArrayOfCountries(
+      let newCountriesData = await getSearchResultsForCountriesForTopic(
         countriesToAddDataFor, topic);
-      await addNewCountryData(newCountriesData, customSearchTopic[0]);
+      await addNewCountryData(newCountriesData, worldDataByTopic[0]);
       countriesDataToReturn = countriesDataToReturn.concat(newCountriesData);
     }
   } else {
