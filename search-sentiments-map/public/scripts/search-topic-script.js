@@ -21,7 +21,7 @@ let countryList = [];
  * Updates the current search topic for the given country and search topic.
  */
 function searchTopic() {
-  let topic = document.getElementById("search-topic").value;
+  let topic = document.getElementById('search-topic').value;
 
   // Make sure there is at least 1 selected country and a non-empty topic.
   // Prompt user to input missing information.
@@ -33,6 +33,11 @@ function searchTopic() {
     $('#user-search-warning-modal').modal('show');
     return;
   }
+
+  document.getElementById('submit-user-topic').innerHTML = 
+      '<span class="spinner-border spinner-border-sm" role="status"' + 
+      'aria-hidden="true"></span>Searching...';
+  document.getElementById('submit-user-topic').disabled = true;
 
   setUserSearchTopic(topic, countryList);
 }

@@ -38,7 +38,8 @@ function setNewTrend(trend) {
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
         currentSearchData = topicData;
       }).then(() => {
-        // Reload map with new sentiment or search interest data and relevant coloring.
+        // Reload map with new sentiment or search interest data and relevant
+        // coloring.
         loadCountryDataByMode();
       });
 }
@@ -54,8 +55,11 @@ function setUserSearchTopic(topic, countries) {
       .then(topicResults => {
         currentSearchData = topicResults;
       }).then(() => {
-          // Reload map with new sentiment or search interest data and relevant coloring.
+          // Reload map with new sentiment or search interest data and relevant
+          // coloring.
           loadCountryDataByMode();
+          document.getElementById('submit-user-topic').innerHTML = 'Submit';
+          document.getElementById('submit-user-topic').disabled = false;
       });
 }
 
