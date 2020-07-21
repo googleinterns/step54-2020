@@ -12,6 +12,8 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+// The default score assigned to countries with no search results.
+const NO_RESULTS_DEFAULT_SCORE = -500;
 /**
  * Displays the information modal when a country on the map is clicked.
  * @param {?google.maps.MouseEvent} e Click event.
@@ -76,8 +78,8 @@ function displayTopResultsForCurrentTrend(countryCode) {
         countryData[0].averageSentiment + '<br>';
 
     for (let i = 0; i < results.length; i++) {
-      let searchResultIndex = i + 1;
-      resultElement.innerHTML += searchResultIndex + '. ' + '<a href=' + 
+      // i + 1 shows the index for each search result. 
+      resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
           results[i].link + '>' + results[i].htmlTitle + '</a><br>' + 
           results[i].snippet + '<br>' + 'Sentiment Score: ' + results[i].score + 
           '<br>';
@@ -89,11 +91,11 @@ function displayTopResultsForCurrentTrend(countryCode) {
 
 
 /** 
- * Displays the sentiment chart in a country for current search trend on modal. 
+ * Displays sentiment chart of search results for the current country on the modal.
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displaySentimentChartForCurrentTrend(countryCode) {
-  let topic = getCurrentTrend;
+  let topic = getCurrentTrend();
   let topicData = getCurrentCustomSearchData();
   let date = new Date(topicData.timestamp);
   let chartElement = document.getElementById('sentiment-chart-tab');
@@ -103,7 +105,8 @@ function displaySentimentChartForCurrentTrend(countryCode) {
       .filter(countries => countries.country === countryCode);
 
   // Handle case where there are no results.
-  if (countryData.length === 0) {
+  if (countryData.length === 0 ||
+      countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
     chartElement.innerHTML += 'No results.<br><i>Last updated on ' +
         date.toString() + '<i><br>';
   } else {
@@ -117,25 +120,21 @@ function displaySentimentChartForCurrentTrend(countryCode) {
 }
 
 google.charts.load('45', {'packages':['corechart']});
-/** Draws a sentiment chart and adds it to the sentiment chart modal tab. 
+/** Draws a sentiment chart and adds it to the given element. 
  *  @param {Object} chartElement Tab element to update with the sentiment chart.
  *  @param {Object} results Results to use to update the sentiment chart.
  */
 function drawSentimentChart(chartElement, results) {
-  var sentimentDataArray = new Array();
+  let sentimentDataArray = [];
   sentimentDataArray.push(["Search Result", "Score", {role: "style"}]);
   for (let i = 0; i < results.length; i++) {
     let sentimentItem = [(i + 1).toString(), results[i].score];
-    if (results[i].score >= 0) {
-      sentimentItem.push('green');
-    } else {
-      sentimentItem.push('red');
-    }
+    results[i].score >= 0 ? sentimentItem.push('green') : sentimentItem.push('red');
     sentimentDataArray.push(sentimentItem);
   }
 
-  var sentimentDataTable = google.visualization.arrayToDataTable(sentimentDataArray);
-  var view = new google.visualization.DataView(sentimentDataTable);
+  let sentimentDataTable = google.visualization.arrayToDataTable(sentimentDataArray);
+  let view = new google.visualization.DataView(sentimentDataTable);
   view.setColumns([0, 1,
       {calc: "stringify",
         sourceColumn: 1,
@@ -143,16 +142,16 @@ function drawSentimentChart(chartElement, results) {
         role: "annotation"},
       2]);
 
-  var options = {
+  let options = {
     title: "Sentiment Scores of Search Results",
     width: 475,
     height: 400,
     bar: {groupWidth: "75%"},
     legend: {position: "none"},
     hAxis: {
-      title: 'Search Results Index'
+      title: 'Search Results Index',
     },
   };
-  var chart = new google.visualization.ColumnChart(chartElement);
+  let chart = new google.visualization.ColumnChart(chartElement);
   chart.draw(view, options);
 }

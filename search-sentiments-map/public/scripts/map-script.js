@@ -66,10 +66,10 @@ function loadMapOutline() {
 
 /** Loads the country sentiment score from Datastore. */
 function loadCountryData() {
-  var dataVariableMax;
-  var countryMax = '';
-  var dataVariableMin; 
-  var countryMin = '';
+  let dataVariableMax = Number.MIN_VALUE;
+  let countryMax = '';
+  let dataVariableMin = Number.MAX_VALUE; 
+  let countryMin = '';
   map.data.forEach(function (row) {
     const countryCode = row.getId();
     const country = row.getProperty('name');
@@ -78,18 +78,12 @@ function loadCountryData() {
       .filter(countries => countries.country === countryCode);
     let dataVariable = 0;
     if (countryData.length != 0) {
-      let score = countryData[0].averageSentiment;
-      dataVariable = score;
-      if (dataVariableMax == undefined) {
-        dataVariableMax = score;
+      dataVariable = countryData[0].averageSentiment;
+      if (dataVariable > dataVariableMax) {
+        dataVariableMax = dataVariable;
         countryMax = country;
-        dataVariableMin = score;
-        countryMin = country;
-      } else if (score > dataVariableMax) {
-        dataVariableMax = score;
-        countryMax = country;
-      } else if (score < dataVariableMin) {
-        dataVariableMin = score;
+      } else if (dataVariable < dataVariableMin) {
+        dataVariableMin = dataVariable;
         countryMin = country;
       }
     } else {
