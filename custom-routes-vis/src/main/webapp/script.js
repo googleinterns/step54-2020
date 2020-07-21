@@ -210,22 +210,22 @@ function generateRoutes() {
  * from the selected API.
  * @param {!Object} routeJson JSON object containing all information of the target
  * route.
- * @param {boolean} usedDirectionsApi Whether the route is obtained by the Directions
+ * @param {boolean} isDirectionsApi Whether the route is obtained by the Directions
  * API; if false, assume it is obtained by the Routes Preferred API.
  */
-function createRoutePolyline(routeNum, routeJson, usedDirectionsApi) {
-  let encodedPolyline = usedDirectionsApi ? 
+function createRoutePolyline(routeNum, routeJson, isDirectionsApi) {
+  let encodedPolyline = isDirectionsApi ? 
       routeJson.overview_polyline.points : routeJson.polyline.encodedPolyline;
   let routeCoordinates = google.maps.geometry.encoding.decodePath(encodedPolyline);
 
   // Total duration of route in seconds.
-  let totalDurationSec = usedDirectionsApi ? 0 : routeJson.duration;
+  let totalDurationSec = isDirectionsApi ? 0 : routeJson.duration;
   // Total distance of route in meters.
-  let totalDistanceMeters = usedDirectionsApi ? 0 : routeJson.distanceMeters;
+  let totalDistanceMeters = isDirectionsApi ? 0 : routeJson.distanceMeters;
   // Note: Routes Preferred has duration and distanceMeters attributes for each
   // route, but Directions only has them for each leg of the route.
 
-  if (usedDirectionsApi) {
+  if (isDirectionsApi) {
     // Accumulate duration and distance because the total is not directly
     // available in results from the Directions API.
     let routeLegs = routeJson.legs;
