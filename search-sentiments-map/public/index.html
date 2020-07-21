@@ -44,6 +44,18 @@
           </div>
         </div>
       </div>
+      <div class="modal fade" id="user-search-warning-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <span class="modal-title" id="user-search-warning-text"></span>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
       <h2 id="title">Sentiment Map for Google Search</h2>
       <div class="row">
         <div class="col-sm-9">
@@ -67,9 +79,7 @@
                 </button>
                 <ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="dropdownMenu1" id="country-select-dropdown" ></ul>
               </div>
-              <button type="submit" id="submit-user-search" class="btn btn-primary" onclick="searchTopic()" data-container="body" data-toggle="popover" data-placement="bottom" data-content="">
-                Search
-              </button>
+              <button type="submit" class="btn btn-primary" onclick="searchTopic()">Search</button>
             </div>
           </form>
           <div>

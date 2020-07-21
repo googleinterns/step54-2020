@@ -71,20 +71,20 @@
 }
 
 .checkbox-menu li label {
-  display: block;
-  padding: 3px 10px;
   clear: both;
+  color: #333;
+  display: block;
   font-weight: normal;
   line-height: 1.42857143;
-  color: #333;
-  white-space: nowrap;
   margin:0;
+  padding: 3px 10px;
   transition: background-color .4s ease;
+  white-space: nowrap;
 }
 .checkbox-menu li input {
   margin: 0px 5px;
-  top: 2px;
   position: relative;
+  top: 2px;
 }
 
 .checkbox-menu li.active label {

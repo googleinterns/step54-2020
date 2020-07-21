@@ -156,7 +156,7 @@ function mouseInToRegion(e) {
   let countryData = e.feature.getProperty('country_data');
   // Add popup info window with country info.
   if (countryData != null) {
-    // Set the hover country so the `setStyle` function can change the
+    // Set the hover country so the {@code setStyle} function can change the
     // border.
     e.feature.setProperty('country', 'hover');
     countryInfo = e.feature.getProperty('name') + ': ';

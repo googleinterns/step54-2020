@@ -21,41 +21,43 @@ let countryList = [];
  */
 function searchTopic() {
   let topic = document.getElementById("search-topic").value;
-  let topTrends = getTopTrends();
 
-  console.log(topic);
-  console.log(countryList);
   // Make sure there is at least 1 selected country and a non-empty topic.
+  // Prompt user to input missing information.
   if (topic.length === 0 || countryList.length === 0) {
-    let popoverText = (topic.length === 0) ? 'Add Search Topic!' : 'Select Countries!';
-    $('#submit-user-search').attr('data-content', popoverText);
-    $('#submit-user-search').popover("show");
+    let modalText = (topic.length === 0) ? 
+        'Input search topic in order to search' :
+        'Select countries to view results for in order to search';
+    document.getElementById('user-search-warning-text').innerHTML = modalText;
+    $('#user-search-warning-modal').modal('show');
     return;
   }
 
-  $('#submit-user-search').popover("hide");
-
-  //getUserSearchTopic(topic, countryList);
+  getUserSearchTopic(topic, countryList);
 }
 
 /**
- * Creates the selector for all of the countries in the relevant json.
+ * Creates the dropdown checkbox for all of the countries in the relevant json.
  */
 function countrySelectSetUp() {
   let dropdownContainer = document.getElementById('country-select-dropdown');
   fetch("country-name.json").then(response => response.json())
       .then(json => {
     json.forEach(country => {
-      dropdownContainer.innerHTML += '<li><label><input type="checkbox" value="' +
+      dropdownContainer.innerHTML +=
+          '<li><label><input type="checkbox" value="' +
           country.id + '">' + country.name + '</label></li>'
     })
   });
 
   $(".checkbox-menu").on("change", "input[type='checkbox']", function() {
+    // Do not allow user to select more that {@code MAX_SELECTED_COUNTRIES}
     if (countryList.length >= MAX_SELECTED_COUNTRIES) {
       this.checked = false;
     }
     $(this).closest("li").toggleClass("active", this.checked);
+
+    // Keep track of checked countries.
     if (this.checked) {
       countryList.push(this.value);
     } else {
@@ -66,6 +68,7 @@ function countrySelectSetUp() {
     }
   });
 
+  // Keep dropdown open until user clicks out.
   $(document).on('click', '.allow-focus', function (e) {
     e.stopPropagation();
   });

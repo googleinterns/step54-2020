@@ -51,7 +51,7 @@ router.get('/:topic', (req, res) => {
 /** 
  * Renders a JSON array of the top search results for requested countries with
  * API data from within the last
- * `CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS` for the specified topic.
+ * {@code CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS} for the specified topic.
  */
 router.get('/:topic/:countries', (req, res) => {
   let topic = req.params.topic;
@@ -86,31 +86,31 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
   if (customSearchTopic.length !== 0 &&
       Date.now() - customSearchTopic[0].timestamp <
       CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS) {
-        timestamp = customSearchTopic[0].timestamp;
-        let countriesToAddDataFor = [];
-        let countriesData = customSearchTopic[0].countries;
+    timestamp = customSearchTopic[0].timestamp;
+    let countriesToAddDataFor = [];
+    let countriesData = customSearchTopic[0].countries;
 
-        // Determine whether a country has existing data or data needs to be
-        // retrieved from Custom Search API for this topic.
-        countries.forEach(country => {
-          let countryData = countriesData
-              .filter(countries => countries.country === country);
-          if (countryData.length === 0) {
-            countriesToAddDataFor.push(country);
-          } else {
-            countriesDataToReturn.push(countryData[0]);
-          }
-        });
+    // Determine whether a country has existing data or data needs to be
+    // retrieved from Custom Search API for this topic.
+    countries.forEach(country => {
+      let countryData = countriesData
+          .filter(countries => countries.country === country);
+      if (countryData.length === 0) {
+        countriesToAddDataFor.push(country);
+      } else {
+        countriesDataToReturn.push(countryData[0]);
+      }
+    });
 
-        // Obtain custom search data for countries without current data.     
-        // Add new custom search data to existing entity and to the data to
-        // send back to the frontend.
-        if (countriesToAddDataFor.length !== 0) {
-          let newCountriesData = await getSearchResultsForArrayOfCountries(
-            countriesToAddDataFor, topic);
-          await addNewCountryData(newCountriesData, customSearchTopic[0]);
-          countriesDataToReturn = countriesDataToReturn.concat(newCountriesData);
-        }
+    // Obtain custom search data for countries without current data.     
+    // Add new custom search data to existing entity and to the data to
+    // send back to the frontend.
+    if (countriesToAddDataFor.length !== 0) {
+      let newCountriesData = await getSearchResultsForArrayOfCountries(
+        countriesToAddDataFor, topic);
+      await addNewCountryData(newCountriesData, customSearchTopic[0]);
+      countriesDataToReturn = countriesDataToReturn.concat(newCountriesData);
+    }
   } else {
     // Get data for all of the requested countries when there is no existing
     // entity and create a new entity with this data.
@@ -156,14 +156,14 @@ async function getSearchResultsForArrayOfCountries(countries, topic) {
 }
 
 /** 
- * Adds country data for specific topic to a `CustomSearchTopic` entity.
+ * Adds country data for specific topic to a {@code CustomSearchTopic} entity.
  * @param {string} countriesData Search results for countries to add to the
  *     Datastore.
  * @param {Object} customSearchEntity The entity we are adding search results to.
  */
 async function addNewCountryData(countriesData, customSearchEntity) {
   // Do not update timestamp to make sure the oldest data is from within the
-  // last `CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS` hours. 
+  // last {@code CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS} hours. 
   customSearchEntity.countries =
       customSearchEntity.countries.concat(countriesData);
   await datastore.save(customSearchEntity);
@@ -201,7 +201,7 @@ async function updateSearchResults() {
   await deleteAncientResults();
   retrieveGlobalTrends().then(async trends => {
     // When testing ,use i < 1 to test for only one trend, and comment out
-    // `await new Promise` line to avoid 1 minute pauses.
+    // {@code await new Promise} line to avoid 1 minute pauses.
     for (let i = 0; i < trends.length; i++) {
       updateSearchResultsForTopic(trends[i].trendTopic);
       // 100 queries per minute limit for Custom Search API. Pause to prevent
@@ -244,7 +244,7 @@ async function updateSearchResultsForTopic(query) {
       await new Promise(resolve =>
           setTimeout(resolve, PAUSE_TO_PREVENT_REACHING_QUOTA_1_MIN_MS));
     }
-    // Update `countryData` within the functions called.
+    // Update {@code countryData} within the functions called.
     const countryResults =
         await getCustomSearchResultsForCountry(json[i].id, query);
     countriesData.push({
@@ -281,24 +281,24 @@ async function getCustomSearchResultsForCountry(countryCode, query) {
  */
 async function formatCountryResults(searchResultsJson) {
   // Parse the JSON string and pass each search result to add to the
-  // `countryData` object.
+  // {@code countryData} object.
   let currentSearchResults = searchResultsJson.items;
-    let countryData = [];
-    let totalScore = 0;
-    if (currentSearchResults == undefined) {
-      return {score: NO_RESULTS_DEFAULT_SCORE, results: countryData};
-    }
-    for (let i = 0; i < currentSearchResults.length; i++) {
-      let formattedResults =
-          await formatSearchResults(currentSearchResults[i]);
-      countryData.push(formattedResults);
-      totalScore += formattedResults.score;
-    }
-    let avgScore = NO_RESULTS_DEFAULT_SCORE;
-    if (currentSearchResults.length !== 0) {
-      avgScore = totalScore / currentSearchResults.length;
-    } 
-    return {score: avgScore, results: countryData};
+  let countryData = [];
+  let totalScore = 0;
+  if (currentSearchResults == undefined) {
+    return {score: NO_RESULTS_DEFAULT_SCORE, results: countryData};
+  }
+  for (let i = 0; i < currentSearchResults.length; i++) {
+    let formattedResults =
+        await formatSearchResults(currentSearchResults[i]);
+    countryData.push(formattedResults);
+    totalScore += formattedResults.score;
+  }
+  let avgScore = NO_RESULTS_DEFAULT_SCORE;
+  if (currentSearchResults.length !== 0) {
+    avgScore = totalScore / currentSearchResults.length;
+  } 
+  return {score: avgScore, results: countryData};
 }
 
 /**
