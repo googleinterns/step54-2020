@@ -112,14 +112,14 @@ function displaySentimentChartForCurrentTrend(countryCode) {
     chartElement.innerHTML += 'Average Sentiment Score: ' + 
         countryData[0].averageSentiment + '<br>';
     chartElement.innerHTML += '<i>Last updated on ' + date.toString() +
-      '<i><br>';
+        '<i><br>';
   }
 }
 
 google.charts.load('45', {'packages':['corechart']});
-/** Creates a sentiment chart and adds it to the modal tab. 
+/** Draws a sentiment chart and adds it to the sentiment chart modal tab. 
  *  @param {Object} chartElement Tab element to update with the sentiment chart.
- *  @param {Object} results Results to update with the sentiment chart.
+ *  @param {Object} results Results to use to update the sentiment chart.
  */
 function drawSentimentChart(chartElement, results) {
   var sentimentDataArray = new Array();
@@ -127,7 +127,7 @@ function drawSentimentChart(chartElement, results) {
   for (let i = 0; i < results.length; i++) {
     let sentimentItem = [(i + 1).toString(), results[i].score];
     if (results[i].score >= 0) {
-      sentimentItem.push('blue');
+      sentimentItem.push('green');
     } else {
       sentimentItem.push('red');
     }
@@ -145,7 +145,7 @@ function drawSentimentChart(chartElement, results) {
 
   var options = {
     title: "Sentiment Scores of Search Results",
-    width: 450,
+    width: 475,
     height: 400,
     bar: {groupWidth: "75%"},
     legend: {position: "none"},

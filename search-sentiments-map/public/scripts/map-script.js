@@ -66,17 +66,32 @@ function loadMapOutline() {
 
 /** Loads the country sentiment score from Datastore. */
 function loadCountryData() {
+  var dataVariableMax;
+  var countryMax = '';
+  var dataVariableMin; 
+  var countryMin = '';
   map.data.forEach(function (row) {
     const countryCode = row.getId();
+    const country = row.getProperty('name');
     let topicData = getCurrentCustomSearchData();
     let countryData = topicData.countries
       .filter(countries => countries.country === countryCode);
     let dataVariable = 0;
     if (countryData.length != 0) {
-      dataVariable = countryData[0].averageSentiment;
-      // TODO(ntarn): Remove console.log statements when finished debugging.
-      console.log('ntarn debug loadCountryData: ' + 'country' +
-          countryData[0].country + ' averageSentiment: ' + dataVariable);
+      let score = countryData[0].averageSentiment;
+      dataVariable = score;
+      if (dataVariableMax == undefined || dataVariableMax == null) {
+        dataVariableMax = score;
+        countryMax = country;
+        dataVariableMin = score;
+        countryMin = country;
+      } else if (score > dataVariableMax) {
+        dataVariableMax = score;
+        countryMax = country;
+      } else if (score < dataVariableMin) {
+        dataVariableMin = score;
+        countryMin = country;
+      }
     } else {
       console.log('Data does not exist for this countryCode:' + countryCode);
     }
@@ -97,6 +112,10 @@ function loadCountryData() {
     document.getElementById('data-max').textContent =
         dataMax.toLocaleString();
   });
+  const extremaHeader = document.getElementById('extrema-sentiment');
+  extremaHeader.innerText = 
+      'Most Negative Country: ' + countryMin + ', Most Positive Country: ' +
+      countryMax;
 }
 
 /**
