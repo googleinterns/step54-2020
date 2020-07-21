@@ -80,7 +80,7 @@ function loadCountryData() {
     if (countryData.length != 0) {
       let score = countryData[0].averageSentiment;
       dataVariable = score;
-      if (dataVariableMax == undefined || dataVariableMax == null) {
+      if (dataVariableMax == undefined) {
         dataVariableMax = score;
         countryMax = country;
         dataVariableMin = score;

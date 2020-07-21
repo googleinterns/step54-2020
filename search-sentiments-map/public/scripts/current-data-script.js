@@ -50,20 +50,3 @@ function setNewTrend(trend) {
         loadCountryData();
       });
 }
-
-function setMostExtremeCountries(trend) {
-  // TODO(carmenbenitez): Add if/else block to show data for other search
-  // results when custom search data for all current top trends is set up. 
-  currentTrend = 'The Old Guard';
-  
-  const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = 
-      'Worldwide sentiments of search results for "' + currentTrend + '"';
-
-  // Reload map with new sentiment data and relevant coloring.
-  fetch('/search/' + currentTrend)
-      .then(resultsJsonArray => resultsJsonArray.json()).then(topicResults => {
-        currentCustomSearchData = topicResults;
-        loadCountryData();
-      });
-}

@@ -134,13 +134,13 @@ function drawSentimentChart(chartElement, results) {
     sentimentDataArray.push(sentimentItem);
   }
 
-  var data = google.visualization.arrayToDataTable(sentimentDataArray);
-  var view = new google.visualization.DataView(data);
+  var sentimentDataTable = google.visualization.arrayToDataTable(sentimentDataArray);
+  var view = new google.visualization.DataView(sentimentDataTable);
   view.setColumns([0, 1,
-      { calc: "stringify",
+      {calc: "stringify",
         sourceColumn: 1,
         type: "string",
-        role: "annotation" },
+        role: "annotation"},
       2]);
 
   var options = {
