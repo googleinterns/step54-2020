@@ -4,6 +4,10 @@
   padding: 30px;
 }
 
+i {
+  font-size: 14px;
+}
+
 #title {
   text-align: center;
 }

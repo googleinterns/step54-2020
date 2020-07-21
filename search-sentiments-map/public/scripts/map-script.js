@@ -79,8 +79,8 @@ function loadCountryDataByMode() {
 
   const topicHeader = document.getElementById('topic-header');
   topicHeader.innerText = isSentimentMode ?
-      'Worldwide sentiment scores of search results for "' + getCurrentTrend() + '"' :
-      'Worldwide search interest scores for "' + getCurrentTrend() + '"' ;
+      'Worldwide sentiment scores of search results for "' + getCurrentSearchData().topic + '"' :
+      'Worldwide search interest scores for "' + getCurrentSearchData().topic + '"' ;
   updateLegends();
   loadCountryData();
 }
@@ -91,7 +91,7 @@ function loadCountryDataByMode() {
  */
 function loadCountryData() {
   map.data.forEach(function(row) {
-    let dataByCountry = getCurrentCustomSearchData().dataByCountry;
+    let dataByCountry = getCurrentSearchData().dataByCountry;
     let countryData = dataByCountry.filter(data => data.country === row.getId());
 
     let dataVariable;

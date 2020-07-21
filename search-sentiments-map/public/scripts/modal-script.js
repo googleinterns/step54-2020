@@ -40,8 +40,8 @@ function setCountryTrends(countryCode) {
   fetch('/country-trends/' + countryCode).then(countryTrends =>
       countryTrends.json()).then(trends => {
         if (trends.length === 0) {
-          topTrendsTab.innerText = 
-              'Trends are not available for the selected country.';
+          topTrendsTab.innerHTML = 
+              'Trends are not available for the selected country.<br>';
         } else {
           trends.forEach(trend => {
             const trendHeader = document.createElement('h5');
@@ -49,6 +49,8 @@ function setCountryTrends(countryCode) {
             topTrendsTab.appendChild(trendHeader);
           });
         }
+        topTrendsTab.innerHTML += 
+            '<i>Last updated on ' + new Date(getTopTrends().timestamp) + '</i>';
       });
 }
 
@@ -57,8 +59,8 @@ function setCountryTrends(countryCode) {
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displayTopResultsForCurrentTrend(countryCode) {
-  let dataByCountry = getCurrentCustomSearchData().dataByCountry;
-  let date = new Date(getCurrentCustomSearchData().timestamp);
+  let dataByCountry = getCurrentSearchData().dataByCountry;
+  let date = new Date(getCurrentSearchData().timestamp);
   let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
 
@@ -66,8 +68,7 @@ function displayTopResultsForCurrentTrend(countryCode) {
 
   if (countryData.length === 0 || countryData[0].averageSentiment == -500) {
     // Handle case where there are no results.
-    resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
-        date.toString() + '<i><br>';
+    resultElement.innerHTML += 'No results.<br>';
   } else {
     resultElement.innerHTML += '<b>Topic Popularity Score: ' + 
         countryData[0].interest + '</b><br>';
@@ -81,7 +82,6 @@ function displayTopResultsForCurrentTrend(countryCode) {
         results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'
         + '<i>Sentiment Score: ' + results[i].score.toFixed(1) + '</i><br>';
     }
-    resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
-      '<i><br>';
   }
+  resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
 }

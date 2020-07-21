@@ -12,17 +12,11 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-// The current trend a user is viewing.
-let currentTrend = '';
-
-// The custom search data for the trend that the user is viewing.
-let currentCustomSearchData = '';
+// JSON object for the data that is currently displayed, including topic,
+// timestamp, and custom search data by country.
+let currentSearchData = '';
+// JSON object for the trends that are currently displayed and their timestamp.
 let topTrends = '';
-
-/** Returns the current trend that the user is viewing. */
-function getCurrentTrend() {
-  return currentTrend;
-}
 
 /** Returns current trend user is viewing. */
 function getTopTrends() {
@@ -30,8 +24,8 @@ function getTopTrends() {
 }
 
 /** Returns current custom search data for trend user is viewing. */
-function getCurrentCustomSearchData() {
-  return currentCustomSearchData;
+function getCurrentSearchData() {
+  return currentSearchData;
 }
 
 /** 
@@ -39,12 +33,9 @@ function getCurrentCustomSearchData() {
  * @param {string} trend New trend to get data for.
  */
 function setNewTrend(trend) {
-  currentTrend = trend;
-  //updateTrends();
-
   fetch('/search/' + trend)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
-        currentCustomSearchData = topicData;
+        currentSearchData = topicData;
       }).then(() => {
         // Reload map with new sentiment or search interest data and relevant coloring.
         loadCountryDataByMode();
@@ -57,14 +48,10 @@ function setNewTrend(trend) {
  * @param {Array} countries Countries to get data for.
  */
 function setUserSearchTopic(topic, countries) {
-  currentTrend = topic;
-  //updateTrends();
-
   fetch('/search/' + topic + '/' + JSON.stringify(countries))
       .then(response => response.json())
       .then(topicResults => {
-        console.log(topicResults);
-        currentCustomSearchData = topicResults;
+        currentSearchData = topicResults;
       }).then(() => {
           // Reload map with new sentiment or search interest data and relevant coloring.
           loadCountryDataByMode();
