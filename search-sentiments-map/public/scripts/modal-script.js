@@ -23,7 +23,6 @@ function onClickCountry(e) {
     // Update Modal with information for relevant country.
     const countryName = e.feature.getProperty('name');
     const countryId = e.feature.getId();
-    //const countryData= e.feature.getProperty('country_data').toLocaleString();
     document.getElementById('modal-title').innerText = countryName;
     displayTopResultsForCurrentTrend(countryId);
     setCountryTrends(countryId);
@@ -36,22 +35,35 @@ function onClickCountry(e) {
  */
 function setCountryTrends(countryCode) {
   const topTrendsTab = document.getElementById('top-trends-tab');
-  topTrendsTab.innerHTML = '';
+  topTrendsTab.innerHTML = '<h4>Trending topics in selected country: </h4>';
   fetch('/country-trends/' + countryCode).then(countryTrends =>
       countryTrends.json()).then(trends => {
         if (trends.length === 0) {
           topTrendsTab.innerHTML = 
               'Trends are not available for the selected country.<br>';
         } else {
-          trends.forEach(trend => {
-            const trendHeader = document.createElement('h5');
-            trendHeader.innerText = trend.topic;
-            topTrendsTab.appendChild(trendHeader);
-          });
+          for (let i = 0; i < trends.length; i++) {
+            let articlesId = 'trend' + i + 'Article';
+            let articlesHtml = 'Search results: <br>';
+            trends[i].articles.forEach(article => {
+              articlesHtml += '<span>' + article + '</span><br>';
+            })
+            topTrendsTab.innerHTML += 
+                '<h5 class="country-trend" onclick="toggleDisplay(\''+ 
+                articlesId + '\')">' + trends[i].topic + '</h5>' + 
+                '<div id="'+ articlesId + '" class="hidden">' + 
+                articlesHtml + '</div>';
+          }
         }
         topTrendsTab.innerHTML += 
             '<i>Last updated on ' + new Date(getTopTrends().timestamp) + '</i>';
       });
+}
+
+/** Toggles whether the element with the given id is displayed or not. */
+function toggleDisplay(id) {
+  document.getElementById(id).classList.toggle('shown');
+  document.getElementById(id).classList.toggle('hidden');
 }
 
 /** 

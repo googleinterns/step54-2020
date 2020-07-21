@@ -25,8 +25,8 @@ i {
 }
 
 #trends-list li:hover {
-  cursor: pointer;
   color: #2268d6;
+  cursor: pointer;
 }
 
 #show-more-or-less {
@@ -36,6 +36,11 @@ i {
 
 #show-more-or-less:hover {
   color: #3aa7d6;
+  cursor: pointer;
+}
+
+.country-trend:hover {
+  color: #2268d6;
   cursor: pointer;
 }
 
