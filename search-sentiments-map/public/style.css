@@ -43,9 +43,11 @@ i {
 }
 
 #top-left-div {
+  background-color: rgba(255, 255, 255, 0.5);
+  left: 40px;
+  padding: 20px 20px 55px 20px;
   position: absolute;
   top: 50px;
-  left: 40px;
 }
 
 /* The switch - the box around the slider. */
@@ -88,13 +90,16 @@ input:checked + .slider:before {
 }
 
 #right-div {
-  height: 60vh;
+  background-color: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  padding: 20px 0 20px 0;
   position: absolute;
   right: 30px;
   top: 40px;
 }
 
-#search-div {
+#search-div,
+#trends-div {
   margin: 20px;
 }
 
