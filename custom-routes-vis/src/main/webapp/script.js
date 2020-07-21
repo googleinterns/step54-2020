@@ -23,9 +23,15 @@ const MarkerNames = {
   DESTINATION: 'destination',
 };
 
-const IOS_URL_ID = 'ios-url';
-const V1_ANDROID_URL_ID = 'v1-android-url';
-const V2_ANDROID_URL_ID = 'v2-android-url';
+/**
+ * Test App URL container ids.
+ * @enum {string}
+ */
+const url_ids = {
+  IOS_URL_ID: 'ios-url', 
+  V1_ANDROID_URL_ID: 'v1-android-url', 
+  V2_ANDROID_URL_ID: 'v2-android-url',
+};
 // Array holding origin and destination markers.
 let originDestinationMarkers = []
 
@@ -85,21 +91,21 @@ function updateDeepLinkingUrl() {
   var destinationPosition = originDestinationMarkers[1]
   if (document.getElementById('origin-coordinates').innerHTML !== '' && 
       document.getElementById('destination-coordinates').innerHTML !== '') {
-    document.getElementById(IOS_URL_ID).innerHTML =
+    document.getElementById(url_ids.IOS_URL_ID).innerHTML =
         '<a href=navsdkdemo://advanced?originLat=' + originDestinationMarkers[0].position.lat() + 
         '&originLng=' + originDestinationMarkers[0].position.lng() + '&destLat=' +
         originDestinationMarkers[1].position.lat() + '&destLng=' +
         // TODO: Update Route Token if we get access to Routes Preferred API.
         originDestinationMarkers[1].position.lng() + '&routeToken=TOKEN>' +  
         'IOS Test App' + '</a>';
-    document.getElementById(V1_ANDROID_URL_ID).innerHTML =
+    document.getElementById(url_ids.V1_ANDROID_URL_ID).innerHTML =
         '<a href=navsdk://fragmentactivity?originlat=' + originDestinationMarkers[0].position.lat() +
         '&originlng=' + originDestinationMarkers[0].position.lng() + '&destinationlat=' +
         originDestinationMarkers[1].position.lat() + '&destinationlng=' +
         // TODO: Update Route Token if we get access to Routes Preferred API.
         originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' +
         'Android V1 Test App' + '</a>';
-    document.getElementById(V2_ANDROID_URL_ID).innerHTML =
+    document.getElementById(url_ids.V2_ANDROID_URL_ID).innerHTML =
         '<a href=navsdk://supportnavmapfragmentactivity?originlat=' +
         originDestinationMarkers[0].position.lat() + '&originlng=' +
         originDestinationMarkers[0].position.lng() + '&destinationlat=' +
@@ -109,9 +115,9 @@ function updateDeepLinkingUrl() {
         'Android V2 Test App' + '</a>';
   } else if (document.getElementById('origin-coordinates').innerHTML === '' || 
       document.getElementById('destination-coordinates').innerHTML === '') { 
-    document.getElementById(IOS_URL_ID).innerHTML = '';
-    document.getElementById(V1_ANDROID_URL_ID).innerHTML = '';
-    document.getElementById(V2_ANDROID_URL_ID).innerHTML = '';
+    for (const id in url_ids) {
+      document.getElementById(url_ids[id]).innerHTML = '';
+    }
   }
   
 }
