@@ -18,6 +18,8 @@ const router = express.Router();  // Using Router to divide the app into modules
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
+const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
+
 /** Renders the trends data of the country given by the request parameter. */
 router.get('/:country', (req, res) => {
   let country = req.params.country;
@@ -37,11 +39,13 @@ router.get('/:country', (req, res) => {
 async function retrieveCountryTrends(country) {
   const query = datastore.createQuery('TrendsEntry').order('timestamp', {
     descending: true,
-  });
+  }).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
-
-  const countryTrends = trendsEntry[0].trendsByCountry
-      .filter(trends => trends.country === country);  
+  const entry = 
+      (Date.now() - trendsEntry[0].timestamp > RETRIEVE_RESULTS_TIME_MS) ? 
+      trendsEntry[0] : trendsEntry[1];
+  const countryTrends = entry.trendsByCountry
+      .filter(trends => trends.country === country);
   if (countryTrends.length === 0) {
     return [];
   }
