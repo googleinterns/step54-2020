@@ -83,7 +83,7 @@ public class GetDirectionsServlet extends HttpServlet {
    * @param destination Destination of the requested routes in "lat,lng" format.
    * @param alpha Whether to send the request to the alpha version of the API.
    * @param key The API key.
-   * @param rateCard The Rate Card for this call ti .
+   * @param rateCard The Rate Card for this call to the API.
    */
   public URLConnection sendPostRequestToRoutesApi(String origin, String destination, boolean alpha,
       String apiKey, String rateCard) throws IOException, MalformedURLException {
