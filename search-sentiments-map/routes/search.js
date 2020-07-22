@@ -176,7 +176,7 @@ async function updateSearchResults() {
 
   retrieveGlobalTrends().then(async trends => {
     // When testing ,use i < 1 to test for only one trend, and comment out
-    // {@code await new Promise} line to avoid 1 minute pauses.
+    // `await new Promise` line to avoid 1 minute pauses.
     for (let i = 0; i < trends.length; i++) {
       let topic = trends[i].trendTopic;
       console.log('Creating WorldDataByTopic entity for', topic)
@@ -273,7 +273,7 @@ async function getCustomSearchResultsForCountry(countryCode, query) {
  */
 async function formatCountryResults(searchResultsJson) {
   // Parse the JSON string and pass each search result to add to the
-  // {@code countryData} object.
+  // `countryData` object.
   let currentSearchResults = searchResultsJson.items;
   let countryData = [];
   let totalScore = 0;
