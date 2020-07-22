@@ -95,14 +95,14 @@ function updateDeepLinkingUrl() {
         '<a href=navsdkdemo://advanced?originLat=' + originDestinationMarkers[0].position.lat() + 
         '&originLng=' + originDestinationMarkers[0].position.lng() + '&destLat=' +
         originDestinationMarkers[1].position.lat() + '&destLng=' +
-        // TODO: Update Route Token if we get access to Routes Preferred API.
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
         originDestinationMarkers[1].position.lng() + '&routeToken=TOKEN>' +  
         'IOS Test App' + '</a>';
     document.getElementById(url_ids.V1_ANDROID_URL_ID).innerHTML =
         '<a href=navsdk://fragmentactivity?originlat=' + originDestinationMarkers[0].position.lat() +
         '&originlng=' + originDestinationMarkers[0].position.lng() + '&destinationlat=' +
         originDestinationMarkers[1].position.lat() + '&destinationlng=' +
-        // TODO: Update Route Token if we get access to Routes Preferred API.
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
         originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' +
         'Android V1 Test App' + '</a>';
     document.getElementById(url_ids.V2_ANDROID_URL_ID).innerHTML =
@@ -110,7 +110,7 @@ function updateDeepLinkingUrl() {
         originDestinationMarkers[0].position.lat() + '&originlng=' +
         originDestinationMarkers[0].position.lng() + '&destinationlat=' +
         originDestinationMarkers[1].position.lat() + '&destinationlng=' + 
-        // TODO: Update Route Token if we get access to Routes Preferred API.
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
         originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' +
         'Android V2 Test App' + '</a>';
   } else if (document.getElementById('origin-coordinates').innerHTML === '' || 
