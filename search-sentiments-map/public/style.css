@@ -47,7 +47,15 @@ i {
   left: 40px;
   padding: 20px 20px 55px 20px;
   position: absolute;
-  top: 50px;
+  top: 40px;
+}
+
+.mode-span {
+  font-weight: bold;
+}
+
+.mode-span:hover {
+  color: #2268d6;
 }
 
 /* The switch - the box around the slider. */
@@ -92,10 +100,23 @@ input:checked + .slider:before {
 #right-div {
   background-color: rgba(255, 255, 255, 0.5);
   overflow: hidden;
-  padding: 20px 0 20px 0;
+  padding: 30px 0 20px 0;
   position: absolute;
-  right: 30px;
+  right: 40px;
   top: 40px;
+}
+
+#show-hide-right-div {
+  font-size: 40px;
+  font-weight: 500;
+  height: 40px;
+  line-height: 40px;
+  padding: 0;
+  position: absolute;
+  right: 45px;
+  top: 45px;
+  width: 40px;
+  z-index: 9;
 }
 
 #search-div,
@@ -109,11 +130,12 @@ input:checked + .slider:before {
   display: block;
   font-weight: normal;
   line-height: 1.42857143;
-  margin:0;
+  margin: 0;
   padding: 3px 10px;
   transition: background-color .4s ease;
   white-space: nowrap;
 }
+
 .checkbox-menu li input {
   margin: 0px 5px;
   position: relative;
@@ -135,8 +157,14 @@ input:checked + .slider:before {
   background-color: #b8b8ff;
 }
 
+.dropdown-menu {         
+  max-height: 200px;
+  overflow-y: auto;
+}
+
 #trends-list li {
   font-family: "Lucida Console", Courier, monospace;
+  width: fit-content;
 }
 
 #trends-list li:hover {

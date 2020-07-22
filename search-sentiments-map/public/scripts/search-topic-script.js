@@ -79,3 +79,11 @@ function countrySelectSetUp() {
     e.stopPropagation();
   });
 }
+
+/** Toggles the display of the user search and trends panel on the right. */
+function toggleRightPanel() {
+  toggleDisplay('right-div');
+  let showHideButton = document.getElementById('show-hide-right-div');
+  showHideButton.innerText === '–' ?
+      showHideButton.innerText = '+' : showHideButton.innerText = '–';
+}

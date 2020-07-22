@@ -67,19 +67,22 @@
         <input id="sentiment-popularity-check" type="checkbox" onclick="loadCountryDataByMode()">
         <span class="slider"></span>
       </label>
-      <span id="switch-info">Switch between Sentiment Mode & Popularity Mode.</span>
+      <span id="switch-info">Switch between <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide sentiments on selected topic" data-placement="top">Sentiment Mode</span> 
+          & <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide interest on selected topic" data-placement="top">Popularity Mode</span>.</span>
     </div>
 
-    <div id="right-div">
-        
+    <!-- The inner text is a dash, which is longer than a hyphen. -->
+    <button id="show-hide-right-div" type="button" class="btn btn-light" onclick="toggleRightPanel()" aria-pressed="true" data-toggle="popover" data-trigger="hover" data-content="Toggle the Panel">–</button>
+
+    <div id="right-div" class="shown">
       <form onsubmit="return false">
         <div id="search-div">
           <input type="text" class="form-control" id="search-topic" name="search-topic" placeholder="Search for a topic">
           <div class="dropdown">
             <button class="btn btn-default dropdown-toggle" type="button"  id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-              Countries to view results for(max 3)<span class="caret"></span>
+              Countries to view results for (max 3)<span class="caret"></span>
             </button>
-            <ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="dropdownMenu1" id="country-select-dropdown" ></ul>
+            <ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="dropdownMenu1" id="country-select-dropdown"></ul>
           </div>
           <button type="submit" class="btn btn-primary" id="submit-user-topic" onclick="searchTopic()">Search</button>
         </div>

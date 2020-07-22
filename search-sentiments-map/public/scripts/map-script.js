@@ -56,6 +56,10 @@ const CountryColorCodes = {
 
 /** Loads the map with country polygons when page loads. */
 function initMap() {
+  $(document).ready(function(){
+    $('[data-toggle="popover"]').popover();   
+  });
+
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 29.246630, lng: 29.678410},
     zoom: 3,
