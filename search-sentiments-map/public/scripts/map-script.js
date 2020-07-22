@@ -119,7 +119,7 @@ function loadCountryData() {
         .filter(data => data.country === row.getId());
 
     let dataVariable = null;
-    if (countryData.length != 0) {
+    if (countryData.length !== 0) {
       dataVariable = 
           isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
     }

@@ -50,7 +50,17 @@ function getCurrentSearchData() {
  */
 function setNewTrend(trend) {
   currentTrend = trend;
-  //updateTrends();
+
+  // Bold and italicize the currently viewed trend.
+  let trendElements = document.getElementById('trends-list').childNodes;
+  trendElements.forEach(function(trendElement) {
+    if (trendElement.innerText === currentTrend) {
+      trendElement.innerHTML = '<span class="font-weight-bold font-italic">' +
+          currentTrend + '</span>';
+    } else {
+      trendElement.innerHTML = trendElement.innerText;
+    }
+  })
 
   fetch('/search/' + trend + '&' + currentTimeRange)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
@@ -71,6 +81,12 @@ function setUserSearchTopic(topic, countries) {
   currentTrend = topic;
   currentTimeRange = 0;
   document.getElementById('timeline-slider').value = 0;
+
+  let trendElements = document.getElementById('trends-list').childNodes;
+  trendElements.forEach(function(trendElement) {
+    trendElement.innerHTML = trendElement.innerText;
+  })
+
   updateTrends(false);
 
   fetch('/search/' + topic + '/' + JSON.stringify(countries))
