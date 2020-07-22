@@ -182,6 +182,11 @@ input:checked + .slider:before {
   cursor: pointer;
 }
 
+.country-trend {
+  display: inline-block;
+  margin-right: 10px;
+}
+
 .country-trend:hover {
   color: #2268d6;
   cursor: pointer;

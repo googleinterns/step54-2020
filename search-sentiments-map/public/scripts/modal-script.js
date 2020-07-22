@@ -46,13 +46,18 @@ function setCountryTrends(countryCode) {
             let articlesId = 'trend' + i + 'Article';
             let articlesHtml = 'Search results: <br>';
             trends[i].articles.forEach(article => {
-              articlesHtml += '<span>' + article + '</span><br>';
+              articlesHtml += '<li><a href="' + article.url + '">' + 
+                  article.title + '</a></li>';
             })
+            let exploreLink = 
+                'https://trends.google.com' + trends[i].exploreLink;
+            articlesHtml += 'Click <a href=' + exploreLink + 
+                '>here</a> to explore the topic on google trends website.';
             topTrendsTab.innerHTML += 
-                '<h5 class="country-trend" onclick="toggleDisplay(\''+ 
-                articlesId + '\')">' + trends[i].topic + '</h5>' + 
-                '<div id="'+ articlesId + '" class="hidden">' + 
-                articlesHtml + '</div>';
+                '<h5 class="country-trend" onclick="toggleDisplay(\''+
+                articlesId + '\')">' + trends[i].topic + '</h5>' +
+                '<i>' + trends[i].traffic + ' searches</i><br>' + '<ul id="' +
+                articlesId + '" class="hidden">' + articlesHtml + '</ul>';
           }
         }
         topTrendsTab.innerHTML += 

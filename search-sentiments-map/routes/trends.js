@@ -92,13 +92,20 @@ async function updateDailyTrends() {
 function constructCountryTrendsJson(trendingSearches, countryCode) {
   let trends = [];
   trendingSearches.forEach(trend => {
-    let articleTitles = [];
+    let articlesFormatted = [];
     trend.articles.forEach(article => {
-      articleTitles.push(article.title);
+      articlesFormatted.push({
+        title: article.title,
+        url: article.url,
+      });
     })
     trends.push({
       topic: trend.title.query,
-      articles: articleTitles,
+      traffic: trend.formattedTraffic,
+      // Note: Can explore the topic by appending the explore link to 
+      // 'https://trends.google.com/trends'.
+      exploreLink: trend.title.exploreLink,
+      articles: articlesFormatted,
       sentimentScore: 0,
     });
   })
@@ -118,7 +125,9 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
         country: US,
         trends: [{
           topic: Donald Trump,
-          articles: [title1, ..., title7],
+          traffic: 200K+,
+          exploreLink: '/trends/explore?q=Donald+Trump&date=now+7-d&geo=US',
+          articles: [{title: title1, url: url1}, ...],
           sentimentScore: 0.2,
           }...
         ]}, {
