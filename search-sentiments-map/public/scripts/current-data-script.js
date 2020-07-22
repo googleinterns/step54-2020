@@ -118,8 +118,10 @@ function changeTimeRange(timeRange) {
  *     call setNewTrend at the end of setTopTrends.
  */
 function updateTrends(setNewTrendIsEnabled = true) {
-  fetch('/trends/' + currentTimeRange).then(globalTrends => globalTrends.json()).then(trends => {
-    topTrends = trends;
-    setTopTrends(setNewTrendIsEnabled); 
+  fetch('/trends/' + currentTimeRange)
+      .then(globalTrends => globalTrends.json())
+      .then(trends => {
+        topTrends = trends;
+        setTopTrends(setNewTrendIsEnabled); 
   });
 }
