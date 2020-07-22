@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCKQFQPXICbli-dG9mQz0WRUZAyKPVfqIk&libraries=geometry"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCKQFQPXICbli-dG9mQz0WRUZAyKPVfqIk"></script>
     <script src="script.js"></script>
   </head>
   <body onload="initMapWithMarkers()">
@@ -38,7 +38,7 @@
           <option value="compute-routes">ComputeRoutes API(V1)</option>
           <option value="compute-routes-alpha">ComputeCustomRoutes API(V1 alpha)</option>
         </select>
-        <input id="api-key" class="form-control" placeholder="API Key (Defaults to use Directions API Key)"></input>
+        <textarea id="api-key" class="form-control" placeholder="API key (defaults to use Directions API)" rows="1"></textarea>
         <div id="rate-card-data" class="hidden">
           <div class="row">
             <label for="cost-per-minute" class="col-sm-5">Cost Per Minute:</label>
@@ -65,7 +65,7 @@
       </div>
       <div class="col-sm-3">
         <div id="routes-options"></div>
-        <button id="generate-routes" type="button" class="btn btn-primary hidden" onclick="generateRoutes()">Generate Routes</button><br>
+        <button type="button" class="btn btn-primary hidden" onclick="generateRoutes()" id="generate-routes">Generate Routes</button><br>
         <div id="route-info"></div>
       </div>
     </div>

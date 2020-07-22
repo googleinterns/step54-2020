@@ -36,7 +36,7 @@ function setTopTrends() {
       // Show a certain number of trending topics by default and hide the rest.
       trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
       trendElement.addEventListener('click', (event) => {
-        setNewTrend(event.currentTarget.innerText);
+        showResultForTopic(event);
       })
       trendsList.append(trendElement);
     }
@@ -52,9 +52,6 @@ function setTopTrends() {
       });
       trendsList.append(showMoreOrLessToggleItem);
     }
-
-    // Set the map to display data on the top-ranking trend.
-    setNewTrend(trends[0].trendTopic);
   });
 }
 
@@ -76,4 +73,14 @@ function showMoreOrLess() {
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
   }
+}
+
+/** 
+ * Update the title of the displayed trend when a topic is selected.
+ * TODO(chenyuz): Show sentiment scores for all countries on the selected topic.
+ */
+function showResultForTopic(event) {
+  const searchTopic = event.currentTarget.innerText;
+  const topicHeader = document.getElementById('topic-header');
+  topicHeader.innerText = 'Worldwide sentiments of search results for "' + searchTopic + '"';
 }
