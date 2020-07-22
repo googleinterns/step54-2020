@@ -183,7 +183,7 @@ function mouseInToRegion(e) {
   if (countryData == null) {
     return;
   }
-  // Set the hover country so the {@code setStyle} function can change the
+  // Set the hover country so the `setStyle` function can change the
   // border.
   e.feature.setProperty('country', 'hover');
   countryInfo = e.feature.getProperty('name') + ': ';

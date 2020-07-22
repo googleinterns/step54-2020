@@ -58,7 +58,7 @@ function countrySelectSetUp() {
   });
 
   $(".checkbox-menu").on("change", "input[type='checkbox']", function() {
-    // Do not allow user to select more that {@code MAX_SELECTED_COUNTRIES}
+    // Do not allow user to select more that `MAX_SELECTED_COUNTRIES`.
     if (countryCodeList.length >= MAX_SELECTED_COUNTRIES) {
       this.checked = false;
     }

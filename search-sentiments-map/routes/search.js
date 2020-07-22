@@ -53,7 +53,7 @@ router.get('/:topic', (req, res) => {
 /** 
  * Renders a JSON array of the top search results for requested countries with
  * API data from within the last
- * {@code CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS} for the specified topic.
+ * `CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS` for the specified topic.
  */
 router.get('/:topic/:countries', (req, res) => {
   let topic = req.params.topic;
