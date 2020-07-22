@@ -47,7 +47,7 @@ function setCountryTrends(countryCode) {
             let articlesHtml = 'Search results: <br>';
             trends[i].articles.forEach(article => {
               articlesHtml += '<span>' + article + '</span><br>';
-            })
+            });
             topTrendsTab.innerHTML += 
                 '<h5 class="country-trend" onclick="toggleDisplay(\''+ 
                 articlesId + '\')">' + trends[i].topic + '</h5>' + 

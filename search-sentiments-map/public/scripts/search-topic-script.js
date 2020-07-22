@@ -54,7 +54,7 @@ function countrySelectSetUp() {
       dropdownContainer.innerHTML +=
           '<li><label id="' + country.id + '"><input type="checkbox" value="' +
           country.id + '">' + country.name + '</label></li>';
-    })
+    });
   });
 
   $(".checkbox-menu").on("change", "input[type='checkbox']", function() {

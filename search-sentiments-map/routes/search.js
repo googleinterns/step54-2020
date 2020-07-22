@@ -145,15 +145,11 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
     timestamp = Date.now();
   }
 
-  try {
-    return {
-      topic: topic,
-      timestamp: timestamp,
-      dataByCountry: countriesDataToReturn,
-    };
-  } catch (err) {
-    console.error('ERROR: ', err);
-  }
+  return {
+    topic: topic,
+    timestamp: timestamp,
+    dataByCountry: countriesDataToReturn,
+  };
 }
 
 /** 
