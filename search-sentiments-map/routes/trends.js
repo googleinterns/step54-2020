@@ -21,6 +21,7 @@ const googleTrends = require('google-trends-api');
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 const TRENDS_DATA_KIND = 'TrendsEntry';
+const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
 
 /** 
  * Renders a JSON array of the top 20 (or fewer) global search trends maintained
@@ -156,7 +157,7 @@ async function deleteAncientTrend() {
   if (trendsEntries.length === 0) {
     return;  // Nothing to delete.
   }
-  if (Date.now() - trendsEntries[0].timestamp > 7 * 24 * 60 * 60000) {
+  if (Date.now() - trendsEntries[0].timestamp > STALE_DATA_THRESHOLD_7_DAYS_MS) {
     const trendsEntryKey = trendsEntries[0][datastore.KEY];
     await datastore.delete(trendsEntryKey);
     console.log(`TrendsEntry ${trendsEntryKey.id} deleted.`);
@@ -210,7 +211,7 @@ function getGlobalTrends(trendsByCountry) {
   for (let [topic, count] of trendCountsMap) {
     trendCountsArr.push({
       topic: topic,
-      count: count,  
+      count: count,
     })
   }
   // Sort trends in descending order of their counts.

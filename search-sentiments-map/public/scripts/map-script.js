@@ -43,7 +43,7 @@ function initMap() {
     mapTypeControl: false,
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
-  .push(document.getElementById('legend'));
+      .push(document.getElementById('legend'));
 
   infowindow = new google.maps.InfoWindow({});
 
@@ -58,18 +58,42 @@ function initMap() {
 
 /** Loads the country boundary polygons from a GeoJSON source. */
 function loadMapOutline() {
-  // Load country data after finished loading in geojson.
-  map.data.loadGeoJson('countries.geojson', null, function () {
-    loadCountryData();
-  });
+  map.data.loadGeoJson('countries.geojson', null);
 }
 
-/** Loads the country sentiment score from Datastore. */
-function loadCountryData() {
+/** 
+ * Gets the selected mode (sentiment or popularity) from the webpage and loads
+ * corresponding data.
+ */
+function loadCountryDataByMode() {
+  let isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
+
+  const topicHeader = document.getElementById('topic-header');
+  topicHeader.innerText = isSentimentMode ?
+      'Worldwide sentiment scores of search results for "' + getCurrentTrend() + '"' :
+      'Worldwide search interest scores for "' + getCurrentTrend() + '"' ;
+
+  loadCountryData(isSentimentMode);
+}
+
+/** 
+ * Loads the sentiments or search interests for all countries from Datastore 
+ * depending on what mode has been specified.
+ * @param {boolean=} isSentimentMode Whether the result to obtain is the sentiment
+ * data. Search interest data will be loaded otherwise.
+ */
+function loadCountryData(isSentimentMode = true) {
   map.data.forEach(function(row) {
-    // Currently a random value, will be changed to call sentiment value.
-    // TODO(ntarn): Add the sentiment value for the country. 
-    const dataVariable = Math.floor(Math.random() * Math.floor(100));
+    let dataByCountry = getCurrentCustomSearchData().dataByCountry;
+    let countryData = dataByCountry.filter(data => data.country === row.getId());
+
+    let dataVariable = 0;
+    if (countryData.length === 0) {
+      console.log('Data does not exist for this countryCode:', row.getId());
+    } else {
+      dataVariable = 
+          isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
+    }
 
     // Keep track of min and max values as we read them.
     if (dataVariable < dataMin) {
@@ -80,13 +104,13 @@ function loadCountryData() {
     }
 
     row.setProperty('country_data', dataVariable);
-
-    // Update and display the map legend.
-    document.getElementById('data-min').textContent =
-        dataMin.toLocaleString();
-    document.getElementById('data-max').textContent =
-        dataMax.toLocaleString();
   });
+
+  // Update and display the map legend.
+  document.getElementById('data-min').textContent =
+      dataMin.toLocaleString();
+  document.getElementById('data-max').textContent =
+      dataMax.toLocaleString();
 }
 
 /**
@@ -98,7 +122,7 @@ function loadCountryData() {
  */
 function styleFeature(feature) {
   let low = [5, 69, 54];  // Color of smallest datum.
-  let high = [151, 83, 34];   // Color of largest datum.
+  let high = [151, 83, 34]; // Color of largest datum.
 
   // Delta represents where the value sits between the min and max.
   let delta = (feature.getProperty('country_data') - dataMin) /
