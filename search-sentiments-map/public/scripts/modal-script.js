@@ -14,6 +14,8 @@
 
 // The default score assigned to countries with no search results.
 const NO_RESULTS_DEFAULT_SCORE = -500;
+const POSITIVE_COLOR = 'green';
+const NEGATIVE_COLOR = 'red';
 /**
  * Displays the information modal when a country on the map is clicked.
  * @param {?google.maps.MouseEvent} e Click event.
@@ -125,7 +127,7 @@ function drawSentimentChart(chartElement, results) {
   sentimentDataArray.push(["Search Result", "Score", {role: "style"}]);
   for (let i = 0; i < results.length; i++) {
     let sentimentItem = [(i + 1).toString(), results[i].score];
-    results[i].score >= 0 ? sentimentItem.push('green') : sentimentItem.push('red');
+    results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : sentimentItem.push(NEGATIVE_COLOR);
     sentimentDataArray.push(sentimentItem);
   }
 

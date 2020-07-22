@@ -76,30 +76,6 @@ function loadCountryDataByMode() {
   loadCountryData(isSentimentMode);
 }
 
-// <<<<<<< HEAD
-// /** Loads the country sentiment score from Datastore. */
-// function loadCountryData() {
-//   let dataVariableMax = Number.MIN_VALUE;
-//   let countryMax = '';
-//   let dataVariableMin = Number.MAX_VALUE; 
-//   let countryMin = '';
-//   map.data.forEach(function (row) {
-//     const countryCode = row.getId();
-//     const country = row.getProperty('name');
-//     let topicData = getCurrentCustomSearchData();
-//     let countryData = topicData.countries
-//       .filter(countries => countries.country === countryCode);
-//     let dataVariable = 0;
-//     if (countryData.length != 0) {
-//       dataVariable = countryData[0].averageSentiment;
-//       if (dataVariable > dataVariableMax) {
-//         dataVariableMax = dataVariable;
-//         countryMax = country;
-//       } else if (dataVariable < dataVariableMin) {
-//         dataVariableMin = dataVariable;
-//         countryMin = country;
-//       }
-// =======
 /** 
  * Loads the sentiments or search interests for all countries from Datastore 
  * depending on what mode has been specified.
@@ -107,17 +83,23 @@ function loadCountryDataByMode() {
  * data. Search interest data will be loaded otherwise.
  */
 function loadCountryData(isSentimentMode = true) {
+
+  // Minimum and maximum average sentiment values for current topic. 
   let dataVariableMax = Number.MIN_VALUE;
-  let countryMax = '';
   let dataVariableMin = Number.MAX_VALUE; 
+
+  // Countries with the minimum and maximum average sentiment values for current topic. 
+  let countryMax = '';
   let countryMin = '';
   map.data.forEach(function(row) {
     let dataByCountry = getCurrentCustomSearchData().dataByCountry;
     let countryData = dataByCountry.filter(data => data.country === row.getId());
     const country = row.getProperty('name');
     let dataVariable = 0;
+
+     // Handle case where there are no search results for the current topic.
     if (countryData.length === 0) {
-      console.log('Data does not exist for this countryCode:', row.getId());
+      console.log('Data does not exist for this country:', country);
     } else {
       dataVariable = 
           isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
