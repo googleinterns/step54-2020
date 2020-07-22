@@ -113,7 +113,7 @@ function loadCountryDataByMode() {
  * depending on what mode has been specified.
  */
 function loadCountryData() {
-  map.data.forEach(function(row) {
+  map.data.forEach(row => {
     let dataByCountry = getCurrentSearchData().dataByCountry;
     let countryData = dataByCountry
         .filter(data => data.country === row.getId());
@@ -155,7 +155,7 @@ function styleFeature(feature) {
 
     color = [];
     // Calculate hsl color integer values based on the delta.
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < high.length; i++) {
       color[i] = (high[i] - low[i]) * delta + low[i];
     }
   }
@@ -182,22 +182,23 @@ function styleFeature(feature) {
 function mouseInToRegion(e) {
   let countryData = e.feature.getProperty('country_data');
   // Add popup info window with country info.
-  if (countryData != null) {
-    // Set the hover country so the {@code setStyle} function can change the
-    // border.
-    e.feature.setProperty('country', 'hover');
-    countryInfo = e.feature.getProperty('name') + ': ';
-
-    // Display "N/A" on hover when there are no results and thererfore the
-    // sentiment score is the no results default score.
-    countryInfo +=
-        ((countryData === NO_RESULTS_DEFAULT_SCORE) ?
-            "N/A" : countryData.toLocaleString());
-
-    infowindow.setContent(countryInfo);
-    infowindow.setPosition(e.latLng);
-    infowindow.open(map);
+  if (countryData == null) {
+    return;
   }
+  // Set the hover country so the {@code setStyle} function can change the
+  // border.
+  e.feature.setProperty('country', 'hover');
+  countryInfo = e.feature.getProperty('name') + ': ';
+
+  // Display "N/A" on hover when there are no results and thererfore the
+  // sentiment score is the no results default score.
+  countryInfo +=
+      ((countryData === NO_RESULTS_DEFAULT_SCORE) ?
+          "N/A" : countryData.toLocaleString());
+
+  infowindow.setContent(countryInfo);
+  infowindow.setPosition(e.latLng);
+  infowindow.open(map);
 }
 
 /**

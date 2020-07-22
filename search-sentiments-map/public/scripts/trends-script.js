@@ -41,7 +41,7 @@ function setTopTrends(setNewTrendIsEnabled) {
     trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
     trendElement.addEventListener('click', (event) => {
       setNewTrend(event.currentTarget.innerText);
-    })
+    });
     trendsList.append(trendElement);
   }
 
