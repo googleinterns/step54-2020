@@ -14,10 +14,12 @@
     "promise.allsettled": "^1.0.2",
     "request": "^2.81.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "should": "^13.2.3"
+  },
   "scripts": {
     "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "",
   "license": "ISC"
