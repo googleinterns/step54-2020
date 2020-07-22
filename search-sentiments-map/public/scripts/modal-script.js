@@ -25,28 +25,7 @@ function onClickCountry(e) {
   document.getElementById('modal-title').innerText = countryName;
   displayTopResultsForCurrentTrend(countryId);
   setCountryTrends(countryId);
-}
-
-/**
- * Sets trends under the top-trends modal tab for the selected country.
- * @param {string} countryCode The two-letter code of the selected country.
- */
-function setCountryTrends(countryCode) {
-  const topTrendsTab = document.getElementById('top-trends-tab');
-  topTrendsTab.innerHTML = '';
-  fetch('/country-trends/' + countryCode).then(countryTrends =>
-      countryTrends.json()).then(trends => {
-        if (trends.length === 0) {
-          topTrendsTab.innerText = 
-              'Trends are not available for the selected country.';
-        } else {
-          trends.forEach(trend => {
-            const trendHeader = document.createElement('h5');
-            trendHeader.innerText = trend.topic;
-            topTrendsTab.appendChild(trendHeader);
-          });
-        }
-      });
+  displayPopularityTimeline(countryId);
 }
 
 /** 
@@ -80,4 +59,85 @@ function displayTopResultsForCurrentTrend(countryCode) {
     resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
       '<i><br>';
   }
+}
+
+/**
+ * Sets trends under the top-trends modal tab for the selected country.
+ * @param {string} countryCode The two-letter code of the selected country.
+ */
+function setCountryTrends(countryCode) {
+  const topTrendsTab = document.getElementById('top-trends-tab');
+  topTrendsTab.innerHTML = '';
+  fetch('/country-trends/' + countryCode).then(countryTrends =>
+      countryTrends.json()).then(trends => {
+        if (trends.length === 0) {
+          topTrendsTab.innerText = 
+              'Trends are not available for the selected country.';
+        } else {
+          trends.forEach(trend => {
+            const trendHeader = document.createElement('h5');
+            trendHeader.innerText = trend.topic;
+            topTrendsTab.appendChild(trendHeader);
+          });
+        }
+      });
+}
+
+/** 
+ * Displays the popularity timeline in a country for the current search trend on modal.
+ * @return {!Array<JSON>} 10 globally trending topics and the number of countries 
+ * where they are trending.
+ */
+function displayPopularityTimeline(countryCode) {
+  const popTimelineTab = document.getElementById('pop-timeline-tab');
+  popTimelineTab.innerHTML = '';
+  fetch('/trends/', {
+    method: 'post',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      topic: getCurrentTrend(),
+      code: countryCode,
+    })
+  }).then(interestData =>
+    interestData.json()).then(timelineJSON => {
+      if (timelineJSON.length === 0) {
+        popTimelineTab.innerText = 
+            'Popularity Timeline is not available for the selected country.';
+      } else {
+        drawPopularityTimeline(timelineJSON);
+      }
+    });
+
+}
+
+/** 
+ * Draw the popularity timeline in a country for the current search trend on modal.
+ * @param {string} countryCode Two letter country code for selected country.
+ */
+function drawPopularityTimeline(timelineJSON) {
+  const popTimelineTab = document.getElementById('pop-timeline-tab');
+  popTimelineTab.innerHTML = '';
+  fetch('/trends/', {
+    method: 'post',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      topic: getCurrentTrend(),
+      code: countryCode,
+    })
+  }).then(interestData =>
+    interestData.json()).then(timelineJSON => {
+      if (timelineJSON.length === 0) {
+        popTimelineTab.innerText = 
+            'Popularity Timeline is not available for the selected country.';
+      } else {
+        console.log(timelineJSON);
+      }
+    });
+
 }

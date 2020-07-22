@@ -23,6 +23,9 @@ const datastore = new Datastore();
 const TRENDS_DATA_KIND = 'TrendsEntry';
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
 
+const bodyParser = require('body-parser');
+const jsonParser = bodyParser.json();
+
 /** 
  * Renders a JSON array of the top 20 (or fewer) global search trends maintained
  * for the current 12-hour range.
@@ -33,6 +36,51 @@ router.get('/', (req, res) => {
     res.send(globalTrends);
   });
 });
+
+/** Renders the popularity data of the country given by the request parameter. */
+router.post('/', jsonParser, (req, res) => {
+  console.log('what is going on:' + req.body.topic + ' ' + req.body.code)
+  // googleTrends.interestOverTime({keyword: 'Valentines Day'})
+  //     .then(function(results){
+  //       console.log(results);
+  //     })
+  //     .catch(function(err){
+  //       console.error(err);
+  //     });
+  googleTrends.interestOverTime({
+    keyword: req.body.topic,
+    startTime: new Date(Date.now() - (STALE_DATA_THRESHOLD_7_DAYS_MS)),
+    geo: req.body.code,
+  }).then(timelineData => {
+    console.log('what is going on 2: ' + timelineData);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(timelineData);
+    })
+  .catch(err => {
+    console.error(err);
+  });
+});
+
+
+/** 
+ * Returns search interest relative to the past 7 days for a given topic.
+ * @param {String} topic The given topic
+ * @param {string} countryCode Two letter country code for selected country.
+ * @return {!Array<JSON>} 10 globally trending topics and the number of countries 
+ * where they are trending.
+ */
+function getPastWeekInterest(topic, countryCode) {
+  return googleTrends.interestOverTime({
+    keyword: topic,
+    startTime: new Date(Date.now() - (4 * 60 * 60 * 1000)),
+    geo: countryCode,
+  }).then(results => {
+      return results;
+      })
+    .catch(err => {
+      console.error(err);
+    });
+ }
 
 /** 
  * Get the global trends from the most recent Datastore entry.
