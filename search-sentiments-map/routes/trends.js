@@ -106,7 +106,6 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
       // 'https://trends.google.com/trends'.
       exploreLink: trend.title.exploreLink,
       articles: articlesFormatted,
-      sentimentScore: 0,
     });
   })
 
@@ -122,23 +121,21 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
  * Example data structure for a `trendsEntry`:
  * {timestamp: 111111111,
     trendsByCountry: [{
-        country: US,
-        trends: [{
-          topic: Donald Trump,
-          traffic: 200K+,
-          exploreLink: '/trends/explore?q=Donald+Trump&date=now+7-d&geo=US',
-          articles: [{title: title1, url: url1}, ...],
-          sentimentScore: 0.2,
-          }...
-        ]}, {
-        country: UK,
-        trends: [..., ...]
-      }...
-    ],
+      country: US,
+      trends: [{
+        topic: Donald Trump,
+        traffic: 200K+,
+        exploreLink: '/trends/explore?q=Donald+Trump&date=now+7-d&geo=US',
+        articles: [{title: title1, url: url1}, ...],
+      }, ...],
+    }, {
+      country: UK,
+      trends: [..., ...],
+    }, ...],
     globalTrends: [{
-        trendTopic: X,
-        count: 5,
-    }, ...]
+      trendTopic: X,
+      count: 5,
+    }, ...],
    }
  * @param {!Array<JSON>} trendsByCountry An array where each element is a country
  * and its trends.

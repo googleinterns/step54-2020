@@ -97,6 +97,13 @@ input:checked + .slider:before {
   -webkit-transform: translateX(46px);
 }
 
+#bottom-left-div {
+  background-color: rgba(255, 255, 255, 0.5);
+  bottom: 100px;
+  left: 40px;
+  position: absolute;
+}
+
 #right-div {
   background-color: rgba(255, 255, 255, 0.5);
   overflow: hidden;

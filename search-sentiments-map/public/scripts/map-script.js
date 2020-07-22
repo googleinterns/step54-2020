@@ -211,3 +211,10 @@ function mouseOutOfRegion(e) {
   e.feature.setProperty('country', 'normal');
   infowindow.close();
 }
+
+function resetMapToCountryLevel(countryCode) {
+  // Reset map center
+  // Display state outlines and popularity data
+  // Reset trends
+  // Change modal displays
+}
