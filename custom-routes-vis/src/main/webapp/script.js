@@ -23,6 +23,15 @@ const MarkerNames = {
   DESTINATION: 'destination',
 };
 
+/**
+ * Test App URL container ids.
+ * @enum {string}
+ */
+const url_ids = {
+  IOS_URL_ID: 'ios-url', 
+  V1_ANDROID_URL_ID: 'v1-android-url', 
+  V2_ANDROID_URL_ID: 'v2-android-url',
+};
 // Array holding origin and destination markers.
 let originDestinationMarkers = [];
 // Array holding routes displayed on the map.
@@ -69,6 +78,7 @@ function createMarker(containerId, label, title, latLng) {
 
   marker.addListener('dragend', function(event) {
     updateCoordinates(event.latLng.lat(), event.latLng.lng(), containerId);
+    updateDeepLinkingUrl();
     if (originDestinationMarkers.length === 2 
         && originDestinationMarkers[0].getVisible() 
         && originDestinationMarkers[1].getVisible()) {
@@ -89,6 +99,44 @@ function updateCoordinates(lat, lng, containerId) {
       "Latitude: " + lat.toFixed(6) + "<br>Longitude: " + lng.toFixed(6) + "<br>";
 }
 
+/**
+ * Updates the deep linking url to various test apps on the page.
+ */
+function updateDeepLinkingUrl() {
+  var originPosition = originDestinationMarkers[0].position;
+  var destinationPosition = originDestinationMarkers[1]
+  if (document.getElementById('origin-coordinates').innerHTML !== '' && 
+      document.getElementById('destination-coordinates').innerHTML !== '') {
+    document.getElementById(url_ids.IOS_URL_ID).innerHTML =
+        '<a href=navsdkdemo://advanced?originLat=' + originDestinationMarkers[0].position.lat() + 
+        '&originLng=' + originDestinationMarkers[0].position.lng() + '&destLat=' +
+        originDestinationMarkers[1].position.lat() + '&destLng=' +
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
+        originDestinationMarkers[1].position.lng() + '&routeToken=TOKEN>' +  
+        'IOS Test App' + '</a>';
+    document.getElementById(url_ids.V1_ANDROID_URL_ID).innerHTML =
+        '<a href=navsdk://fragmentactivity?originlat=' + originDestinationMarkers[0].position.lat() +
+        '&originlng=' + originDestinationMarkers[0].position.lng() + '&destinationlat=' +
+        originDestinationMarkers[1].position.lat() + '&destinationlng=' +
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
+        originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' +
+        'Android V1 Test App' + '</a>';
+    document.getElementById(url_ids.V2_ANDROID_URL_ID).innerHTML =
+        '<a href=navsdk://supportnavmapfragmentactivity?originlat=' +
+        originDestinationMarkers[0].position.lat() + '&originlng=' +
+        originDestinationMarkers[0].position.lng() + '&destinationlat=' +
+        originDestinationMarkers[1].position.lat() + '&destinationlng=' + 
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
+        originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' +
+        'Android V2 Test App' + '</a>';
+  } else if (document.getElementById('origin-coordinates').innerHTML === '' || 
+      document.getElementById('destination-coordinates').innerHTML === '') { 
+    for (const id in url_ids) {
+      document.getElementById(url_ids[id]).innerHTML = '';
+    }
+  }
+  
+}
 /**
  * Hides 'place marker' button and waits for user to select coordinate for
  * marker. Updates marker to be in correct location, and show 'delete marker'
@@ -118,6 +166,7 @@ function showMarker(markerName) {
         originDestinationMarkers[markerIndex].setVisible(true);
         updateCoordinates(event.latLng.lat(), event.latLng.lng(),
             markerName + '-coordinates');
+        updateDeepLinkingUrl();
         document.getElementById('hide-' + markerName + '-marker')
             .style.display = 'block';
 
@@ -159,6 +208,7 @@ function hideMarker(markerName) {
   document.getElementById('hide-' + markerName + '-marker').style.display =
       'none';
   document.getElementById('generate-routes').style.display = 'none';
+  updateDeepLinkingUrl();
 }
 
 /** Removes all routes from the DOM. */
