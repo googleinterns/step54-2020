@@ -40,7 +40,7 @@ function setNewTrend(trend) {
       }).then(() => {
         // Reload map with new sentiment or search interest data and relevant
         // coloring.
-        loadCountryDataByMode();
+        loadRegionDataByMode();
       });
 }
 
@@ -57,7 +57,7 @@ function setUserSearchTopic(topic, countries) {
       }).then(() => {
           // Reload map with new sentiment or search interest data and relevant
           // coloring.
-          loadCountryDataByMode();
+          loadRegionDataByMode();
           document.getElementById('submit-user-topic').innerHTML = 'Submit';
           document.getElementById('submit-user-topic').disabled = false;
       });
@@ -69,6 +69,8 @@ function setUserSearchTopic(topic, countries) {
 function updateTrends() {
   fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
     topTrends = trends;
-    setTopTrends(); 
+    setTopTrends();
+    // Set the map to display data on the top-ranking trend.
+    setNewTrend(trends.globalTrends[0].trendTopic);
   });
 }

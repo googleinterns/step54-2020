@@ -60,9 +60,6 @@ function setTopTrends() {
   }
   document.getElementById('trends-timestamp').innerText = 
       'Last Updated: ' + new Date(getTopTrends().timestamp);
-
-  // Set the map to display data on the top-ranking trend.
-  setNewTrend(trends[0].trendTopic);
 }
 
 /**
