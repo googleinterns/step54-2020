@@ -55,7 +55,7 @@ router.get('/:topic&:timeRange', (req, res) => {
 /** 
  * Renders a JSON array of the top search results for requested countries with
  * API data from within the last
- * {@code CURRENT_DATA_TIME_RANGE_12_HOURS_MS} for the specified topic.
+ * `CURRENT_DATA_TIME_RANGE_12_HOURS_MS` for the specified topic.
  */
 router.get('/:topic/:countries', (req, res) => {
   let topic = req.params.topic;
@@ -185,7 +185,7 @@ async function updateSearchResults() {
 
   retrieveGlobalTrends().then(async trends => {
     // When testing ,use i < 1 to test for only one trend, and comment out
-    // {@code await new Promise} line to avoid 1 minute pauses.
+    // `await new Promise` line to avoid 1 minute pauses.
     for (let i = 0; i < trends.length; i++) {
       let topic = trends[i].trendTopic;
       console.log('Creating WorldDataByTopic entity for', topic)
@@ -282,7 +282,7 @@ async function getCustomSearchResultsForCountry(countryCode, query) {
  */
 async function formatCountryResults(searchResultsJson) {
   // Parse the JSON string and pass each search result to add to the
-  // {@code countryData} object.
+  // `countryData` object.
   let currentSearchResults = searchResultsJson.items;
   let countryData = [];
   let totalScore = 0;
