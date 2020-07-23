@@ -87,6 +87,9 @@ function setUserSearchTopic(topic, countries) {
     trendElement.innerHTML = trendElement.innerText;
   })
 
+  // Reset current trends to show trends from the last 12 hours. Pass false as
+  // the parameter to prevent a new trend from being set and overriding the
+  // user search topic.
   updateTrends(false);
 
   fetch('/search/' + topic + '/' + JSON.stringify(countries))

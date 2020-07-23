@@ -55,7 +55,7 @@ router.get('/:topic&:timeRange', (req, res) => {
 /** 
  * Renders a JSON array of the top search results for requested countries with
  * API data from within the last
- * {@code CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS} for the specified topic.
+ * {@code CURRENT_DATA_TIME_RANGE_12_HOURS_MS} for the specified topic.
  */
 router.get('/:topic/:countries', (req, res) => {
   let topic = req.params.topic;
@@ -70,7 +70,8 @@ router.get('/:topic/:countries', (req, res) => {
  * Returns a JSON-formatted array of search results from specified time range
  * for all countries retrieved from the Datastore.
  * @param {string} topic Search topic to get data for.
- * @param {number} timeRange The interval value for the time range.
+ * @param {number} timeRange An integer representing how many 
+ *     `CURRENT_DATA_TIME_RANGE_12_HOURS_MS` ranges previous to get data from.
  * @return {Object} A JSON array of search results for all countries for
  *     given topic.
  */
