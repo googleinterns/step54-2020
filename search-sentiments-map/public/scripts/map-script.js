@@ -213,8 +213,7 @@ function mouseInToRegion(e) {
   if (regionData == null) {
     return;
   }
-  // Set the hover region so the {@code setStyle} function can change the
-  // border.
+  // Set the hover region so the `setStyle` function can change the border.
   e.feature.setProperty('status', 'hover');
   regionInfo = isWorldLevel ? 
       e.feature.getProperty('name') + ': ' : 
