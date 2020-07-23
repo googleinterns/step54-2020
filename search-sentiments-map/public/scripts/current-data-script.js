@@ -111,7 +111,9 @@ function setUserSearchTopic(topic, countries) {
  * @param {number} timeRange The interval value for the time range.
  */
 function setTimeRange(timeRange) {
-  if (currentTimeRange === timeRan)
+  if (currentTimeRange === timeRange) {
+    return;
+  }
   currentTimeRange = timeRange;
   updateTrends();
 }
