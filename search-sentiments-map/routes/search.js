@@ -71,13 +71,13 @@ async function retrieveSearchResultFromDatastore(topic) {
  * Deletes stale data from Datastore.
  */
 async function updateSearchResults() {
-  await deleteAncientResults();
-  retrieveGlobalTrends().then(async trends => {
+  await search.deleteAncientResults();
+  search.retrieveGlobalTrends().then(async trends => {
     // Note: when testing ,use i < 1 to test for only one trend, and comment 
     // out `await new Promise` line to avoid 1 minute pauses.
     for (let i = 0; i < trends.length; i++) {
-      await updateSearchResultsForTopic(trends[i].trendTopic);
-      await new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
+      await search.updateSearchResultsForTopic(trends[i].trendTopic);
+      // await new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
     }
   });
 }
@@ -278,5 +278,12 @@ async function addWorldDataByTopicToDatastore(topic, countriesData) {
   }
 }
 
+const search = {
+  updateSearchResults,
+  deleteAncientResults,
+  retrieveGlobalTrends,
+  updateSearchResultsForTopic,
+}
+
 module.exports.router = router;
-module.exports.updateSearchResults = updateSearchResults;
+module.exports.search = search;
