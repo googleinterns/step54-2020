@@ -110,7 +110,7 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
   let timestamp;
   if (worldDataByTopic.length !== 0 &&
       Date.now() - worldDataByTopic[0].timestamp <
-      CURRENT_DATA_THRESHOLD_24_HOURS_MS) {
+      CURRENT_DATA_THRESHOLD_12_HOURS_MS) {
     timestamp = worldDataByTopic[0].timestamp;
     let countriesToAddDataFor = [];
     let countriesData = worldDataByTopic[0].dataByCountry;

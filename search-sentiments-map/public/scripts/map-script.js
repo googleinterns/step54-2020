@@ -86,7 +86,7 @@ function initMap() {
   map.data.setStyle(styleFeature);
   map.data.addListener('mouseover', mouseInToRegion);
   map.data.addListener('mouseout', mouseOutOfRegion);
-  map.data.addListener('click', onClickCountry);
+  map.data.addListener('click', onClickRegion);
 
   // Loads the country boundary polygons from a GeoJSON source.
   map.data.loadGeoJson(WORLD_GEOJSON);
@@ -103,18 +103,23 @@ function updateLegends() {
 
 /** 
  * Gets the selected mode (sentiment or popularity) from the webpage and loads
- * corresponding data.
+ * corresponding data on the map.
  */
 function loadRegionDataByMode() {
   isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
 
   const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = isSentimentMode ?
-      'Worldwide sentiment scores of search results for "' + getCurrentSearchData().topic + '"' :
-      'Worldwide search interest scores for "' + getCurrentSearchData().topic + '"' ;
+  if (isWorldLevel) {
+    topicHeader.innerText = isSentimentMode ?
+        'Worldwide sentiment scores of search results for "' + getCurrentSearchData().topic + '"' :
+        'Worldwide search interest scores for "' + getCurrentSearchData().topic + '"';
+  } else {
+    topicHeader.innerText = 
+        'State-level search interest scores for "' + getCurrentSearchData().topic + '"';
+  }
   updateLegends();
 
-  isWorldLevel ?  loadCountryData() : loadStatesData();
+  isWorldLevel ?  loadCountryData() : loadStateData();
 }
 
 /** 
@@ -129,15 +134,19 @@ function loadCountryData() {
 
     let dataVariable = null;
     if (countryData.length != 0) {
-      dataVariable = 
-          isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
+      dataVariable = isSentimentMode ? 
+          countryData[0].averageSentiment : countryData[0].interest;
     }
 
     row.setProperty('country_data', dataVariable);
   });
 }
 
-function loadStatesData() {
+/** 
+ * Loads the search interest data for US states on the map. 
+ * TODO(chenyuz): Fetch data from the backend to replace the placeholder.
+ */
+function loadStateData() {
   map.data.forEach(function(row) {
     let dataVariable = -10;
 
@@ -160,12 +169,12 @@ function styleFeature(feature) {
       feature.getProperty('country_data') : feature.getProperty('state_data');
 
   if (regionData == null) {
-    // Set country color to be light grey if that country is disabled (occurs in
-    // user search).
+    // Set region color to be light grey if that region is disabled (occurs in
+    // user search for countries not selected).
     color = RegionColorCodes.LIGHT_GRAY;
   } else if (regionData === NO_RESULTS_DEFAULT_SCORE) {
-    // Set country color to be dark grey if that country has no results.
-    color = RegionColorCodes.DARK_GRAY;  
+    // Set region color to be dark grey if that region has no results.
+    color = RegionColorCodes.DARK_GRAY;
   } else {
     let dataMin = isSentimentMode ? DATA_MIN_SENTIMENT : DATA_MIN_POPULARITY;  
     // Delta represents where the value sits between the min and max.
@@ -193,7 +202,7 @@ function styleFeature(feature) {
 }
 
 /**
- * Responds to the mouse-in event on a map shape(country).
+ * Responds to the mouse-in event on a map shape (country or state).
  * @param {?google.maps.MouseEvent} e Mouse-in event.
  */
 function mouseInToRegion(e) {
@@ -204,7 +213,7 @@ function mouseInToRegion(e) {
   if (regionData == null) {
     return;
   }
-  // Set the hover country so the {@code setStyle} function can change the
+  // Set the hover region so the {@code setStyle} function can change the
   // border.
   e.feature.setProperty('status', 'hover');
   regionInfo = isWorldLevel ? 
@@ -224,18 +233,23 @@ function mouseInToRegion(e) {
 }
 
 /**
- * Responds to the mouse-out event on a map shape (country).
+ * Responds to the mouse-out event on a map shape (country or state).
  * @param {?google.maps.MouseEvent} e Mouse-out event.
  */
 function mouseOutOfRegion(e) {
-  // Reset the hover country, returning the border to normal. Close infowindow.
+  // Reset the hover status, returning the border to normal. Close infowindow.
   e.feature.setProperty('status', 'normal');
   infowindow.close();
 }
 
 /**
- * Resets the map according to the zoom level (US or world) selected by the user
- * by adjusting the map center, zoom level, polygons, and displayed data.
+ * Resets the map according to the zoom level (US or world) selected by the 
+ * user by adjusting the map center, zoom level, polygons, and displayed data.
+ * TODO(chenyuz): 
+ * 1. On US level, add button to allow switching to US trends.
+ * 2. Toggle the display of mode selector. Show on hover of the select that 
+ * only popularity is available.
+ * 3. Modify user search to be for popularity only.
  */
 function resetMapZoomLevel() {
   const zoomLevel = document.getElementById('zoom-level-select').value;
@@ -248,10 +262,11 @@ function resetMapZoomLevel() {
     map.setCenter(US_CENTER_COORDINATES);
     map.setZoom(US_ZOOM_LEVEL);
     isWorldLevel = false;
+    isSentimentMode = false;  // Sentiment mode is not available at US level.
     map.data.loadGeoJson(US_GEOJSON, {idPropertyName: 'STATE'}, function() {
       loadRegionDataByMode();
     });
-  } else { // Set the map to world level.
+  } else { // Reset the map to world level.
     map.setCenter(WORLD_CENTER_COORDINATES);
     map.setZoom(WORLD_ZOOM_LEVEL);
     isWorldLevel = true;
@@ -259,7 +274,4 @@ function resetMapZoomLevel() {
       loadRegionDataByMode();
     });
   }
-  // Display popularity data
-  // Reset trends
-  // Change modal displays
 }

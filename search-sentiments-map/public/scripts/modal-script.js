@@ -13,20 +13,23 @@
 // the License.
 
 /**
- * Displays the information modal when a country on the map is clicked.
+ * Displays the information modal when a region on the map is clicked.
  * @param {?google.maps.MouseEvent} e Click event.
  */
-function onClickCountry(e) {
-  if (e.feature.getProperty('country_data') != null) {
-    $('#region-info-modal').modal('show');
-
-    // Update Modal with information for relevant country.
-    const countryName = e.feature.getProperty('name');
-    const countryId = e.feature.getId();
-    document.getElementById('modal-title').innerText = countryName;
-    displayTopResultsForCurrentTrend(countryId);
-    setCountryTrends(countryId);
+function onClickRegion(e) {
+  // Don't display anything when the map is on state level, or when the clicked
+  // country has no data.
+  if (e.feature.getProperty('country_data') == null) {
+    return;
   }
+  $('#region-info-modal').modal('show');
+
+  // Update Modal with information for relevant country.
+  const countryName = e.feature.getProperty('name');
+  const countryId = e.feature.getId();
+  document.getElementById('modal-title').innerText = countryName;
+  displayTopResultsForCurrentTrend(countryId);
+  setCountryTrends(countryId);
 }
 
 /**

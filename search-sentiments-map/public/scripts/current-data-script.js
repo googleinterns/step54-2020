@@ -58,7 +58,7 @@ function setUserSearchTopic(topic, countries) {
       .then(() => {
         // Reload map with new sentiment or search interest data and relevant
         // coloring.
-        loadCountryDataByMode();
+        loadRegionDataByMode();
         document.getElementById('submit-user-topic').innerHTML = 'Submit';
         document.getElementById('submit-user-topic').disabled = false;
       });
