@@ -32,7 +32,6 @@ public class GetDirectionsServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
     String origin = request.getParameter("origin");
     String destination = request.getParameter("destination");
     String endpoint = request.getParameter("endpoint");
@@ -88,13 +87,12 @@ public class GetDirectionsServlet extends HttpServlet {
   public URLConnection sendPostRequestToRoutesApi(String origin, String destination, boolean alpha,
       String apiKey, String rateCard) throws IOException, MalformedURLException {
     URL routesUrl;
-    String rateCardString;
+    String rateCardString = "";
     if (alpha) {
       routesUrl = new URL("https://routespreferred.googleapis.com/v1alpha:computeCustomRoutes");
       rateCardString = "\"routeObjective\": {\"rateCard\": " + rateCard + "},";
     } else {
       routesUrl = new URL("https://routespreferred.googleapis.com/v1:computeRoutes");
-      rateCardString = "";
     }
 
     HttpURLConnection connection = (HttpURLConnection) routesUrl.openConnection();

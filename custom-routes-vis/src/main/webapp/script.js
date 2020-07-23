@@ -300,7 +300,7 @@ function selectRouteDisplayDetails(routeNum, totalDuration, totalDistance) {
 function changeServiceEndpoint() {
   let serviceEndpoint = document.getElementById('service-endpoint').value;
 
-  // Only Compute Custom Routes has a rate card.
+  // Only display rate card div if compute custom routes is selected.
   document.getElementById('rate-card-data').style.display = 
       (serviceEndpoint === 'compute-routes-alpha') ? 'block' : 'none';
 }
@@ -312,14 +312,14 @@ function changeServiceEndpoint() {
 function createRateCard() {
   let costPerMin = parseFloat(document.getElementById('cost-per-minute').value);
   let costPerKm = parseFloat(document.getElementById('cost-per-km').value);
-  let includeTolls = ("true" === document.getElementById('include-tolls').value);
+  let includeTolls = ('true' === document.getElementById('include-tolls').value);
 
-  let rateCard = {"includeTolls": includeTolls};
+  let rateCard = {'includeTolls': includeTolls};
   if (!isNaN(costPerMin)) {
-    rateCard["costPerMinute"] = {"value": costPerMin};
+    rateCard['costPerMinute'] = {'value': costPerMin};
   }
   if (!isNaN(costPerKm)) {
-    rateCard["costPerKm"] = {"value": costPerKm};
+    rateCard['costPerKm'] = {'value': costPerKm};
   }
 
   return rateCard;
