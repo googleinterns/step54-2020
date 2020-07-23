@@ -237,8 +237,9 @@ function generateRoutes() {
   let apiKey = document.getElementById('api-key').value;
 
   // Get the routes and display them on map.
-  fetch('/get-directions?origin=' + origin + '&destination=' + destination + 
-      '&endpoint=' + serviceEndpoint + '&apiKey=' + apiKey)
+  fetch('/get-directions?origin=' + origin + '&destination=' + destination +
+      '&endpoint=' + serviceEndpoint + '&apiKey=' + apiKey + '&rateCard=' +
+      JSON.stringify(createRateCard()))
       .then(response => response.json()).then(directions => {
         // Log the response status from the Directions API.
         // TODO(chenyuz): Find equivalence for Routes Preferred API.
@@ -340,6 +341,34 @@ function selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMete
       '\nDistance: ' + formatDistance(totalDistanceMeters) +
       '\nRoute Token: ';
 }
+
+/** Shows or hides rate-card-data div when service endpoint changed. */
+function changeServiceEndpoint() {
+  let serviceEndpoint = document.getElementById('service-endpoint').value;
+
+  // Only display rate card div if compute custom routes is selected.
+  document.getElementById('rate-card-data').style.display = 
+      (serviceEndpoint === 'compute-routes-alpha') ? 'block' : 'none';
+}
+
+/**
+ * Creates formatted rate card object based on form input.
+ * @returns {Object} Rate Card JSON Object.
+ */
+function createRateCard() {
+  let costPerMin = parseFloat(document.getElementById('cost-per-minute').value);
+  let costPerKm = parseFloat(document.getElementById('cost-per-km').value);
+  let includeTolls = ('true' === document.getElementById('include-tolls').value);
+
+  let rateCard = {'includeTolls': includeTolls};
+  if (!isNaN(costPerMin)) {
+    rateCard['costPerMinute'] = {'value': costPerMin};
+  }
+  if (!isNaN(costPerKm)) {
+    rateCard['costPerKm'] = {'value': costPerKm};
+  }
+
+  return rateCard;
 
 /** 
  * Formats the duration to be of the form "xx h xx min xx s."

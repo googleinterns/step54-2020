@@ -44,6 +44,7 @@ public class GetDirectionsServlet extends HttpServlet {
     String origin = request.getParameter("origin");
     String destination = request.getParameter("destination");
     String endpoint = request.getParameter("endpoint");
+    String rateCard = request.getParameter("rateCard");
 
     String requestApiKey = request.getParameter("apiKey");
     String directionsApiKey = System.getenv("DIRECTIONS_API_KEY");
@@ -54,10 +55,10 @@ public class GetDirectionsServlet extends HttpServlet {
 
     switch (endpoint) {
       case COMPUTE_ROUTES:
-        connection = connectToRoutesApi(origin, destination, false, apiKey);
+        connection = connectToRoutesApi(origin, destination, false, apiKey, "");
         break;
       case COMPUTE_ROUTES_ALPHA:
-        connection = connectToRoutesApi(origin, destination, true, apiKey);
+        connection = connectToRoutesApi(origin, destination, true, apiKey, rateCard);
         break;
       default:  // Default to use the Directions API.
         connection = connectToDirectionsApi(origin, destination, apiKey);
@@ -90,12 +91,18 @@ public class GetDirectionsServlet extends HttpServlet {
    * @param destination Destination of the requested routes in "lat,lng" format.
    * @param shouldUseAlphaApi Whether to send the request to the alpha version of the API.
    * @param apiKey The API key.
+   * @param rateCard The Rate Card for this call to the API.
    */
-  public URLConnection connectToRoutesApi(String origin, String destination, 
-      boolean shouldUseAlphaApi, String apiKey) throws IOException, MalformedURLException {
-    URL routesUrl = shouldUseAlphaApi ? 
-        new URL("https://routespreferred.googleapis.com/v1alpha:computeCustomRoutes") : 
-        new URL("https://routespreferred.googleapis.com/v1:computeRoutes");
+  public URLConnection connectToRoutesApi(String origin, String destination, boolean shouldUseAlphaApi,
+      String apiKey, String rateCard) throws IOException, MalformedURLException {
+    URL routesUrl;
+    String rateCardString = "";
+    if (alpha) {
+      routesUrl = new URL("https://routespreferred.googleapis.com/v1alpha:computeCustomRoutes");
+      rateCardString = "\"routeObjective\": {\"rateCard\": " + rateCard + "},";
+    } else {
+      routesUrl = new URL("https://routespreferred.googleapis.com/v1:computeRoutes");
+    }
 
     HttpURLConnection connection = (HttpURLConnection) routesUrl.openConnection();
     connection.setRequestMethod("POST");
@@ -115,7 +122,8 @@ public class GetDirectionsServlet extends HttpServlet {
         + "\"destination\": {\"location\":  {\"latLng\": "
         + "{\"latitude\": " + destination.split(",")[0]
         + ", \"longitude\": " + destination.split(",")[1] + "}}},"
-        + "\"travelMode\": \"DRIVE\", \"computeAlternativeRoutes\": true}";
+        + "\"travelMode\": \"DRIVE\"," + rateCardString
+        + "\"computeAlternativeRoutes\": true}";
 
     try(OutputStream os = connection.getOutputStream()) {
       byte[] input = requestParamsJson.getBytes("utf-8");
