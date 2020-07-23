@@ -111,11 +111,11 @@ function loadRegionDataByMode() {
   const topicHeader = document.getElementById('topic-header');
   if (isWorldLevel) {
     topicHeader.innerText = isSentimentMode ?
-        'Worldwide sentiment scores of search results for "' + getCurrentSearchData().topic + '"' :
-        'Worldwide search interest scores for "' + getCurrentSearchData().topic + '"';
+        'Worldwide sentiment scores of search results for "' + getCurrentTopic() + '"' :
+        'Worldwide search interest scores for "' + getCurrentTopic() + '"';
   } else {
     topicHeader.innerText = 
-        'State-level search interest scores for "' + getCurrentSearchData().topic + '"';
+        'State-level search interest scores for "' + getCurrentTopic() + '"';
   }
   updateLegends();
 
@@ -143,14 +143,20 @@ function loadCountryData() {
 }
 
 /** 
- * Loads the search interest data for US states on the map. 
- * TODO(chenyuz): Fetch data from the backend to replace the placeholder.
+ * Loads the search interest data for US states on the map.
+ * @param {string=} topic Topic to get data for. Defaults to the current topic.
  */
-function loadStateData() {
-  map.data.forEach(function(row) {
-    let dataVariable = -10;
+function loadStateData(topic = getCurrentTopic()) {
+  fetch('/search-interests/' + topic).then(response => response.json())
+      .then(stateInterests => {
+    map.data.forEach(function(row) {
+      let interest = stateInterests.filter(stateInterest => 
+          stateInterest.geoName === row.getProperty('NAME'));
+      let dataVariable = interest.length === 0 ? 
+          NO_RESULTS_DEFAULT_SCORE : interest[0].value[0];
 
-    row.setProperty('state_data', dataVariable);
+      row.setProperty('state_data', dataVariable);
+    });
   });
 }
 
@@ -262,7 +268,7 @@ function resetMapZoomLevel() {
     map.setZoom(US_ZOOM_LEVEL);
     isWorldLevel = false;
     isSentimentMode = false;  // Sentiment mode is not available at US level.
-    map.data.loadGeoJson(US_GEOJSON, {idPropertyName: 'STATE'}, function() {
+    map.data.loadGeoJson(US_GEOJSON, {idPropertyName: 'gx_id'}, function() {
       loadRegionDataByMode();
     });
   } else { // Reset the map to world level.

@@ -12,13 +12,20 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+// String for the topic that the user is currently viewing.
+let currentTopic = '';
 // JSON object for the data that is currently displayed, including topic,
 // timestamp, and custom search data by country.
 let currentSearchData = '';
 // JSON object for the trends that are currently displayed and their timestamp.
 let topTrends = '';
 
-/** Returns current trend that the user is viewing. */
+/** Returns current topic that the user is viewing. */
+function getCurrentTopic() {
+  return currentTopic;
+}
+
+/** Returns the current top trends. */
 function getTopTrends() {
   return topTrends;
 }
@@ -34,9 +41,11 @@ function getCurrentSearchData() {
  * @param {string} trend New trend to get data for.
  */
 function setNewTrend(trend) {
+  currentTopic = trend;
   fetch('/search/' + trend)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
         currentSearchData = topicData;
+        console.log('search data', currentSearchData)
       }).then(() => {
         // Reload map with new sentiment or search interest data and relevant
         // coloring.
@@ -50,6 +59,7 @@ function setNewTrend(trend) {
  * @param {Array} countries Countries to get data for.
  */
 function setUserSearchTopic(topic, countries) {
+  currentTopic = topic;
   fetch('/search/' + topic + '/' + JSON.stringify(countries))
       .then(response => response.json())
       .then(topicResults => {
@@ -63,6 +73,20 @@ function setUserSearchTopic(topic, countries) {
         document.getElementById('submit-user-topic').disabled = false;
       });
 }
+
+/** 
+ * Retrieves interest data for US states and reconstructs the map with new data.
+ * @param {string=} topic Topic to get data for. Defaults to the current topic.
+ */
+/*
+function setStateInterestsData(topic = currentTopic) {
+  fetch('/search-interests/' + topic).then(response => response.json()).then(stateInterests => {
+    console.log(stateInterests);
+    currentSearchData = stateInterests;
+  }).then(() => {
+    loadRegionDataByMode();
+  });
+}*/
 
 /**
  * Fetches current top trends from the backend and displays them on the website.

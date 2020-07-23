@@ -48,6 +48,7 @@ function searchTopic() {
  */
 function countrySelectSetUp() {
   let dropdownContainer = document.getElementById('country-select-dropdown');
+  // Fetch the list of countries ordered alphabetically by their names.
   fetch("country-name.json").then(response => response.json())
       .then(json => {
     json.forEach(country => {
