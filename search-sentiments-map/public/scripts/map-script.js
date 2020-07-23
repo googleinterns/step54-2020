@@ -31,7 +31,7 @@ const WORLD_ZOOM_LEVEL = 3;
 const WORLD_GEOJSON = 'countries.geojson';
 const US_CENTER_COORDINATES = {lat: 39.844724, lng: -92.019078};
 const US_ZOOM_LEVEL = 5;
-const US_GEOJSON = 'states.geojson';
+const US_GEOJSON = 'https://storage.googleapis.com/mapsdevsite/json/states.js';
 
 // Whether the map is currently in sentiment mode or popularity mode.
 let isSentimentMode = true;
