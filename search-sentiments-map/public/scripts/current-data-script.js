@@ -85,7 +85,7 @@ function setUserSearchTopic(topic, countries) {
   let trendElements = document.getElementById('trends-list').childNodes;
   trendElements.forEach(function(trendElement) {
     trendElement.innerHTML = trendElement.innerText;
-  })
+  });
 
   // Reset current trends to show trends from the last 12 hours. Pass false as
   // the parameter to prevent a new trend from being set and overriding the
@@ -110,21 +110,22 @@ function setUserSearchTopic(topic, countries) {
  * Changes `currentTimeRange` parameter and updates trends for new time range.
  * @param {number} timeRange The interval value for the time range.
  */
-function changeTimeRange(timeRange) {
+function setTimeRange(timeRange) {
+  if (currentTimeRange === timeRan)
   currentTimeRange = timeRange;
   updateTrends();
 }
 
 /**
  * Fetches current top trends from back end and displays them on the website.
- * @param {boolean=} setNewTrendIsEnabled Boolean for whether or not to
+ * @param {boolean=} setNewTrendEnabled Boolean for whether or not to
  *     call setNewTrend at the end of setTopTrends.
  */
-function updateTrends(setNewTrendIsEnabled = true) {
+function updateTrends(setNewTrendEnabled = true) {
   fetch('/trends/' + currentTimeRange)
       .then(globalTrends => globalTrends.json())
       .then(trends => {
         topTrends = trends;
-        setTopTrends(setNewTrendIsEnabled); 
-  });
+        setTopTrends(setNewTrendEnabled); 
+      });
 }
