@@ -1,0 +1,7 @@
+indexes:
+
+- kind: WorldDataByTopic
+  properties:
+  - name: lowercaseTopic
+  - name: timestamp
+    direction: desc

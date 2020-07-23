@@ -23,10 +23,23 @@ const MarkerNames = {
   DESTINATION: 'destination',
 };
 
+/**
+ * Test App URL container ids.
+ * @enum {string}
+ */
+const url_ids = {
+  IOS_URL_ID: 'ios-url', 
+  V1_ANDROID_URL_ID: 'v1-android-url', 
+  V2_ANDROID_URL_ID: 'v2-android-url',
+};
+// Array holding origin and destination markers.
 let originDestinationMarkers = [];
+// Array holding routes displayed on the map.
 let displayedRoutes = [];
-const routeColors = ['#ff0000', '#eb8f1e', '#3299d1'];
-let selectedRouteNum = 0;
+// Colors of the routes displayed.
+// Colors in the array are red, orange, and blue, respectively.
+const ROUTE_COLORS = ['#ff0000', '#eb8f1e', '#3299d1'];
+let selectedRouteNum = 0;  // The index of the route selected.
 var map;
 
 /** Creates the world map and markers. */
@@ -48,7 +61,7 @@ function initMapWithMarkers() {
  * Creates hidden marker that updates coordiantes on page when moved.
  * @param {string} containerId ID of container to update coordinates in.
  * @param {string} label Label to display on container.
- * @param {Object} title Title of marker.
+ * @param {string} title Title of marker.
  * @param {Object} latLng Default coordinates of where to place marker.
  */
 function createMarker(containerId, label, title, latLng) {
@@ -65,7 +78,8 @@ function createMarker(containerId, label, title, latLng) {
 
   marker.addListener('dragend', function(event) {
     updateCoordinates(event.latLng.lat(), event.latLng.lng(), containerId);
-    if (originDestinationMarkers.length == 2 
+    updateDeepLinkingUrl();
+    if (originDestinationMarkers.length === 2 
         && originDestinationMarkers[0].getVisible() 
         && originDestinationMarkers[1].getVisible()) {
       generateRoutes();
@@ -80,10 +94,49 @@ function createMarker(containerId, label, title, latLng) {
  * @param {string} containerId ID of container to update coordinates in.
  */
 function updateCoordinates(lat, lng, containerId) {
+  // Show 6 decimal places of the lat and lng.
   document.getElementById(containerId).innerHTML = 
-      "Latitude: " + lat + "<br>Longitude: " + lng + "<br>";
+      "Latitude: " + lat.toFixed(6) + "<br>Longitude: " + lng.toFixed(6) + "<br>";
 }
 
+/**
+ * Updates the deep linking url to various test apps on the page.
+ */
+function updateDeepLinkingUrl() {
+  var originPosition = originDestinationMarkers[0].position;
+  var destinationPosition = originDestinationMarkers[1]
+  if (document.getElementById('origin-coordinates').innerHTML !== '' && 
+      document.getElementById('destination-coordinates').innerHTML !== '') {
+    document.getElementById(url_ids.IOS_URL_ID).innerHTML =
+        '<a href=navsdkdemo://advanced?originLat=' + originDestinationMarkers[0].position.lat() + 
+        '&originLng=' + originDestinationMarkers[0].position.lng() + '&destLat=' +
+        originDestinationMarkers[1].position.lat() + '&destLng=' +
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
+        originDestinationMarkers[1].position.lng() + '&routeToken=TOKEN>' +  
+        'IOS Test App' + '</a>';
+    document.getElementById(url_ids.V1_ANDROID_URL_ID).innerHTML =
+        '<a href=navsdk://fragmentactivity?originlat=' + originDestinationMarkers[0].position.lat() +
+        '&originlng=' + originDestinationMarkers[0].position.lng() + '&destinationlat=' +
+        originDestinationMarkers[1].position.lat() + '&destinationlng=' +
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
+        originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' +
+        'Android V1 Test App' + '</a>';
+    document.getElementById(url_ids.V2_ANDROID_URL_ID).innerHTML =
+        '<a href=navsdk://supportnavmapfragmentactivity?originlat=' +
+        originDestinationMarkers[0].position.lat() + '&originlng=' +
+        originDestinationMarkers[0].position.lng() + '&destinationlat=' +
+        originDestinationMarkers[1].position.lat() + '&destinationlng=' + 
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
+        originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' +
+        'Android V2 Test App' + '</a>';
+  } else if (document.getElementById('origin-coordinates').innerHTML === '' || 
+      document.getElementById('destination-coordinates').innerHTML === '') { 
+    for (const id in url_ids) {
+      document.getElementById(url_ids[id]).innerHTML = '';
+    }
+  }
+  
+}
 /**
  * Hides 'place marker' button and waits for user to select coordinate for
  * marker. Updates marker to be in correct location, and show 'delete marker'
@@ -113,6 +166,7 @@ function showMarker(markerName) {
         originDestinationMarkers[markerIndex].setVisible(true);
         updateCoordinates(event.latLng.lat(), event.latLng.lng(),
             markerName + '-coordinates');
+        updateDeepLinkingUrl();
         document.getElementById('hide-' + markerName + '-marker')
             .style.display = 'block';
 
@@ -154,6 +208,7 @@ function hideMarker(markerName) {
   document.getElementById('hide-' + markerName + '-marker').style.display =
       'none';
   document.getElementById('generate-routes').style.display = 'none';
+  updateDeepLinkingUrl();
 }
 
 /** Removes all routes from the DOM. */
@@ -167,7 +222,7 @@ function clearRoutes() {
 
 /**
  * Generates routes from origin to destination by calling the selected API.
- * Precondition: two markers exist in the originDestinationMarkers array.
+ * Precondition: Two markers exist in the originDestinationMarkers array.
  */
 function generateRoutes() {
   clearRoutes();
@@ -187,7 +242,7 @@ function generateRoutes() {
       JSON.stringify(createRateCard()))
       .then(response => response.json()).then(directions => {
         // Log the response status from the Directions API.
-        // TODO(chenyuz): find equivalence for Routes Preferred API.
+        // TODO(chenyuz): Find equivalence for Routes Preferred API.
         console.log(directions.status);
 
         let routes = directions.routes;
@@ -202,99 +257,90 @@ function generateRoutes() {
 
 /**
  * Creates a polyline for a route on the map.
- * @param {num} routeNum The index of the route in the order as it is returned
- * from the API.
- * @param {!JSON} routeJson JSON object containing all information of the target
+ * @param {num} routeNum The index of the route in the order that it is returned
+ * from the selected API.
+ * @param {!Object} routeJson JSON object containing all information of the target
  * route.
- * @param {bool} directionsApi Whether the route is obtained by the Directions
+ * @param {boolean} isDirectionsApi Whether the route is obtained by the Directions
  * API; if false, assume it is obtained by the Routes Preferred API.
  */
-function createRoutePolyline(routeNum, routeJson, directionsApi) {
-  let routeLegs = routeJson.legs;
-  let routeCoordinates = [];
+function createRoutePolyline(routeNum, routeJson, isDirectionsApi) {
+  let encodedPolyline = isDirectionsApi ? 
+      routeJson.overview_polyline.points : routeJson.polyline.encodedPolyline;
+  let routeCoordinates = google.maps.geometry.encoding.decodePath(encodedPolyline);
 
   // Total duration of route in seconds.
-  let totalDuration = directionsApi ? 0 : routeJson.duration;
+  let totalDurationSec = isDirectionsApi ? 0 : routeJson.duration;
   // Total distance of route in meters.
-  let totalDistance = directionsApi ? 0 : routeJson.distanceMeters;
+  let totalDistanceMeters = isDirectionsApi ? 0 : routeJson.distanceMeters;
   // Note: Routes Preferred has duration and distanceMeters attributes for each
-  // route, but Directions only has those for each leg of the route.
+  // route, but Directions only has them for each leg of the route.
 
-  for (let i = 0; i < routeLegs.length; i++) {
-    let legSteps = routeLegs[i].steps;
-    console.log('num steps', legSteps.length);
-
-    for (let j = 0; j < legSteps.length; j++) {
-      if (directionsApi) {
-        routeCoordinates.push(legSteps[j].start_location);
-      } else {
-        routeCoordinates.push(legSteps[j].startLocation.LatLng);
-      }
-    }
-
-    // Add the end location to the coordinates array.
-    if (i == routeLegs.length - 1) {
-      if (directionsApi) {
-        routeCoordinates.push(legSteps[legSteps.length - 1].end_location);
-      } else {
-        routeCoordinates.push(legSteps[legSteps.length - 1].endLocation.LatLng);
-      }
-    }
-
-    if (directionsApi) {
-      totalDuration += parseInt(routeLegs[i].duration.value);
-      totalDistance += parseInt(routeLegs[i].distance.value);
+  if (isDirectionsApi) {
+    // Accumulate duration and distance because the total is not directly
+    // available in results from the Directions API.
+    let routeLegs = routeJson.legs;
+    for (let i = 0; i < routeLegs.length; i++) {
+      totalDurationSec += parseInt(routeLegs[i].duration.value);
+      totalDistanceMeters += parseInt(routeLegs[i].distance.value);
     }
   }
 
-  createRouteFromCoordinates(routeCoordinates, routeNum, totalDuration,
-      totalDistance);
+  createRouteFromCoordinates(routeCoordinates, routeNum, totalDurationSec,
+      totalDistanceMeters);
 }
 
 /**
  * Creates the route on the map and stores it in the routes array.
+ * @param {Array} routeCoordinates The coordinates that the route goes through.
+ * @param {num} routeNum The index of the selected route in the routes array.
+ * @param {num} totalDurationSec The duration of the route in seconds.
+ * @param {num} totalDistanceMeters The distance of the route in meters.
  */
-function createRouteFromCoordinates(routeCoordinates, routeNum, totalDuration, 
-    totalDistance) {
+function createRouteFromCoordinates(
+    routeCoordinates, 
+    routeNum, 
+    totalDurationSec, 
+    totalDistanceMeters) {
   let route = new google.maps.Polyline({
     path: routeCoordinates,
     geodesic: true,
-    strokeColor: routeColors[routeNum % 3],
-    strokeOpacity: 0.5,
+    strokeColor: ROUTE_COLORS[routeNum % 3],
+    strokeOpacity: 0.3,
     strokeWeight: 6,
   });
   route.setMap(map);
   displayedRoutes.push(route);
 
   // Select the first route as default.
-  if (routeNum == 0) {
-    selectRouteDisplayDetails(0, totalDuration, totalDistance);
+  if (routeNum === 0) {
+    selectRouteDisplayDetails(0, totalDurationSec, totalDistanceMeters);
   }
 
   route.addListener('click', function(event) {
-    console.log('route click');
-    selectRouteDisplayDetails(routeNum, totalDuration, totalDistance);
+    selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMeters);
   });
 }
 
 /** 
- * Highlights the selected route and displays its duration and distance.
+ * Highlights the selected route and displays its formatted duration and 
+ * distance in miles.
  * @param {num} routeNum The index of the selected route in the routes array.
- * @param {num} totalDuration The duration of the route in seconds.
- * @param {num} totalDistance The distance of the route in meters.
+ * @param {num} totalDurationSec The duration of the route in seconds.
+ * @param {num} totalDistanceMeters The distance of the route in meters.
+ * TODO(chenyuz): Add in the route token returned from the Routes Preferred API.
  */
-function selectRouteDisplayDetails(routeNum, totalDuration, totalDistance) {
-  displayedRoutes[selectedRouteNum].setOptions({ strokeOpacity: 0.5, })
+function selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMeters) {
+  displayedRoutes[selectedRouteNum].setOptions({ strokeOpacity: 0.3, })
   selectedRouteNum = routeNum;
   displayedRoutes[routeNum].setOptions({ strokeOpacity: 1.0, });
 
   let routeInfoElement = document.getElementById('route-info');
-  routeInfoElement.innerText = 'Selected Route Info:\n' 
-      + 'Duration: ' + totalDuration + ' seconds\n'
-      + 'Distance: ' + totalDistance + ' meters\n'
-      + 'Route Token: ';
+  routeInfoElement.innerText = 'Selected Route Info:' +
+      '\nDuration: ' + formatDuration(totalDurationSec) +
+      '\nDistance: ' + formatDistance(totalDistanceMeters) +
+      '\nRoute Token: ';
 }
-
 
 /** Shows or hides rate-card-data div when service endpoint changed. */
 function changeServiceEndpoint() {
@@ -323,4 +369,31 @@ function createRateCard() {
   }
 
   return rateCard;
+
+/** 
+ * Formats the duration to be of the form "xx h xx min xx s."
+ * @param {num} durationSec Duration in seconds.
+ * @return {string} The duration in the form "xx h xx min xx s."
+ */
+function formatDuration(durationSec) {
+  if (durationSec > 60) {
+    let durationMin = Math.floor(durationSec / 60);
+    let remainderSec = durationSec % 60;
+    if (durationMin > 60) {
+      let durationHours = Math.floor(durationMin / 60);
+      let remainderMin = durationMin % 60;
+      return durationHours + ' h ' + remainderMin + ' min ' + remainderSec + ' s';
+    }
+    return durationMin + ' min ' + remainderSec + ' s';
+  }
+  return durationSec + ' s';
+}
+
+/** 
+ * Formats the distance to be in miles with 4 decimal places.
+ * @param {num} distanceMeters Distance in meters.
+ * @return {string} The distance in miles to be displayed.
+ */
+function formatDistance(distanceMeters) {
+  return (distanceMeters * 0.0006213712).toFixed(4) + ' miles';
 }

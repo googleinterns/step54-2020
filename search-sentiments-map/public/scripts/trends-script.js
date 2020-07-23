@@ -23,36 +23,40 @@ const NUM_SHOWN = 7;
 /** Displays the top trends on the DOM. */
 function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
+  trendsList.innerHTML = '';
+  let trends = getTopTrends().globalTrends;
 
-  // Get the globally trending search topics from the backend.
-  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
-    for (let i = 0; i < trends.length; i++) {
-      const trendElement = document.createElement('li');
-      trendElement.innerText = `${trends[i].trendTopic}`;
-      // Display the number of countries where the search topic is trending,
-      // when hovered.
-      trendElement.title = `Trending in ${trends[i].count} countries`;
+  for (let i = 0; i < trends.length; i++) {
+    const trendElement = document.createElement('li');
+    trendElement.innerText = `${trends[i].trendTopic}`;
+    // Display the number of countries where the search topic is trending,
+    // when hovered.
+    trendElement.title = `Trending in ${trends[i].count} countries`;
 
-      // Show a certain number of trending topics by default and hide the rest.
-      trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
-      trendElement.addEventListener('click', (event) => {
-        showResultForTopic(event);
-      })
-      trendsList.append(trendElement);
-    }
+    // Show a certain number of trending topics by default and hide the rest.
+    trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
+    trendElement.addEventListener('click', (event) => {
+      setNewTrend(event.currentTarget.innerText);
+    });
+    trendsList.append(trendElement);
+  }
 
-    // Add a toggle button to the list to show more or less topics depending
-    // on the number of topics displayed.
-    if (trends.length > NUM_SHOWN) {
-      const showMoreOrLessToggleItem = document.createElement('li');
-      showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
-      showMoreOrLessToggleItem.id = SHOW_MORE_OR_LESS_ID;
-      showMoreOrLessToggleItem.addEventListener('click', () => {
-        showMoreOrLess();
-      });
-      trendsList.append(showMoreOrLessToggleItem);
-    }
-  });
+  // Add a toggle button to the list to show more or less topics depending
+  // on the number of topics displayed.
+  if (trends.length > NUM_SHOWN) {
+    const showMoreOrLessToggleItem = document.createElement('li');
+    showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
+    showMoreOrLessToggleItem.id = SHOW_MORE_OR_LESS_ID;
+    showMoreOrLessToggleItem.addEventListener('click', () => {
+      showMoreOrLess();
+    });
+    trendsList.append(showMoreOrLessToggleItem);
+  }
+  document.getElementById('trends-timestamp').innerText = 
+      'Last Updated: ' + new Date(getTopTrends().timestamp);
+
+  // Set the map to display data on the top-ranking trend.
+  setNewTrend(trends[0].trendTopic);
 }
 
 /**
@@ -73,14 +77,4 @@ function showMoreOrLess() {
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
   }
-}
-
-/** 
- * Update the title of the displayed trend when a topic is selected.
- * TODO(chenyuz): Show sentiment scores for all countries on the selected topic.
- */
-function showResultForTopic(event) {
-  const searchTopic = event.currentTarget.innerText;
-  const topicHeader = document.getElementById('topic-header');
-  topicHeader.innerText = 'Worldwide sentiments of search results for "' + searchTopic + '"';
 }
