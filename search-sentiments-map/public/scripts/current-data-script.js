@@ -18,12 +18,12 @@ let currentSearchData = '';
 // JSON object for the trends that are currently displayed and their timestamp.
 let topTrends = '';
 
-/** Returns current trend user is viewing. */
+/** Returns current trend that the user is viewing. */
 function getTopTrends() {
   return topTrends;
 }
 
-/** Returns current custom search data for trend that user is viewing. */
+/** Returns current custom search data for trend that the user is viewing. */
 function getCurrentSearchData() {
   return currentSearchData;
 }
@@ -45,7 +45,7 @@ function setNewTrend(trend) {
 }
 
 /** 
- * Retrieves relevant data for new trend and reconstructs map with new data.
+ * Retrieves relevant data for new trend and reconstructs the map with new data.
  * @param {string} topic New topic to get data for.
  * @param {Array} countries Countries to get data for.
  */
@@ -54,12 +54,13 @@ function setUserSearchTopic(topic, countries) {
       .then(response => response.json())
       .then(topicResults => {
         currentSearchData = topicResults;
-      }).then(() => {
-          // Reload map with new sentiment or search interest data and relevant
-          // coloring.
-          loadRegionDataByMode();
-          document.getElementById('submit-user-topic').innerHTML = 'Submit';
-          document.getElementById('submit-user-topic').disabled = false;
+      })
+      .then(() => {
+        // Reload map with new sentiment or search interest data and relevant
+        // coloring.
+        loadCountryDataByMode();
+        document.getElementById('submit-user-topic').innerHTML = 'Submit';
+        document.getElementById('submit-user-topic').disabled = false;
       });
 }
 

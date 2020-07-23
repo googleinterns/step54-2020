@@ -122,7 +122,7 @@ function loadRegionDataByMode() {
  * depending on what mode has been specified.
  */
 function loadCountryData() {
-  map.data.forEach(function(row) {
+  map.data.forEach(row => {
     let dataByCountry = getCurrentSearchData().dataByCountry;
     let countryData = dataByCountry
         .filter(data => data.country === row.getId());
@@ -172,7 +172,7 @@ function styleFeature(feature) {
     let delta = (regionData - dataMin) / (DATA_MAX - dataMin);
     color = [];
     // Calculate hsl color integer values based on the delta.
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < high.length; i++) {
       color[i] = (high[i] - low[i]) * delta + low[i];
     }
   }
@@ -201,25 +201,26 @@ function mouseInToRegion(e) {
       e.feature.getProperty('country_data') : 
       e.feature.getProperty('state_data');
 
-  // Add popup info window with region info.
-  if (regionData != null) {
-    // Set the hover country so the {@code setStyle} function can change the
-    // border.
-    e.feature.setProperty('status', 'hover');
-    regionInfo = isWorldLevel ? 
-        e.feature.getProperty('name') + ': ' : 
-        e.feature.getProperty('NAME') + ': ';
-
-    // Display "N/A" on hover when there are no results and thererfore the
-    // sentiment score is the no results default score.
-    regionInfo +=
-        ((regionData === NO_RESULTS_DEFAULT_SCORE) ?
-            "N/A" : regionData.toLocaleString());
-
-    infowindow.setContent(regionInfo);
-    infowindow.setPosition(e.latLng);
-    infowindow.open(map);
+  if (regionData == null) {
+    return;
   }
+  // Set the hover country so the {@code setStyle} function can change the
+  // border.
+  e.feature.setProperty('status', 'hover');
+  regionInfo = isWorldLevel ? 
+      e.feature.getProperty('name') + ': ' : 
+      e.feature.getProperty('NAME') + ': ';
+
+  // Display "N/A" on hover when there are no results and thererfore the
+  // sentiment score is the no results default score.
+  regionInfo +=
+      ((regionData === NO_RESULTS_DEFAULT_SCORE) ?
+          "N/A" : regionData.toLocaleString());
+
+  // Add popup info window with region info.
+  infowindow.setContent(regionInfo);
+  infowindow.setPosition(e.latLng);
+  infowindow.open(map);
 }
 
 /**

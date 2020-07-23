@@ -28,9 +28,7 @@ const countriesJson = require('./../public/country-code.json');
 global.Headers = fetch.Headers;
 
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
-// TODO(carmenbenitez): Set this to be 12 hours when our data is
-// updated every 12 hours.
-const CURRENT_DATA_THRESHOLD_24_HOURS_MS = 24 * 60 * 60000;
+const CURRENT_DATA_THRESHOLD_12_HOURS_MS = 12 * 60 * 60000;
 const PAUSE_TO_PREVENT_REACHING_QUOTA_1_MIN_MS = 60000;
 const QUERIES_PER_MIN = 100;
 
@@ -147,15 +145,11 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
     timestamp = Date.now();
   }
 
-  try {
-    return {
-      topic: topic,
-      timestamp: timestamp,
-      dataByCountry: countriesDataToReturn,
-    };
-  } catch (err) {
-    console.error('ERROR: ', err);
-  }
+  return {
+    topic: topic,
+    timestamp: timestamp,
+    dataByCountry: countriesDataToReturn,
+  };
 }
 
 /** 

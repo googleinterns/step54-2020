@@ -34,7 +34,7 @@ function setTopTrends() {
     trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
     trendElement.addEventListener('click', (event) => {
       setNewTrend(event.currentTarget.innerText);
-    })
+    });
     trendsList.append(trendElement);
 
     // Display the number of countries where the search topic is trending,
