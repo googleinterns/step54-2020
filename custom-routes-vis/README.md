@@ -5,5 +5,3 @@ It utilizes the Maps API and Java Servlets as the backend.
 `mvn clean package appengine:run`
 2. Deploy to custom-routes-visualization.appspot.com with
 `mvn clean package appengine:deploy`
-
-Set the environment variable DIRECTIONS_API_KEY to be the api key before running.

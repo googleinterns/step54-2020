@@ -19,10 +19,12 @@ const search = require('./search.js');
 
 // Router that updates trends data.
 // Scheduled to run at minute 0 past every 12th hour (11am and 11pm every day).
-router.get('/', async (req, res) => {
+router.get('/', (req, res) => {
   console.log('Updating Search Results Data.');
-  await trends.updateTrendsFunction();
-  search.updateSearchResults();
+  // TODO(carmenbenitez, ntarn, chenyuz): Uncomment out for testing or for
+  // final deploy.
+  // trends.updateTrendsFunction();
+  // search.updateSearchResults();
 });
 
 module.exports.router = router;

@@ -21,8 +21,7 @@ const NEGATIVE_COLOR = 'red';
  * @param {?google.maps.MouseEvent} e Click event.
  */
 function onClickCountry(e) {
-  if (e.feature.getProperty('country_data') != null) {
-    $('#region-info-modal').modal('show');
+  $('#region-info-modal').modal('show');
 
   // Update Modal with information for relevant country.
   const countryName = e.feature.getProperty('name');
@@ -39,35 +38,20 @@ function onClickCountry(e) {
  */
 function setCountryTrends(countryCode) {
   const topTrendsTab = document.getElementById('top-trends-tab');
-  topTrendsTab.innerHTML = '<h4>Trending topics in selected country: </h4>';
+  topTrendsTab.innerHTML = '';
   fetch('/country-trends/' + countryCode).then(countryTrends =>
       countryTrends.json()).then(trends => {
         if (trends.length === 0) {
-          topTrendsTab.innerHTML = 
-              'Trends are not available for the selected country.<br>';
+          topTrendsTab.innerText = 
+              'Trends are not available for the selected country.';
         } else {
-          for (let i = 0; i < trends.length; i++) {
-            let articlesId = 'trend' + i + 'Article';
-            let articlesHtml = 'Search results: <br>';
-            trends[i].articles.forEach(article => {
-              articlesHtml += '<span>' + article + '</span><br>';
-            });
-            topTrendsTab.innerHTML += 
-                '<h5 class="country-trend" onclick="toggleDisplay(\''+ 
-                articlesId + '\')">' + trends[i].topic + '</h5>' + 
-                '<div id="'+ articlesId + '" class="hidden">' + 
-                articlesHtml + '</div>';
-          }
+          trends.forEach(trend => {
+            const trendHeader = document.createElement('h5');
+            trendHeader.innerText = trend.topic;
+            topTrendsTab.appendChild(trendHeader);
+          });
         }
-        topTrendsTab.innerHTML += 
-            '<i>Last updated on ' + new Date(getTopTrends().timestamp) + '</i>';
       });
-}
-
-/** Toggles whether the element with the given id is displayed or not. */
-function toggleDisplay(id) {
-  document.getElementById(id).classList.toggle('shown');
-  document.getElementById(id).classList.toggle('hidden');
 }
 
 /** 
@@ -75,22 +59,21 @@ function toggleDisplay(id) {
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displayTopResultsForCurrentTrend(countryCode) {
-  let dataByCountry = getCurrentSearchData().dataByCountry;
-  let date = new Date(getCurrentSearchData().timestamp);
+  let dataByCountry = getCurrentCustomSearchData().dataByCountry;
+  let date = new Date(getCurrentCustomSearchData().timestamp);
   let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
 
   let countryData = dataByCountry.filter(data => data.country === countryCode);
-
-  if (countryData.length === 0 ||
-      countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
+  if (countryData.length === 0) {
     // Handle case where there are no results.
-    resultElement.innerHTML += 'No results.<br>';
+    resultElement.innerHTML += 'No results.<br><i>Last updated on ' +
+        date.toString() + '<i><br>';
   } else {
-    resultElement.innerHTML += '<b>Topic Popularity Score: ' + 
-        countryData[0].interest + '</b><br>';
-    resultElement.innerHTML += '<b>Average Sentiment Score: ' + 
-        countryData[0].averageSentiment.toFixed(1) + '</b><br>';
+    resultElement.innerHTML += 'Popularity Score: ' + 
+        countryData[0].interest + '<br>';
+    resultElement.innerHTML += 'Average Sentiment Score: ' + 
+        countryData[0].averageSentiment + '<br>';
 
     // Get search results for the specified country.
     let results = countryData[0].results;
@@ -101,8 +84,9 @@ function displayTopResultsForCurrentTrend(countryCode) {
           results[i].snippet + '<br>' + 'Sentiment Score: ' + results[i].score + 
           '<br>';
     }
+    resultElement.innerHTML += '<i>Last updated on ' + date.toString() +
+      '<i><br>';
   }
-  resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
 }
 
 /** 
