@@ -15,7 +15,7 @@
 /**
  * Changes current data being viewed to show data from new timerange
  */
-function onSliderChange() {
+function onSliderChanged() {
   let sliderVal = document.getElementById('timeline-slider').value;
   document.getElementById('timeline-slider-label').innerText =
       'See results from ' + ' from ' + sliderVal * 0.5 + ' days ago';
