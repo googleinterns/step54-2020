@@ -248,8 +248,6 @@ function mouseOutOfRegion(e) {
 /**
  * Resets the map according to the zoom level (US or world) selected by the 
  * user by adjusting the map center, zoom level, polygons, and displayed data.
- * TODO(chenyuz): 
- * 3. Modify user search to be for popularity only.
  */
 function resetMapZoomLevel() {
   const zoomLevel = document.getElementById('zoom-level-select').value;
@@ -258,7 +256,9 @@ function resetMapZoomLevel() {
     map.data.remove(feature);
   });
   toggleDisplay('switch-trends-click');
+  toggleDisplay('up-to-date-span');
   toggleDisplay('switch-div');
+  toggleDisplay('country-dropdown-button');
 
   if (zoomLevel === 'us') {
     map.setCenter(US_CENTER_COORDINATES);
