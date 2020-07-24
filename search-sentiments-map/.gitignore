@@ -1,6 +1,8 @@
 node_modules/
-.env
 search-sentiments-map/.project
 search-sentiments-map/.factorypath
 search-sentiments-map/.settings/
 search-sentiments-map/.classpath/
+target/
+.idea
+.env
