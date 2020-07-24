@@ -47,7 +47,7 @@ function setCountryTrends(countryCode) {
         } else {
           for (let i = 0; i < trends.length; i++) {
             let articlesId = 'trend' + i + 'Article';
-            let articlesHtml = 'Search results: <br>';
+            let articlesHtml = '';
             trends[i].articles.forEach(article => {
               articlesHtml += '<li><a href="' + article.url + '">' + 
                   article.title + '</a></li>';
