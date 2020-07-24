@@ -94,10 +94,8 @@ function displayTopResultsForCurrentTrend(countryCode) {
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displaySentimentChartForCurrentTrend(countryCode) {
-  // let topic = getCurrentTrend();
-  let dataByCountry = getCurrentCustomSearchData().dataByCountry;
-  let countryData = dataByCountry.filter(data => data.country === countryCode);
-  // let topicData = getCurrentCustomSearchData();
+  let countryData = getCurrentCustomSearchData().dataByCountry.filter(data => 
+      data.country === countryCode);
   let date = new Date(getCurrentCustomSearchData().timestamp);
   let chartElement = document.getElementById('sentiment-chart-tab');
   chartElement.innerHTML = '';
@@ -116,7 +114,8 @@ function displaySentimentChartForCurrentTrend(countryCode) {
         '<i><br>';
   }
 }
-
+// Use version 45 of Google Charts to render tick marks when div container is
+// hidden.
 google.charts.load('45', {'packages':['corechart']});
 /** Draws a sentiment chart and adds it to the given element. 
  *  @param {Object} chartElement Tab element to update with the sentiment chart.
@@ -127,21 +126,22 @@ function drawSentimentChart(chartElement, results) {
   sentimentDataArray.push(["Search Result", "Score", {role: "style"}]);
   for (let i = 0; i < results.length; i++) {
     let sentimentItem = [(i + 1).toString(), results[i].score];
-    results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : sentimentItem.push(NEGATIVE_COLOR);
+    results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : sentimentItem
+        .push(NEGATIVE_COLOR);
     sentimentDataArray.push(sentimentItem);
   }
 
   let sentimentDataTable = google.visualization.arrayToDataTable(sentimentDataArray);
   let view = new google.visualization.DataView(sentimentDataTable);
-  view.setColumns([0, 1,
-      {calc: "stringify",
-        sourceColumn: 1,
-        type: "string",
-        role: "annotation"},
-      2]);
+  view.setColumns([0, 1, {
+      calc: 'stringify',
+      sourceColumn: 1,
+      type: 'string',
+      role: 'annotation'
+    }, 2]);
 
   let options = {
-    title: "Sentiment Scores of Search Results",
+    title: 'Sentiment Scores of Search Results',
     width: 800,
     height: 400,
     bar: {groupWidth: "55%"},
@@ -150,6 +150,7 @@ function drawSentimentChart(chartElement, results) {
       title: 'Search Results Index',
     },
   };
+
   let chart = new google.visualization.ColumnChart(chartElement);
   chart.draw(view, options);
 }
