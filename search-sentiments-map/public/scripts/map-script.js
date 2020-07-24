@@ -39,6 +39,10 @@ let isSentimentMode = true;
 // Whether the map is zoomed on world level or US states level.
 let isWorldLevel = true;
 
+function getIsWorldLevel() {
+  return isWorldLevel;
+}
+
 // Multiplier for sentiment scores.
 const SCORE_SCALE_MULTIPLIER = 100;
 // The default score assigned to countries with no search results.
@@ -274,12 +278,4 @@ function resetMapZoomLevel() {
       updateGlobalTrendsAndDisplayFirst();
     });
   }
-}
-
-/** 
- * Sets the top trends to be US or global. Called when `switch-trends-click`
- * is clicked.
- */
-function switchTrends(event) {
-  setTopTrends(false, event.currentTarget.innerText === 'Global trends');
 }

@@ -22,11 +22,10 @@ const NUM_SHOWN = 7;
 
 /** 
  * Displays the top trends on the DOM and sets their onclick method. 
- * @param {boolean=} worldLevel Whether the map displays world-level data.
  * @param {boolean=} globalTrends Whether the trends to display are global
  * trends. Display US trends otherwise.
  */
-function setTopTrends(worldLevel = true, globalTrends = true) {
+function setTopTrends(globalTrends = true) {
   document.getElementById('switch-trends-click').innerText = globalTrends ?
       'US trends' : 'Global trends';
   document.getElementById('trends-title').innerText = globalTrends ?
@@ -37,7 +36,7 @@ function setTopTrends(worldLevel = true, globalTrends = true) {
   let trends = globalTrends ? 
       getTopTrends().globalTrends : getTopTrends().usTrends;
 
-  addTrendsToList(trendsList, trends, worldLevel, globalTrends);
+  addTrendsToList(trendsList, trends, globalTrends);
 
   // Add a toggle button to the list to show more or less topics depending
   // on the number of topics displayed.
@@ -55,7 +54,7 @@ function setTopTrends(worldLevel = true, globalTrends = true) {
 }
 
 /** Helper function for the `setTopTrends` function. */
-function addTrendsToList(trendsList, trends, worldLevel, globalTrends) {
+function addTrendsToList(trendsList, trends, globalTrends) {
   for (let i = 0; i < trends.length; i++) {
     const trendElement = document.createElement('li');
 
@@ -66,7 +65,7 @@ function addTrendsToList(trendsList, trends, worldLevel, globalTrends) {
     // Show a certain number of trending topics by default and hide the rest.
     trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
 
-    if (worldLevel) {
+    if (getIsWorldLevel()) {
       trendElement.addEventListener('click', (event) => {
         setNewTrend(event.currentTarget.innerText);
       });
@@ -107,4 +106,12 @@ function showMoreOrLess() {
     }
     showMoreOrLessToggleItem.innerText = TOGGLE_SHOW_MORE;
   }
+}
+
+/** 
+ * Sets the top trends to be US or global. Called when `switch-trends-click`
+ * is clicked.
+ */
+function switchTrends(event) {
+  setTopTrends(event.currentTarget.innerText === 'Global trends');
 }

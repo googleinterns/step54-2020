@@ -80,35 +80,40 @@ function setUserSearchTopic(topic, countries) {
  */
 function setStateInterestsData(topic) {
   currentTopic = topic;
-  fetch('/search-interests/' + topic).then(response => response.json()).then(stateInterests => {
-    currentSearchData = stateInterests;
-  }).then(() => {
-    loadRegionDataByMode();
-  });
+  fetch('/search-interests/' + topic).then(response => response.json())
+      .then(stateInterests => {
+        currentSearchData = stateInterests;
+      }).then(() => {
+        loadRegionDataByMode();
+      });
 }
 
 /**
- * Fetches current top global trends from the backend and displays them on the 
- * website.
+ * Fetches current top global trends from the backend, displays them on the 
+ * website, and shows map data for the first trend.
  */
 function updateGlobalTrendsAndDisplayFirst() {
   fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
     topTrends['globalTrends'] = trends.globalTrends;
     topTrends['timestamp'] = trends.timestamp;
 
-    setTopTrends(true, true);  // Global map, global trends.
+    setTopTrends(true);  // Set global trends.
     // Set the map to display data on the top-ranking trend.
     setNewTrend(trends.globalTrends[0].trendTopic);
   });
 }
 
+/**
+ * Fetches current US trends from the backend, displays them on the website, 
+ * and shows map data for the first trend.
+ */
 function updateUsTrendsAndDisplayFirst() {
   fetch('/country-trends/US').then(usTrends => usTrends.json())
       .then(trends => {
-    topTrends['usTrends'] = trends;
+        topTrends['usTrends'] = trends;
 
-    setTopTrends(false, true);  // Global map, US trends.
-    // Set the map to display data on the top-ranking trend.
-    setStateInterestsData(trends[0].topic);
-  });
+        setTopTrends(true);  // Set global trends.
+        // Set the map to display data on the top-ranking trend.
+        setStateInterestsData(trends[0].topic);
+      });
 }
