@@ -26,13 +26,18 @@ let mapStyle = [{
 let map;
 let infowindow;
 
-const WORLD_CENTER_COORDINATES = {lat: 29.246630, lng: 29.678410};
-const WORLD_ZOOM_LEVEL = 3;
-const WORLD_GEOJSON = 'countries.geojson';
-const US_CENTER_COORDINATES = {lat: 39.844724, lng: -92.019078};
-const US_ZOOM_LEVEL = 5;
-const US_GEOJSON = 'https://storage.googleapis.com/mapsdevsite/json/states.js';
-const US_SELECT_VALUE = 'us';
+const WORLD = {
+  CENTER_COORDINATES: {lat: 29.246630, lng: 29.678410},
+  ZOOM_LEVEL: 3,
+  GEOJSON: 'countries.geojson',
+};
+
+const US = {
+  CENTER_COORDINATES: {lat: 39.844724, lng: -92.019078},
+  ZOOM_LEVEL: 5,
+  GEOJSON: 'https://storage.googleapis.com/mapsdevsite/json/states.js',
+  SELECT_VALUE: 'us',
+};
 
 // Whether the map is currently in sentiment mode or popularity mode.
 let isSentimentMode = true;
@@ -73,8 +78,8 @@ function initMap() {
   });
 
   map = new google.maps.Map(document.getElementById('map'), {
-    center: WORLD_CENTER_COORDINATES,
-    zoom: WORLD_ZOOM_LEVEL,
+    center: WORLD.CENTER_COORDINATES,
+    zoom: WORLD.ZOOM_LEVEL,
     styles: mapStyle,
     mapTypeControl: false,
   });
@@ -90,7 +95,7 @@ function initMap() {
   map.data.addListener('click', onClickRegion);
 
   // Loads the country boundary polygons from a GeoJSON source.
-  map.data.loadGeoJson(WORLD_GEOJSON);
+  map.data.loadGeoJson(WORLD.GEOJSON);
 }
 
 /** Update the map legend's max and min values. */
@@ -207,18 +212,20 @@ function styleFeature(feature) {
  * @param {?google.maps.MouseEvent} e Mouse-in event.
  */
 function mouseInToRegion(e) {
-  let regionData = isWorldLevel ? 
-      e.feature.getProperty('country_data') : 
-      e.feature.getProperty('state_data');
+  let regionData = 
+      isWorldLevel ? 
+          e.feature.getProperty('country_data') : 
+          e.feature.getProperty('state_data');
 
   if (regionData == null) {
     return;
   }
   // Set the hover region so the `setStyle` function can change the border.
   e.feature.setProperty('status', 'hover');
-  regionInfo = isWorldLevel ? 
-      e.feature.getProperty('name') + ': ' : 
-      e.feature.getProperty('NAME') + ': ';
+  regionInfo = 
+      isWorldLevel ? 
+          e.feature.getProperty('name') + ': ' : 
+          e.feature.getProperty('NAME') + ': ';
 
   // Display "N/A" on hover when there are no results and thererfore the
   // sentiment score is the no results default score.
@@ -258,18 +265,18 @@ function resetMapZoomLevel() {
     map.data.remove(feature);
   });
 
-  if (zoomLevel === US_SELECT_VALUE) {
-    map.setCenter(US_CENTER_COORDINATES);
-    map.setZoom(US_ZOOM_LEVEL);
+  if (zoomLevel === US.SELECT_VALUE) {
+    map.setCenter(US.CENTER_COORDINATES);
+    map.setZoom(US.ZOOM_LEVEL);
     isWorldLevel = false;
-    map.data.loadGeoJson(US_GEOJSON, {idPropertyName: 'STATE'}, function() {
+    map.data.loadGeoJson(US.GEOJSON, {idPropertyName: 'STATE'}, function() {
       loadRegionDataByMode();
     });
   } else { // Reset the map to world level.
-    map.setCenter(WORLD_CENTER_COORDINATES);
-    map.setZoom(WORLD_ZOOM_LEVEL);
+    map.setCenter(WORLD.CENTER_COORDINATES);
+    map.setZoom(WORLD.ZOOM_LEVEL);
     isWorldLevel = true;
-    map.data.loadGeoJson(WORLD_GEOJSON, null, function() {
+    map.data.loadGeoJson(WORLD.GEOJSON, null, function() {
       loadRegionDataByMode();
     });
   }

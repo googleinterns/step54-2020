@@ -69,7 +69,7 @@ function setCountryTrends(countryCode) {
 }
 
 /** 
- * Toggles whether the element with the given id is displayed or not given 
+ * Toggles whether the element with the given id is displayed or not, given 
  * that the element has class 'shown' or 'hidden'. 
  */
 function toggleDisplay(id) {

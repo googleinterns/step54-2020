@@ -97,6 +97,6 @@ function countrySelectSetUp() {
 function toggleRightPanel() {
   toggleDisplay('right-div');
   let showHideButton = document.getElementById('show-hide-right-div');
-  showHideButton.innerText === '–' ?
-      showHideButton.innerText = '+' : showHideButton.innerText = '–';
+  showHideButton.innerText = 
+      showHideButton.innerText === '–' ? '+' : '–';
 }
