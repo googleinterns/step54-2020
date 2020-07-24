@@ -32,11 +32,10 @@ const PAUSE_ONE_MIN_MS = 60000;
 const QUERIES_PER_MIN = 100;
 
 /** 
- * Renders a JSON array of the top search results for all countries with API data
- * obtained every 12 hours for the specified topic.
+ * Renders a JSON array of the top search results for all countries with API
+ * data obtained every 12 hours for the specified topic.
  */
 router.get('/:topic', (req, res) => {
-  console.log("here");
   let topic = req.params.topic;
   search.retrieveSearchResultFromDatastore(topic).then(topicDataJsonArray => {
     res.setHeader('Content-Type', 'application/json');
@@ -84,7 +83,8 @@ async function updateSearchResults() {
 
 /** 
  * Obtains the most recent global trends by querying the Datastore.
- * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
+ * @return {!Array<JSON>} A JSON array of global trends and their originating
+ *     countries.
  */
 async function retrieveGlobalTrends() {
   const query = datastore.createQuery('TrendsEntry').order('timestamp', {
@@ -141,10 +141,11 @@ async function updateSearchResultsForTopic(query) {
 async function getCustomSearchResultsForCountry(countryCode, query) {
   const {searchApiKey} = require('./config.js');
   let response = 
-      await fetch('https://www.googleapis.com/customsearch/v1?key=' + searchApiKey
-          + '&cx=017187910465527070415:o5pur9drtw0&q='  + query
+      await fetch('https://www.googleapis.com/customsearch/v1?key='
+          + searchApiKey + '&cx=017187910465527070415:o5pur9drtw0&q='  + query
           + '&cr=country' + countryCode
-          + '&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
+          + '&num=10&safe=active&dateRestrict=d1&fields=items'
+          + '(title,snippet,htmlTitle,link)');
   let searchResults =  await response.json();
   return await search.formatCountryResults(searchResults);
 }
@@ -200,7 +201,7 @@ function formatSearchResult(searchResult) {
  * @param {Object} searchResult Object for one search result.
  */
 function getSentiment(searchResult) {
-  return fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {
+  return fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment',{
     method: 'POST',  // Send a request to the URL.
     headers: new Headers({
       'Content-Type': 'text/plain',
@@ -272,7 +273,9 @@ async function addWorldDataByTopicToDatastore(topic, countriesData) {
   try {
     await datastore.save(entity);
     console.log(topic);
-    console.log(`Custom Search Result ${worldDataByTopicKey.id} created successfully.`);
+    console.log(
+        `Custom Search Result ${worldDataByTopicKey.id} created successfully.`
+    );
   } catch (err) {
     console.error('ERROR:', err);
   }
@@ -283,6 +286,7 @@ function sleepForOneMinute() {
   return new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
 }
 
+// Necessary for t
 const search = {
   retrieveSearchResultFromDatastore,
   updateSearchResults,
@@ -296,6 +300,6 @@ const search = {
   addWorldDataByTopicToDatastore,
   sleepForOneMinute,
 }
+module.exports.search = search;
 
 module.exports.router = router;
-module.exports.search = search;
