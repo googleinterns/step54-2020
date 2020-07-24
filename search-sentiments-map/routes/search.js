@@ -72,14 +72,13 @@ async function retrieveSearchResultFromDatastore(topic) {
  */
 async function updateSearchResults() {
   await search.deleteAncientResults();
-  search.retrieveGlobalTrends().then(async trends => {
+  const trends = await search.retrieveGlobalTrends();
+  for (let i = 0; i < trends.length; i++) {
+    await search.updateSearchResultsForTopic(trends[i].trendTopic);
     // Note: when testing ,use i < 1 to test for only one trend, and comment 
     // out `await new Promise` line to avoid 1 minute pauses.
-    for (let i = 0; i < trends.length; i++) {
-      await search.updateSearchResultsForTopic(trends[i].trendTopic);
-      // await new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
-    }
-  });
+    await search.sleepForOneMinute();
+  }
 }
 
 /** 
@@ -114,7 +113,7 @@ async function updateSearchResultsForTopic(query) {
       // Use a limited number of queries per minute for the Custom Search API, 
       // and include a pause to prevent surpassing limit.
       if (i !== 0 && i % QUERIES_PER_MIN === 0) {
-        await new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
+        await sleepForOneMinute();
       }
       let countryResults = await getCustomSearchResultsForCountry(
           countryCode, query);
@@ -278,11 +277,17 @@ async function addWorldDataByTopicToDatastore(topic, countriesData) {
   }
 }
 
+/** Sleep for one minute. */
+function sleepForOneMinute() {
+  return new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
+}
+
 const search = {
   updateSearchResults,
   deleteAncientResults,
   retrieveGlobalTrends,
   updateSearchResultsForTopic,
+  sleepForOneMinute,
 }
 
 module.exports.router = router;
