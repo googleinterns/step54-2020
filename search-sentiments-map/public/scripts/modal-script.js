@@ -127,8 +127,8 @@ function setCountryTrends(countryCode) {
  * where they are trending.
  */
 function displayPopularityTimeline(countryCode) {
-  const popTimelineTab = document.getElementById('pop-timeline-tab');
-  popTimelineTab.innerHTML = '';
+  const popTimelineElement = document.getElementById('pop-timeline-tab');
+  popTimelineElement.innerHTML = '';
   fetch('/trends/', {
     method: 'post',
     headers: {
@@ -142,20 +142,48 @@ function displayPopularityTimeline(countryCode) {
   }).then(interestData =>
     interestData.json()).then(timelineJSON => {
       if (timelineJSON.length === 0) {
-        popTimelineTab.innerText = 
+        popTimelineElement.innerText = 
             'Popularity Timeline is not available for the selected country.';
       } else {
-        drawPopularityTimeline(timelineJSON);
+        drawPopularityTimeline(timelineJSON.default, popTimelineElement, 
+            getCurrentSearchData().topic);
       }
     });
 
 }
 
+google.charts.load('45', {'packages':['corechart']});
 /** 
  * Draw the popularity timeline in a country for the current search trend on modal.
  * @param {string} countryCode Two letter country code for selected country.
  */
-function drawPopularityTimeline(timelineJSON) {
+function drawPopularityTimeline(timelineJSON, popTimelineElement, topic) {
+  var data = new google.visualization.DataTable();
+  data.addColumn('string');
+  data.addColumn('number');
   console.log('in popularity timeline draw' + timelineJSON);
-
+  console.log(timelineJSON.timelineData);
+  const timelineData = timelineJSON.timelineData;
+  for (let i = 0; i < timelineData.length; i++) {
+    data.addRows([[timelineData[i].formattedAxisTime, timelineData[i].value[0]]]);
+  }
+  var options = {
+    title: "Popularity of " + topic,
+    width: 750,
+    height: 400,
+    legend: {position: "none"},
+    hAxis: {
+      title: 'Date',
+    },
+    vAxis: {
+      title: 'Popularity',
+      ticks: [0, 20 , 40, 60, 80, 100],
+    },
+    trendlines: {
+      0: {type: 'exponential', color: '#333', opacity: 1},
+      1: {type: 'linear', color: '#111', opacity: .3},
+    },
+  };
+  var chart = new google.visualization.LineChart(popTimelineElement);
+  chart.draw(data, options);
 }

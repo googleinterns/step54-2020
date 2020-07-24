@@ -55,10 +55,10 @@ router.post('/', jsonParser, (req, res) => {
     keyword: req.body.topic,
     startTime: new Date(Date.now() - (DATA_FROM_8_DAYS_AGO_MS)),
     geo: req.body.code,
-  }).then(timelineData => {
-    console.log('what is going on 2: ' + timelineData);
+  }).then(data => {
+    console.log('what is going on 2: ' + data);
     res.setHeader('Content-Type', 'application/json');
-    res.send(timelineData);
+    res.send(data);
     })
   .catch(err => {
     console.error(err);
