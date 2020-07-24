@@ -245,8 +245,6 @@ function mouseOutOfRegion(e) {
  * Resets the map according to the zoom level (US or world) selected by the 
  * user by adjusting the map center, zoom level, polygons, and displayed data.
  * TODO(chenyuz): 
- * 2. Toggle the display of mode selector. Show on hover of the select that 
- * only popularity is available.
  * 3. Modify user search to be for popularity only.
  */
 function resetMapZoomLevel() {
