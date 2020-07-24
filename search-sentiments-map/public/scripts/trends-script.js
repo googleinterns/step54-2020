@@ -23,7 +23,7 @@ const NUM_SHOWN = 7;
 /** 
  * Displays the top trends on the DOM and sets their onclick method. 
  * @param {boolean=} globalTrends Whether the trends to display are global
- * trends. Display US trends otherwise.
+ *     trends. Display US trends otherwise.
  */
 function setTopTrends(globalTrends = true) {
   document.getElementById('switch-trends-click').innerText = globalTrends ?

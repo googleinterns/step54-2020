@@ -34,7 +34,7 @@ router.get('/:country', (req, res) => {
  * from the Datastore for the specified country.
  * @param {!string} country The two-letter code for the country requested.
  * @return {!Array<JSON>} An array of the trends; empty array if there is no
- * trends data for the specified country.
+ *     trends data for the specified country.
  */
 async function retrieveCountryTrends(country) {
   const query = datastore.createQuery('TrendsEntry').order('timestamp', {

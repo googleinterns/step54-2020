@@ -39,7 +39,7 @@ router.get('/', (req, res) => {
 /** 
  * Get the global trends from the most recent Datastore entry.
  * @return {!Array<JSON>} A JSON array of global trends and their originating 
- * countries.
+ *     countries.
  */
 async function retrieveGlobalTrends() {
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp', {
@@ -84,10 +84,10 @@ async function updateDailyTrends() {
 /** 
  * Creates a JSON item for trends in the given country.
  * @param {?Array<JSON>} trendingSearches The JSON array containing the top trends 
- * of the given country.
+ *     of the given country.
  * @param {string} countryCode The two-letter code for the country considered.
  * @return {Object<JSON>} A JSON object that includes a country's code and its 
- * top trends.
+ *     top trends.
  */
 function constructCountryTrendsJson(trendingSearches, countryCode) {
   let trends = [];
@@ -138,7 +138,7 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
     }, ...],
    }
  * @param {!Array<JSON>} trendsByCountry An array where each element is a country
- * and its trends.
+ *     and its trends.
  */
 async function saveTrendsAndDeletePrevious(trendsByCountry) {
   await deleteAncientTrend();
@@ -199,9 +199,9 @@ async function deleteAllTrends() {
  * Finds the trending topics that appear the most across all recorded countries 
  * and gets the top 10 as the globally trending topics.
  * @param {!Array<JSON>} trendsByCountry An array where each element is a country
- * and its trends.
+ *     and its trends.
  * @return {!Array<JSON>} 10 globally trending topics and the number of countries 
- * where they are trending.
+ *     where they are trending.
  */
 function getGlobalTrends(trendsByCountry) {
   // Use a map to count the number of occurences of each trend.
