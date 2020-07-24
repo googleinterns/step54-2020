@@ -1,8 +1,9 @@
 const chai = require('chai');
 const should = require('chai').should();
+const expect = require('chai').expect;
 const sinon = require('sinon');
 const search = require('./../routes/search').search;
-const router = require('./../routes/search').router;
+const {Datastore} = require('@google-cloud/datastore');
 
 describe('Search', function() {
   describe('UpdateSearchResults', function() {
@@ -11,13 +12,21 @@ describe('Search', function() {
     let updateSearchResultsForTopicStub;
 
     beforeEach(() => {
-      deleteAncientResultsStub = sinon.stub(search, 'deleteAncientResults').resolves('Not interested in the output');
-      sleepForOneMinuteStub = sinon.stub(search, 'sleepForOneMinute').resolves('Not interested in the output');
-      retrieveGlobalTrendsStub = sinon.stub(search, 'retrieveGlobalTrends').resolves([
-        {trendTopic: "trend1"},
-        {trendTopic: "trend2"}
-      ]);
-      updateSearchResultsForTopicStub = sinon.stub(search, 'updateSearchResultsForTopic').resolves('Not interested in the output');
+      deleteAncientResultsStub = 
+          sinon.stub(search, 'deleteAncientResults')
+              .resolves('Not interested in the output');
+      sleepForOneMinuteStub = 
+          sinon.stub(search, 'sleepForOneMinute')
+              .resolves('Not interested in the output');
+      retrieveGlobalTrendsStub = 
+          sinon.stub(search, 'retrieveGlobalTrends')
+              .resolves([
+                {trendTopic: "trend1"},
+                {trendTopic: "trend2"}
+              ]);
+      updateSearchResultsForTopicStub =
+          sinon.stub(search, 'updateSearchResultsForTopic')
+              .resolves('Not interested in the output');
     })
 
     afterEach(() => {
@@ -35,30 +44,28 @@ describe('Search', function() {
     });
   });
 
-  describe('RouterGetResults', function() {
-    let retrieveSearchResultFromDatastoreStub;
-
+  describe('RetrieveSearchResultFromDatastore', function() {
     beforeEach(() => {
-      retrieveSearchResultFromDatastoreStub = sinon.stub(search, 'retrieveSearchResultFromDatastore').resolves({
-        {trendTopic: "trend1"},
-        {trendTopic: "trend2"},
+      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
+        results = [{
+          topic: 'testTopic',
+          timestamp: 0,
+          dataByCountry: {},
+        }];
+        return [results];
       });
-    })
+    });
 
     afterEach(() => {
       sinon.restore();
-    })
+    });
 
-    it('should return latest data', async function() {
-      retrieveSearchResultFromDatastoreStub.callCount.should.equal(1);
-      let req,res,spy;
+    it('should return latest datastore data', async function() {
+      const results = await search.retrieveSearchResultFromDatastore('testTopic');
 
-      req = res = {};
-      spy = res.send = sinon.spy();
-
-      await router.get('/testTopic');
-      expect(spy.calledOnce).to.equal(true);
-    });     
+      results.topic.should.equal('testTopic');
+      results.timestamp.should.equal(0);
+      expect(results.dataByCountry).to.be.empty;
     });
   });
 });

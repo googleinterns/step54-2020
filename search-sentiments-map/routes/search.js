@@ -36,8 +36,9 @@ const QUERIES_PER_MIN = 100;
  * obtained every 12 hours for the specified topic.
  */
 router.get('/:topic', (req, res) => {
+  console.log("here");
   let topic = req.params.topic;
-  retrieveSearchResultFromDatastore(topic).then(topicDataJsonArray => {
+  search.retrieveSearchResultFromDatastore(topic).then(topicDataJsonArray => {
     res.setHeader('Content-Type', 'application/json');
     res.send(topicDataJsonArray);
   });
@@ -113,9 +114,9 @@ async function updateSearchResultsForTopic(query) {
       // Use a limited number of queries per minute for the Custom Search API, 
       // and include a pause to prevent surpassing limit.
       if (i !== 0 && i % QUERIES_PER_MIN === 0) {
-        await sleepForOneMinute();
+        await search.sleepForOneMinute();
       }
-      let countryResults = await getCustomSearchResultsForCountry(
+      let countryResults = await search.getCustomSearchResultsForCountry(
           countryCode, query);
       countriesData.push({
         country: countryCode,
@@ -125,7 +126,7 @@ async function updateSearchResultsForTopic(query) {
       });
     }
   });
-  addWorldDataByTopicToDatastore(query, countriesData);
+  search.addWorldDataByTopicToDatastore(query, countriesData);
 }
 
 /** 
@@ -145,7 +146,7 @@ async function getCustomSearchResultsForCountry(countryCode, query) {
           + '&cr=country' + countryCode
           + '&num=10&safe=active&dateRestrict=d1&fields=items(title,snippet,htmlTitle,link)');
   let searchResults =  await response.json();
-  return await formatCountryResults(searchResults);
+  return await search.formatCountryResults(searchResults);
 }
 
 /**
@@ -164,7 +165,7 @@ async function formatCountryResults(searchResultsJson) {
   }
   for (let i = 0; i < currentSearchResults.length; i++) {
     let formattedResults =
-        await formatSearchResult(currentSearchResults[i]);
+        await search.formatSearchResult(currentSearchResults[i]);
     countryData.push(formattedResults);
     totalScore += formattedResults.score;
   }
@@ -181,7 +182,7 @@ async function formatCountryResults(searchResultsJson) {
  * @return {Object} Formatted search result data in JSON form.
  */
 function formatSearchResult(searchResult) {
-  return getSentiment(searchResult)
+  return search.getSentiment(searchResult)
       .then(response => response.json())
       .then((result) => {
         return {
@@ -283,10 +284,16 @@ function sleepForOneMinute() {
 }
 
 const search = {
+  retrieveSearchResultFromDatastore,
   updateSearchResults,
-  deleteAncientResults,
   retrieveGlobalTrends,
   updateSearchResultsForTopic,
+  getCustomSearchResultsForCountry,
+  formatCountryResults,
+  formatSearchResult,
+  getSentiment,
+  deleteAncientResults,
+  addWorldDataByTopicToDatastore,
   sleepForOneMinute,
 }
 
