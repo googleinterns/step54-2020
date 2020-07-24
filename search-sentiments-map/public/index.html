@@ -15,7 +15,7 @@
     <script src="scripts/search-topic-script.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
-  <body onload="initMap(); updateTrends(); countrySelectSetUp();">    
+  <body onload="initMap(); updateGlobalTrendsAndDisplayFirst(); countrySelectSetUp();">    
     <div class="modal fade" id="region-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -63,12 +63,14 @@
 
     <div id="top-left-div">
       <h3 id="topic-header">Worldwide sentiments</h3>
-      <label class="switch">
-        <input id="sentiment-popularity-check" type="checkbox" onclick="loadRegionDataByMode()">
-        <span class="slider"></span>
-      </label>
-      <span id="switch-info">Switch between <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide sentiments on selected topic" data-placement="top">Sentiment Mode</span> 
-          & <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide interest on selected topic" data-placement="top">Popularity Mode</span>.</span>
+      <div id="switch-div">
+        <label class="switch">
+          <input id="sentiment-popularity-check" type="checkbox" onclick="loadRegionDataByMode()">
+          <span class="slider"></span>
+        </label>
+        <span id="switch-info">Switch between <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide sentiments on selected topic" data-placement="top">Sentiment Mode</span> 
+            & <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide interest on selected topic" data-placement="top">Popularity Mode</span>.</span>
+      </div>
     </div>
 
     <!-- The inner text is a dash, which is longer than a hyphen. -->
@@ -89,7 +91,8 @@
       </form>
       <br>
       <div id="trends-div">
-        <h3>Trending Search Topics</h3>
+        <h3 id="trends-title">Globally Trending Search Topics</h3>
+        <span id="switch-trends-click" class="hidden" onclick="switchTrends(event)">US trends</span>
         <ul id="trends-list">
         </ul>
         <i id="trends-timestamp"></i>

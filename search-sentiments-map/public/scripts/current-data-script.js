@@ -16,9 +16,11 @@
 let currentTopic = '';
 // JSON object for the data that is currently displayed, including topic,
 // timestamp, and custom search data by country.
-let currentSearchData = '';
-// JSON object for the trends that are currently displayed and their timestamp.
-let topTrends = '';
+let currentSearchData = {};
+// JSON object for the current top trends, including US trends if applicable,
+// and their timestamp.
+// Format: {globalTrends:..., usTrends:..., timestamp:...,}
+let topTrends = {};
 
 /** Returns current topic that the user is viewing. */
 function getCurrentTopic() {
@@ -45,7 +47,6 @@ function setNewTrend(trend) {
   fetch('/search/' + trend)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
         currentSearchData = topicData;
-        console.log('search data', currentSearchData)
       }).then(() => {
         // Reload map with new sentiment or search interest data and relevant
         // coloring.
@@ -64,8 +65,7 @@ function setUserSearchTopic(topic, countries) {
       .then(response => response.json())
       .then(topicResults => {
         currentSearchData = topicResults;
-      })
-      .then(() => {
+      }).then(() => {
         // Reload map with new sentiment or search interest data and relevant
         // coloring.
         loadRegionDataByMode();
@@ -76,26 +76,39 @@ function setUserSearchTopic(topic, countries) {
 
 /** 
  * Retrieves interest data for US states and reconstructs the map with new data.
- * @param {string=} topic Topic to get data for. Defaults to the current topic.
+ * @param {string} topic Topic to get data for.
  */
-/*
-function setStateInterestsData(topic = currentTopic) {
+function setStateInterestsData(topic) {
+  currentTopic = topic;
   fetch('/search-interests/' + topic).then(response => response.json()).then(stateInterests => {
-    console.log(stateInterests);
     currentSearchData = stateInterests;
   }).then(() => {
     loadRegionDataByMode();
   });
-}*/
+}
 
 /**
- * Fetches current top trends from the backend and displays them on the website.
+ * Fetches current top global trends from the backend and displays them on the 
+ * website.
  */
-function updateTrends() {
+function updateGlobalTrendsAndDisplayFirst() {
   fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
-    topTrends = trends;
-    setTopTrends();
+    topTrends['globalTrends'] = trends.globalTrends;
+    topTrends['timestamp'] = trends.timestamp;
+
+    setTopTrends(true, true);  // Global map, global trends.
     // Set the map to display data on the top-ranking trend.
     setNewTrend(trends.globalTrends[0].trendTopic);
+  });
+}
+
+function updateUsTrendsAndDisplayFirst() {
+  fetch('/country-trends/US').then(usTrends => usTrends.json())
+      .then(trends => {
+    topTrends['usTrends'] = trends;
+
+    setTopTrends(false, true);  // Global map, US trends.
+    // Set the map to display data on the top-ranking trend.
+    setStateInterestsData(trends[0].topic);
   });
 }

@@ -68,12 +68,8 @@ function setCountryTrends(countryCode) {
       });
 }
 
-/** 
- * Toggles whether the element with the given id is displayed or not given 
- * that the element has class 'shown' or 'hidden'. 
- */
+/** Toggles whether the element with the given id is displayed or not. */
 function toggleDisplay(id) {
-  document.getElementById(id).classList.toggle('shown');
   document.getElementById(id).classList.toggle('hidden');
 }
 

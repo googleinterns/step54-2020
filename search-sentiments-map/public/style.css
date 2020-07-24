@@ -169,11 +169,23 @@ input:checked + .slider:before {
   overflow-y: auto;
 }
 
+#trends-title {
+  display: inline-block;
+}
+
+#switch-trends-click {
+  color: #2196F3;
+  font-size: 15px;
+  margin-left: 10px;
+}
+
 #trends-list li {
   font-family: "Lucida Console", Courier, monospace;
   width: fit-content;
 }
 
+.country-trend:hover,
+#switch-trends-click:hover,
 #trends-list li:hover {
   color: #2268d6;
   cursor: pointer;
@@ -192,11 +204,6 @@ input:checked + .slider:before {
 .country-trend {
   display: inline-block;
   margin-right: 10px;
-}
-
-.country-trend:hover {
-  color: #2268d6;
-  cursor: pointer;
 }
 
 .shown {

@@ -106,10 +106,9 @@ function updateLegends() {
  * corresponding data on the map.
  */
 function loadRegionDataByMode() {
-  isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
-
   const topicHeader = document.getElementById('topic-header');
   if (isWorldLevel) {
+    isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
     topicHeader.innerText = isSentimentMode ?
         'Worldwide sentiment scores of search results for "' + getCurrentTopic() + '"' :
         'Worldwide search interest scores for "' + getCurrentTopic() + '"';
@@ -142,21 +141,16 @@ function loadCountryData() {
   });
 }
 
-/** 
- * Loads the search interest data for US states on the map.
- * @param {string=} topic Topic to get data for. Defaults to the current topic.
- */
-function loadStateData(topic = getCurrentTopic()) {
-  fetch('/search-interests/' + topic).then(response => response.json())
-      .then(stateInterests => {
-    map.data.forEach(function(row) {
-      let interest = stateInterests.filter(stateInterest => 
-          stateInterest.geoName === row.getProperty('NAME'));
-      let dataVariable = interest.length === 0 ? 
-          NO_RESULTS_DEFAULT_SCORE : interest[0].value[0];
+/** Loads the search interest data for US states on the map. */
+function loadStateData() {
+  let stateInterests = getCurrentSearchData();
+  map.data.forEach(function(row) {
+    let interest = stateInterests.filter(stateInterest => 
+        stateInterest.geoName === row.getProperty('NAME'));
+    let dataVariable = interest.length === 0 ? 
+        NO_RESULTS_DEFAULT_SCORE : interest[0].value[0];
 
-      row.setProperty('state_data', dataVariable);
-    });
+    row.setProperty('state_data', dataVariable);
   });
 }
 
@@ -251,7 +245,6 @@ function mouseOutOfRegion(e) {
  * Resets the map according to the zoom level (US or world) selected by the 
  * user by adjusting the map center, zoom level, polygons, and displayed data.
  * TODO(chenyuz): 
- * 1. On US level, add button to allow switching to US trends.
  * 2. Toggle the display of mode selector. Show on hover of the select that 
  * only popularity is available.
  * 3. Modify user search to be for popularity only.
@@ -262,21 +255,33 @@ function resetMapZoomLevel() {
   map.data.forEach(function(feature) {
     map.data.remove(feature);
   });
+  toggleDisplay('switch-trends-click');
+  toggleDisplay('switch-div');
 
   if (zoomLevel === 'us') {
     map.setCenter(US_CENTER_COORDINATES);
     map.setZoom(US_ZOOM_LEVEL);
     isWorldLevel = false;
     isSentimentMode = false;  // Sentiment mode is not available at US level.
+
     map.data.loadGeoJson(US_GEOJSON, {idPropertyName: 'gx_id'}, function() {
-      loadRegionDataByMode();
+      updateUsTrendsAndDisplayFirst();
     });
   } else { // Reset the map to world level.
     map.setCenter(WORLD_CENTER_COORDINATES);
     map.setZoom(WORLD_ZOOM_LEVEL);
     isWorldLevel = true;
+
     map.data.loadGeoJson(WORLD_GEOJSON, null, function() {
-      loadRegionDataByMode();
+      updateGlobalTrendsAndDisplayFirst();
     });
   }
+}
+
+/** 
+ * Sets the top trends to be US or global. Called when `switch-trends-click`
+ * is clicked.
+ */
+function switchTrends(event) {
+  setTopTrends(false, event.currentTarget.innerText === 'Global trends');
 }
