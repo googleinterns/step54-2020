@@ -20,8 +20,12 @@ const router = express.Router();  // Using Router to divide the app into modules
 const googleTrends = require('google-trends-api');
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
+
 const TRENDS_DATA_KIND = 'TrendsEntry';
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
+// Constant for getting popularity data from 8 days ago.
+const DATA_FROM_8_DAYS_AGO_MS = 8 * 24 * 60 * 60000; 
+const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
 
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
@@ -49,7 +53,7 @@ router.post('/', jsonParser, (req, res) => {
   //     });
   googleTrends.interestOverTime({
     keyword: req.body.topic,
-    startTime: new Date(Date.now() - (STALE_DATA_THRESHOLD_7_DAYS_MS)),
+    startTime: new Date(Date.now() - (DATA_FROM_8_DAYS_AGO_MS)),
     geo: req.body.code,
   }).then(timelineData => {
     console.log('what is going on 2: ' + timelineData);
@@ -84,14 +88,21 @@ function getPastWeekInterest(topic, countryCode) {
 
 /** 
  * Get the global trends from the most recent Datastore entry.
- * @return {!Array<JSON>} A JSON array of global trends and their originating countries.
+ * @return {!Array<JSON>} A JSON array of global trends and their originating 
+ * countries.
  */
 async function retrieveGlobalTrends() {
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp', {
     descending: true,
-  });
+  }).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
-  return trendsEntry[0].globalTrends;
+  return {
+    timestamp: trendsEntry[0].timestamp,
+    // Returns the most recent trends with search results data retrieved.
+    globalTrends: 
+        (Date.now() - trendsEntry[0].timestamp > RETRIEVE_RESULTS_TIME_MS) ?
+        trendsEntry[0].globalTrends : trendsEntry[1].globalTrends,
+  }
 }
 
 /** 
