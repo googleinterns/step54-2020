@@ -2,7 +2,12 @@ indexes:
 
 - kind: WorldDataByTopic
   properties:
-  - name: topic
   - name: lowercaseTopic
+  - name: timestamp
+    direction: desc
+
+- kind: WorldDataByTopic
+  properties:
+  - name: topic
   - name: timestamp
     direction: desc

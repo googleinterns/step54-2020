@@ -44,7 +44,7 @@ function setTopTrends() {
       placement: 'right',
       trigger: 'hover',
     }
-    $('#trend' + i).popover(options);
+    $('#' + trendElement.id).popover(options);
   }
 
   // Add a toggle button to the list to show more or less topics depending

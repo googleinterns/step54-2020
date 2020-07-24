@@ -67,11 +67,20 @@
         <input id="sentiment-popularity-check" type="checkbox" onclick="loadRegionDataByMode()">
         <span class="slider"></span>
       </label>
-      <span id="switch-info">Switch between <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide sentiments on selected topic" data-placement="top">Sentiment Mode</span> 
-          & <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide interest on selected topic" data-placement="top">Popularity Mode</span>.</span>
+      <span id="switch-info">
+        Switch between 
+        <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide sentiments on selected topic" data-placement="top">
+          Sentiment Mode
+        </span> 
+        & 
+        <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide interest on selected topic" data-placement="top">
+          Popularity Mode
+        </span>
+        .
+      </span>    
     </div>
 
-    <!-- The inner text is a dash, which is longer than a hyphen. -->
+    <!-- The inner text is a dash, which is longer than a hyphen. Copy-paste it if needed. -->
     <button id="show-hide-right-div" type="button" class="btn btn-light" onclick="toggleRightPanel()" aria-pressed="true" data-toggle="popover" data-trigger="hover" data-content="Toggle the Panel">–</button>
 
     <div id="right-div" class="shown">

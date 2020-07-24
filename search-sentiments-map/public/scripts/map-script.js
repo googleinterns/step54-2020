@@ -32,6 +32,7 @@ const WORLD_GEOJSON = 'countries.geojson';
 const US_CENTER_COORDINATES = {lat: 39.844724, lng: -92.019078};
 const US_ZOOM_LEVEL = 5;
 const US_GEOJSON = 'https://storage.googleapis.com/mapsdevsite/json/states.js';
+const US_SELECT_VALUE = 'us';
 
 // Whether the map is currently in sentiment mode or popularity mode.
 let isSentimentMode = true;
@@ -106,14 +107,14 @@ function updateLegends() {
  * corresponding data on the map.
  */
 function loadRegionDataByMode() {
-  isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
-
   const topicHeader = document.getElementById('topic-header');
   if (isWorldLevel) {
+    isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;  
     topicHeader.innerText = isSentimentMode ?
         'Worldwide sentiment scores of search results for "' + getCurrentSearchData().topic + '"' :
         'Worldwide search interest scores for "' + getCurrentSearchData().topic + '"';
   } else {
+    isSentimentMode = false;  // Sentiment mode is not available at US level.    
     topicHeader.innerText = 
         'State-level search interest scores for "' + getCurrentSearchData().topic + '"';
   }
@@ -257,11 +258,10 @@ function resetMapZoomLevel() {
     map.data.remove(feature);
   });
 
-  if (zoomLevel === 'us') {
+  if (zoomLevel === US_SELECT_VALUE) {
     map.setCenter(US_CENTER_COORDINATES);
     map.setZoom(US_ZOOM_LEVEL);
     isWorldLevel = false;
-    isSentimentMode = false;  // Sentiment mode is not available at US level.
     map.data.loadGeoJson(US_GEOJSON, {idPropertyName: 'STATE'}, function() {
       loadRegionDataByMode();
     });
