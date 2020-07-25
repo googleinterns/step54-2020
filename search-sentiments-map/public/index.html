@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Sentiment Map</title>
     <!-- Font awesome icons. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -13,78 +13,89 @@
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="scripts/modal-script.js"></script>
     <script src="scripts/trends-script.js"></script>
+    <script src="scripts/search-topic-script.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
-  <body onload="initMap(); setTopTrends();">
-    <div class="content">
-      <!-- Bootstrap CSS. -->
-      <div class="modal fade" id="region-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title" id="modal-title"></h4>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="modal-body">
-              <div role="tabpanel">
-                <ul class="nav nav-tabs" role="tablist">
-                  <li role="presentation" class="nav-item active">
-                    <a class="nav-link active" href="#search-results-tab" aria-controls="search-results-tab" role="tab" data-toggle="tab">Search Results</a>
-                  </li>
-                  <li role="presentation" class="nav-item">
-                    <a class="nav-link" href="#sentiment-chart-tab" aria-controls="sentiment-chart-tab" role="tab" data-toggle="tab">Sentiment Chart</a>
-                  </li>
-                  <li role="presentation" class="nav-item">
-                    <a class="nav-link" href="#top-trends-tab" aria-controls="top-trends-tab" role="tab" data-toggle="tab">Top Trends</a>
-                  </li>
-                </ul>
-                <div class="tab-content">
-                  <div role="tabpanel" class="tab-pane fade show active" id="search-results-tab"></div>
-                  <div role="tabpanel" class="tab-pane fade" id="sentiment-chart-tab"></div>
-                  <div role="tabpanel" class="tab-pane fade" id="top-trends-tab"></div>
-                </div>
+  <body onload="initMap(); updateTrends(); countrySelectSetUp();">    
+    <div class="modal fade" id="region-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="modal-title"></h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <div role="tabpanel">
+              <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="nav-item active">
+                  <a class="nav-link active" href="#search-results-tab" aria-controls="search-results-tab" role="tab" data-toggle="tab">Search Results</a>
+                </li>
+                <li role="presentation" class="nav-item">
+                  <a class="nav-link" href="#sentiment-chart-tab" aria-controls="sentiment-chart-tab" role="tab" data-toggle="tab">Sentiment Chart</a>
+                </li>
+                <li role="presentation" class="nav-item">
+                  <a class="nav-link" href="#top-trends-tab" aria-controls="top-trends-tab" role="tab" data-toggle="tab">Top Trends</a>
+                </li>
+              </ul>
+              <div class="tab-content">
+                <div role="tabpanel" class="tab-pane fade show active" id="search-results-tab"></div>
+                <div role="tabpanel" class="tab-pane fade" id="sentiment-chart-tab"></div>
+                <div role="tabpanel" class="tab-pane fade" id="top-trends-tab"></div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <h2 id="title">Sentiment Map for Google Search</h2>
-      <div class="row">
-        <div class="col-sm-9">
-          <h5 id="topic-header">Worldwide sentiments</h5>
-          <h6 id="extrema-sentiment"></h4>
-          <div id="map"></div>
-          <div id="legend">
-            <div id="data-min">min</div>
-            <div class="color-key"></div>
-            <div id="data-max">max</div>
-          </div>
-
-          <label class="switch">
-            <input id="sentiment-popularity-check" type="checkbox" onclick="loadCountryDataByMode()">
-            <span class="slider"></span>
-          </label>
-          <span id="switch-info">Switch between Sentiment Mode & Popularity Mode.</span>
-        </div>
-
-        <div class="col-sm-3">
-          <div>
-            <h3>Trending Search Topics</h3>
-            <ul id="trends-list">
-            </ul>
-          </div>
-          <div id="search-box" class="input-group row">
-            <textarea class="form-control col-sm-9" id="search-topic" name="search-topic" placeholder="Search for a topic..." rows="1"></textarea>
-            <br/>
-            <div class="input-group-append">
-              <button onclick="" type="submit"><i class="fa fa-search"></i></button>
-            </div>  
+    </div>
+    <div class="modal fade" id="user-search-warning-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <span class="modal-title" id="user-search-warning-text"></span>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
         </div>
       </div>
-    </div>    
+    </div>
+    <div id="map"></div>
+    <div id="legend">
+      <div id="data-min">min</div>
+      <div class="color-key"></div>
+      <div id="data-max">max</div>
+    </div>
 
-    <!-- JS required for Bootstrap. -->
+    <div id="top-left-div">
+      <h3 id="topic-header">Worldwide sentiments</h3>
+      <label class="switch">
+        <input id="sentiment-popularity-check" type="checkbox" onclick="loadCountryDataByMode()">
+        <span class="slider"></span>
+      </label>
+      <span id="switch-info">Switch between Sentiment Mode & Popularity Mode.</span>
+    </div>
+
+    <div id="right-div">
+      <form onsubmit="return false">
+        <div id="search-div">
+          <input type="text" class="form-control" id="search-topic" name="search-topic" placeholder="Search for a topic">
+          <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button"  id="country-dropdown-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              Countries to view results for(max 3)<span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="dropdownMenu1" id="country-select-dropdown" ></ul>
+          </div>
+          <button type="submit" class="btn btn-primary" id="submit-user-topic" onclick="searchTopic()">Search</button>
+        </div>
+      </form>
+      <br><br>
+      <div id="trends-div">
+        <h3>Trending Search Topics</h3>
+        <ul id="trends-list">
+        </ul>
+        <i id="trends-timestamp"></i>
+      </div>
+    </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
