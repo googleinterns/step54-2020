@@ -13,7 +13,6 @@
 // the License.
 
 // The default score assigned to countries with no search results.
-const NO_RESULTS_DEFAULT_SCORE = -500;
 const POSITIVE_COLOR = 'green';
 const NEGATIVE_COLOR = 'red';
 /**
@@ -24,14 +23,16 @@ function onClickCountry(e) {
   if (e.feature.getProperty('country_data') != null) {
     $('#region-info-modal').modal('show');
 
-  // Update Modal with information for relevant country.
-  const countryName = e.feature.getProperty('name');
-  const countryId = e.feature.getId();
-  document.getElementById('modal-title').innerText = countryName;
-  displayTopResultsForCurrentTrend(countryId);
-  setCountryTrends(countryId);
-  displaySentimentChartForCurrentTrend(countryId);
+    // Update Modal with information for relevant country.
+    const countryName = e.feature.getProperty('name');
+    const countryId = e.feature.getId();
+    document.getElementById('modal-title').innerText = countryName;
+    displayTopResultsForCurrentTrend(countryId);
+    setCountryTrends(countryId);
+    displaySentimentChartForCurrentTrend(countryId);
+  }
 }
+
 
 /**
  * Sets trends under the top-trends modal tab for the selected country.
@@ -82,8 +83,7 @@ function displayTopResultsForCurrentTrend(countryCode) {
 
   let countryData = dataByCountry.filter(data => data.country === countryCode);
 
-  if (countryData.length === 0 ||
-      countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
+  if (countryData.length === 0) {
     // Handle case where there are no results.
     resultElement.innerHTML += 'No results.<br>';
   } else {
@@ -110,17 +110,14 @@ function displayTopResultsForCurrentTrend(countryCode) {
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displaySentimentChartForCurrentTrend(countryCode) {
-  // let topic = getCurrentTrend();
-  let dataByCountry = getCurrentCustomSearchData().dataByCountry;
+  let dataByCountry = getCurrentSearchData().dataByCountry;
   let countryData = dataByCountry.filter(data => data.country === countryCode);
-  // let topicData = getCurrentCustomSearchData();
-  let date = new Date(getCurrentCustomSearchData().timestamp);
+  let date = new Date(getCurrentSearchData().timestamp);
   let chartElement = document.getElementById('sentiment-chart-tab');
   chartElement.innerHTML = '';
 
   // Handle case where there are no results.
-  if (countryData.length === 0 ||
-      countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
+  if (countryData.length === 0) {
     chartElement.innerHTML += 'No results.<br><i>Last updated on ' +
         date.toString() + '<i><br>';
   } else {
@@ -158,7 +155,7 @@ function drawSentimentChart(chartElement, results) {
 
   let options = {
     title: "Sentiment Scores of Search Results",
-    width: 800,
+    width: 750,
     height: 400,
     bar: {groupWidth: "55%"},
     legend: {position: "none"},
