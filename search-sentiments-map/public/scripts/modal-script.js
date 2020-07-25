@@ -76,12 +76,12 @@ function toggleDisplay(id) {
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displayTopResultsForCurrentTrend(countryCode) {
-  let dataByCountry = getCurrentSearchData().dataByCountry;
   let date = new Date(getCurrentSearchData().timestamp);
   let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
 
-  let countryData = dataByCountry.filter(data => data.country === countryCode);
+  let countryData = getCurrentSearchData().dataByCountry.filter(data => 
+      data.country === countryCode);
 
   if (countryData.length === 0) {
     // Handle case where there are no results.
@@ -110,8 +110,8 @@ function displayTopResultsForCurrentTrend(countryCode) {
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displaySentimentChartForCurrentTrend(countryCode) {
-  let dataByCountry = getCurrentSearchData().dataByCountry;
-  let countryData = dataByCountry.filter(data => data.country === countryCode);
+  let countryData = getCurrentSearchData().dataByCountry.filter(data => 
+      data.country === countryCode);
   let date = new Date(getCurrentSearchData().timestamp);
   let chartElement = document.getElementById('sentiment-chart-tab');
   chartElement.innerHTML = '';
@@ -140,7 +140,8 @@ function drawSentimentChart(chartElement, results) {
   sentimentDataArray.push(["Search Result", "Score", {role: "style"}]);
   for (let i = 0; i < results.length; i++) {
     let sentimentItem = [(i + 1).toString(), results[i].score];
-    results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : sentimentItem.push(NEGATIVE_COLOR);
+    results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : sentimentItem
+        .push(NEGATIVE_COLOR);
     sentimentDataArray.push(sentimentItem);
   }
 

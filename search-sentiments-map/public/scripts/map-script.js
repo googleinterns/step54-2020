@@ -120,8 +120,7 @@ function loadCountryData() {
   let countryMax = '';
   let countryMin = '';
   map.data.forEach(row => {
-    let dataByCountry = getCurrentSearchData().dataByCountry;
-    let countryData = dataByCountry
+    let countryData = getCurrentSearchData().dataByCountry
         .filter(data => data.country === row.getId());
     const country = row.getProperty('name');
     let dataVariable = null;
@@ -142,8 +141,7 @@ function loadCountryData() {
 
   const extremaHeader = document.getElementById('extrema-sentiment');
   extremaHeader.innerText = 
-      'Most Negative Country: ' + countryMin + ', Most Positive Country: ' +
-      countryMax;
+      'Most Positive Country: ' + countryMax + ', Most Negative Country: ' + countryMin;
 
 }
 
