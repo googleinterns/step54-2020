@@ -88,13 +88,12 @@ function loadCountryData(isSentimentMode = true) {
   let dataVariableMax = Number.MIN_VALUE;
   let dataVariableMin = Number.MAX_VALUE; 
 
-  // Countries with the minimum and maximum average sentiment values for current
-  // topic. 
+  // Countries with the minimum and maximum average sentiment values for current topic. 
   let countryMax = '';
   let countryMin = '';
   map.data.forEach(function(row) {
-    let countryData = getCurrentCustomSearchData().dataByCountry.filter(data => 
-        data.country === row.getId());
+    let dataByCountry = getCurrentCustomSearchData().dataByCountry;
+    let countryData = dataByCountry.filter(data => data.country === row.getId());
     const country = row.getProperty('name');
     let dataVariable = 0;
 
@@ -134,6 +133,7 @@ function loadCountryData(isSentimentMode = true) {
       dataMin.toLocaleString();
   document.getElementById('data-max').textContent =
       dataMax.toLocaleString();
+
 }
 
 /**
