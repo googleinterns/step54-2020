@@ -22,13 +22,13 @@ const NUM_SHOWN = 7;
 
 /** 
  * Displays the top trends on the DOM.
- * @param {boolean} setNewTrendIsEnabled Boolean for whether or not to
- *     call setNewTrend at the end of setTopTrends.
+ * @param {boolean} setNewTrendIsEnabled Boolean for whether or not to change
+ *     the trend that the user is viewing.
  */
 function setTopTrends(setNewTrendIsEnabled) {
   const trendsList = document.getElementById('trends-list');
   trendsList.innerHTML = '';
-  let trends = getTopTrends().globalTrends;
+  let trends = getCurrentTopTrends().globalTrends;
 
   for (let i = 0; i < trends.length; i++) {
     const trendElement = document.createElement('li');
@@ -57,7 +57,7 @@ function setTopTrends(setNewTrendIsEnabled) {
     trendsList.append(showMoreOrLessToggleItem);
   }
   document.getElementById('trends-timestamp').innerText = 
-      'Last Updated: ' + new Date(getTopTrends().timestamp);
+      'Last Updated: ' + new Date(getCurrentTopTrends().timestamp);
 
   if (setNewTrendIsEnabled) {
     // Set the map to display data on the top-ranking trend.

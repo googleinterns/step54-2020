@@ -14,12 +14,16 @@
 
 // JSON object for the data that is currently displayed, including topic,
 // timestamp, and custom search data by country.
-let currentSearchData = '';
+let currentSearchData = {}
+
 // JSON object for the trends that are currently displayed and their timestamp.
-let topTrends = '';
+let topTrendsData = {};
 
 // The current time range for the data that the user is viewing.
-let currentTimeRange = '';
+let currentTimeRange = 0;
+
+// The current trend that the user is viewing.
+let currentTrend = '';
 
 /** Returns the current trend that the user is viewing. */
 function getCurrentTrend() {
@@ -31,9 +35,9 @@ function getCurrentTimeRange() {
   return currentTimeRange;
 }
 
-/** Returns top trends for timeRange that the user is viewing. */
-function getTopTrends() {
-  return topTrends;
+/** Returns top trends for `currentTimeRange` that the user is viewing. */
+function getCurrentTopTrends() {
+  return topTrendsData;
 }
 
 /** 
@@ -54,12 +58,9 @@ function setNewTrend(trend) {
   // Bold and italicize the currently viewed trend.
   let trendElements = document.getElementById('trends-list').childNodes;
   trendElements.forEach(function(trendElement) {
-    if (trendElement.innerText === currentTrend) {
-      trendElement.innerHTML = '<span class="font-weight-bold font-italic">' +
-          currentTrend + '</span>';
-    } else {
-      trendElement.innerHTML = trendElement.innerText;
-    }
+    trendElement.innerHTML = (trendElement.innerText === currentTrend) ?
+        '<span class="font-weight-bold font-italic">' + currentTrend +
+        '</span>' : trendElement.innerHTML = trendElement.innerText;
   })
 
   fetch('/search/' + trend + '&' + currentTimeRange)
@@ -108,7 +109,7 @@ function setUserSearchTopic(topic, countries) {
 
 /**
  * Changes `currentTimeRange` parameter and updates trends for new time range.
- * @param {number} timeRange The interval value for the time range.
+ * @param {number} timeRange The new time range interval value.
  */
 function setTimeRange(timeRange) {
   if (currentTimeRange === timeRange) {
@@ -120,14 +121,14 @@ function setTimeRange(timeRange) {
 
 /**
  * Fetches current top trends from back end and displays them on the website.
- * @param {boolean=} setNewTrendEnabled Boolean for whether or not to
- *     call setNewTrend at the end of setTopTrends.
+ * @param {boolean=} setNewTrendEnabled Boolean for whether or not to change
+ *     the trend that the user is viewing.
  */
 function updateTrends(setNewTrendEnabled = true) {
   fetch('/trends/' + currentTimeRange)
       .then(globalTrends => globalTrends.json())
       .then(trends => {
-        topTrends = trends;
+        topTrendsData = trends;
         setTopTrends(setNewTrendEnabled); 
       });
 }

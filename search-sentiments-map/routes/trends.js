@@ -41,7 +41,7 @@ router.get('/:timeRange', (req, res) => {
 
 /** 
  * Get the global trends from the most recent Datastore entry.
- * @param {number} timeRange The interval value for the time range.
+ * @param {number} timeRange The new time range interval value.
  * @return {!Array<JSON>} A JSON array of global trends and their originating
  *     countries.
  */
@@ -56,8 +56,8 @@ async function retrieveGlobalTrendsForTimeRange(timeRange) {
     // Returns the most recent trends with search results data retrieved.
     globalTrends: 
         (Date.now() - trendsEntry[0].timestamp > 
-        RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
-        trendsEntry[0].globalTrends : trendsEntry[1].globalTrends,
+            RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
+                trendsEntry[0].globalTrends : trendsEntry[1].globalTrends,
   }
 }
 
