@@ -33,7 +33,6 @@ function onClickCountry(e) {
   }
 }
 
-
 /**
  * Sets trends under the top-trends modal tab for the selected country.
  * @param {string} countryCode The two-letter code of the selected country.
@@ -80,11 +79,12 @@ function displayTopResultsForCurrentTrend(countryCode) {
   let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
 
-  let countryData = getCurrentSearchData().dataByCountry.filter(data => 
-      data.country === countryCode);
+  let countryData = getCurrentSearchData().dataByCountry
+      .filter(data => data.country === countryCode);
 
-  if (countryData.length === 0) {
-    // Handle case where there are no results.
+  if (countryData.length === 0 ||
+      countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
+    // Handle case where there are no search results for the topic.
     resultElement.innerHTML += 'No results.<br>';
   } else {
     resultElement.innerHTML += '<b>Topic Popularity Score: ' + 
@@ -98,8 +98,8 @@ function displayTopResultsForCurrentTrend(countryCode) {
       // i + 1 shows the index for each search result. 
       resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
           results[i].link + '>' + results[i].htmlTitle + '</a><br>' + 
-          results[i].snippet + '<br>' + 'Sentiment Score: ' + results[i].score + 
-          '<br>';
+          results[i].snippet + '<br>' + 'Sentiment Score: ' + 
+          results[i].score.toFixed(1) + '<br>';
     }
   }
   resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
@@ -110,26 +110,29 @@ function displayTopResultsForCurrentTrend(countryCode) {
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displaySentimentChartForCurrentTrend(countryCode) {
-  let countryData = getCurrentSearchData().dataByCountry.filter(data => 
-      data.country === countryCode);
+  let countryData = getCurrentSearchData().dataByCountry
+      .filter(data => data.country === countryCode);
   let date = new Date(getCurrentSearchData().timestamp);
   let chartElement = document.getElementById('sentiment-chart-tab');
   chartElement.innerHTML = '';
 
-  // Handle case where there are no results.
-  if (countryData.length === 0) {
+  // Handle case where there are no search results for the topic.
+  if (countryData.length === 0 ||
+      countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
     chartElement.innerHTML += 'No results.<br><i>Last updated on ' +
         date.toString() + '<i><br>';
   } else {
     let results = countryData[0].results;
     drawSentimentChart(chartElement, results);
     chartElement.innerHTML += 'Average Sentiment Score: ' + 
-        countryData[0].averageSentiment + '<br>';
+        countryData[0].averageSentiment.toFixed(1) + '<br>';
     chartElement.innerHTML += '<i>Last updated on ' + date.toString() +
         '<i><br>';
   }
 }
 
+// Use version 45 to allow for chart ticks to be drawn when the div container is
+// hidden. Needs to load before any functions are called. 
 google.charts.load('45', {'packages':['corechart']});
 /** Draws a sentiment chart and adds it to the given element. 
  *  @param {Object} chartElement Tab element to update with the sentiment chart.
@@ -140,26 +143,26 @@ function drawSentimentChart(chartElement, results) {
   sentimentDataArray.push(["Search Result", "Score", {role: "style"}]);
   for (let i = 0; i < results.length; i++) {
     let sentimentItem = [(i + 1).toString(), results[i].score];
-    results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : sentimentItem
-        .push(NEGATIVE_COLOR);
+    results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : 
+      sentimentItem.push(NEGATIVE_COLOR);
     sentimentDataArray.push(sentimentItem);
   }
 
   let sentimentDataTable = google.visualization.arrayToDataTable(sentimentDataArray);
   let view = new google.visualization.DataView(sentimentDataTable);
-  view.setColumns([0, 1,
-      {calc: "stringify",
-        sourceColumn: 1,
-        type: "string",
-        role: "annotation"},
-      2]);
+  view.setColumns([0, 1, {
+    calc: 'stringify',
+    sourceColumn: 1,
+    type: 'string',
+    role: 'annotation'
+  }, 2]);
 
   let options = {
-    title: "Sentiment Scores of Search Results",
+    title: 'Sentiment Scores of Search Results',
     width: 750,
     height: 400,
-    bar: {groupWidth: "55%"},
-    legend: {position: "none"},
+    bar: {groupWidth: '55%'},
+    legend: {position: 'none'},
     hAxis: {
       title: 'Search Results Index',
     },

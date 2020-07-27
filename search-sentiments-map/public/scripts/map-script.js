@@ -130,7 +130,8 @@ function loadCountryData() {
       if (dataVariable > dataVariableMax) {
         dataVariableMax = dataVariable;
         countryMax = country;
-      } else if (dataVariable < dataVariableMin) {
+      }
+      if (dataVariable < dataVariableMin) {
         dataVariableMin = dataVariable;
         countryMin = country;
       }
