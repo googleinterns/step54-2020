@@ -12,7 +12,10 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-/** Server-side script that uses the Google Cloud Natural Language API to get the sentiment score. */
+/** 
+ * Server-side script that uses the Google Cloud Natural Language API to get 
+ * the sentiment score. 
+ */
 const express = require('express');
 var router = express.Router();  // Using Router to divide the app into modules.
 var allSettled = require('promise.allsettled');

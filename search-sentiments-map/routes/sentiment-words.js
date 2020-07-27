@@ -12,13 +12,15 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+/** 
+ * Server-side script that uses the Node.js Sentiment module to get words that are 
+ * marked as negative or positive using the AFINN-165 wordlist.
+ */
 const express = require('express');
 const router = express.Router();  // Using Router to divide the app into modules.
 const SentimentApi = require('sentiment');
 var sentimentWords = new SentimentApi(); 
 router.get('/:titleSnippet', (req, res) => {
-  console.log('Updating Positive Words.');
-  console.log(req.params);
   let titleSnippet = req.params.titleSnippet;
   getPositiveNegativeWords(titleSnippet).then(sentimentWordsJsonArray => {
     res.setHeader('Content-Type', 'application/json');

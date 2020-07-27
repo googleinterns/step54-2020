@@ -67,10 +67,11 @@ function toggleDisplay(id) {
 }
 
 /** 
- * Displays the top results in a country for current search trend on modal. 
+ * Displays the top results in a country for current search trend on modal
+ * and show positive/negative words depending on the sign of the sentiment score.  
  * @param {string} countryCode Two letter country code for selected country.
  */
-function displayTopResultsForCurrentTrend(countryCode) {
+async function displayTopResultsForCurrentTrend(countryCode) {
   let dataByCountry = getCurrentSearchData().dataByCountry;
   let date = new Date(getCurrentSearchData().timestamp);
   let resultElement =  document.getElementById('search-results-tab');
@@ -91,15 +92,13 @@ function displayTopResultsForCurrentTrend(countryCode) {
     // Get search results for the specified country.
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
-      fetch('/sentiment-words/' + results[i].title + results[i].snippet)
+      await fetch('/sentiment-words/' + results[i].title + results[i].snippet)
           .then(resultsJsonArray => resultsJsonArray.json())
           .then(sentimentWordsResult => {
             // Check to make sure that there is detection of positive and 
             // negative words from the Node.js sentiment API.
             if (sentimentWordsResult != null && 
                 sentimentWordsResult.positive.length != 0) {
-              resultElement.innerHTML += '<b>Positive Words: ' + sentimentWordsResult.positive + '</b><br>';
-              resultElement.innerHTML += '<b>Negative Words: ' + sentimentWordsResult.negative + '</b><br>';
               resultElement.innerHTML += '<a href=' + results[i].link + '>' +
                   results[i].htmlTitle + '</a><br>';
               var snippetArray = results[i].snippet.split(" ");
@@ -107,30 +106,26 @@ function displayTopResultsForCurrentTrend(countryCode) {
                 let checkWordInArray = word.replace(/[^a-z0-9+]+/gi, '');
                 if (results[i].score > 0 && sentimentWordsResult.positive
                     .includes(checkWordInArray)) {
-                  resultElement.innerHTML += '<span style=\'color: green;\'>' + word + ' </span>';
+                  resultElement.innerHTML += '<span style=\'color: green;\'>' + 
+                      word + ' </span>';
                 } else if (results[i].score < 0 && sentimentWordsResult.negative
                     .includes(checkWordInArray)) {
-                  resultElement.innerHTML += '<span style=\'color: red;\'>' + word + ' </span>';
+                  resultElement.innerHTML += '<span style=\'color: red;\'>' + 
+                      word + ' </span>';
                 } else {
                   resultElement.innerHTML += word + ' ';
                 }
               });
-              resultElement.innerHTML += '<i>Sentiment Score from other api: ' + sentimentWordsResult.score.toFixed(1) + '</i><br>';
-              resultElement.innerHTML += '<i>Sentiment Score: ' + results[i].score.toFixed(1) + '</i><br>';
-              resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
-              console.log('in display top results');
+              resultElement.innerHTML += '<br><i>Sentiment Score: ' + 
+                  results[i].score.toFixed(1) + '</i><br>';
             } else {
               resultElement.innerHTML += '<a href=' + results[i].link + '>' +
-                results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'
-                + '<i>Sentiment Score: ' + results[i].score.toFixed(1) + '</i><br>';
-              resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
+                  results[i].htmlTitle + '</a><br>' + results[i].snippet + 
+                  '<br>' + '<i>Sentiment Score: ' + results[i].score.toFixed(1) + 
+                  '</i><br>';
             }
           });
     }
+    resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
   }
-  
-}
-
-function colorWord(item, index) {
-
 }
