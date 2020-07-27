@@ -60,7 +60,8 @@ function setCountryTrends(countryCode) {
           }
         }
         topTrendsTab.innerHTML += 
-            '<i>Last updated on ' + new Date(getTopTrends().timestamp) + '</i>';
+            '<i>Last updated on ' + new Date(getCurrentTopTrends().timestamp) +
+            '</i>';
       });
 }
 

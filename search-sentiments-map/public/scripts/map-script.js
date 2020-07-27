@@ -64,6 +64,8 @@ function initMap() {
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
       .push(document.getElementById('legend'));
+  map.controls[google.maps.ControlPosition.BOTTOM_RIGHT]
+      .push(document.getElementById('timeline-slider-div'));
   updateLegends(true);
 
   infowindow = new google.maps.InfoWindow({});
@@ -124,7 +126,7 @@ function loadCountryData() {
         .filter(data => data.country === row.getId());
     const country = row.getProperty('name');
     let dataVariable = null;
-    if (countryData.length != 0) {
+    if (countryData.length !== 0) {
       dataVariable = 
           isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
       if (dataVariable > dataVariableMax) {

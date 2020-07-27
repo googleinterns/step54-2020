@@ -28,7 +28,8 @@ const countriesJson = require('./../public/country-code.json');
 global.Headers = fetch.Headers;
 
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
-const CURRENT_DATA_THRESHOLD_12_HOURS_MS = 12 * 60 * 60000;
+// Time interval between data updates.
+const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
 const PAUSE_TO_PREVENT_REACHING_QUOTA_1_MIN_MS = 60000;
 const QUERIES_PER_MIN = 100;
 
@@ -42,9 +43,10 @@ const NO_RESULTS_DEFAULT_SCORE = -500;
  * Renders a JSON array of the top search results for all countries with API
  * data obtained every 12 hours for the specified topic.
  */
-router.get('/:topic', (req, res) => {
+router.get('/:topic&:timeRange', (req, res) => {
   let topic = req.params.topic;
-  retrieveSearchResultFromDatastore(topic).then(topicDataJsonArray => {
+  let timeRange = parseInt(req.params.timeRange);
+  retrieveSearchResultFromDatastore(topic, timeRange).then(topicDataJsonArray => {
     res.setHeader('Content-Type', 'application/json');
     res.send(topicDataJsonArray);
   });
@@ -53,7 +55,7 @@ router.get('/:topic', (req, res) => {
 /** 
  * Renders a JSON array of the top search results for requested countries with
  * API data from within the last
- * `CURRENT_SEARCH_RESULT_THRESHOLD_24_HOURS_MS` for the specified topic.
+ * `CURRENT_DATA_TIME_RANGE_12_HOURS_MS` for the specified topic.
  */
 router.get('/:topic/:countries', (req, res) => {
   let topic = req.params.topic;
@@ -65,15 +67,22 @@ router.get('/:topic/:countries', (req, res) => {
 });
 
 /** 
- * Returns a JSON-formatted array of search results for all countries retrieved
- * from the Datastore.
+ * Returns a JSON-formatted array of search results from specified time range
+ * for all countries retrieved from the Datastore.
  * @param {string} topic Search topic to get data for.
+ * @param {number} timeRange An integer representing how many 
+ *     `CURRENT_DATA_TIME_RANGE_12_HOURS_MS` ranges previous to get data from.
+ * @return {Object} A JSON array of search results for all countries for
+ *     given topic.
  */
-async function retrieveSearchResultFromDatastore(topic) {
+async function retrieveSearchResultFromDatastore(topic, timeRange) {
   // Request latest entity with a topic matching the given topic.
-  const query = datastore.createQuery(WORLD_DATA_KIND).order('timestamp', {
-    descending: true,
-  }).filter('topic', topic).limit(1);
+  const query = datastore.createQuery(WORLD_DATA_KIND)
+      .order('timestamp', {descending: true})
+      .limit(1)
+      .filter('topic', topic)
+      .filter('timestamp', '<',
+          Date.now() - CURRENT_DATA_TIME_RANGE_12_HOURS_MS * timeRange);
 
   try {
     const [worldDataByTopic] = await datastore.runQuery(query);
@@ -110,7 +119,7 @@ async function retrieveUserSearchResultFromDatastore(topic, countries) {
   let timestamp;
   if (worldDataByTopic.length !== 0 &&
       Date.now() - worldDataByTopic[0].timestamp <
-      CURRENT_DATA_THRESHOLD_24_HOURS_MS) {
+      CURRENT_DATA_TIME_RANGE_12_HOURS_MS) {
     timestamp = worldDataByTopic[0].timestamp;
     let countriesToAddDataFor = [];
     let countriesData = worldDataByTopic[0].dataByCountry;
