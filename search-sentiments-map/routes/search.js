@@ -144,8 +144,8 @@ async function getCustomSearchResultsForCountry(countryCode, query) {
       await fetch('https://www.googleapis.com/customsearch/v1?key='
           + searchApiKey + '&cx=017187910465527070415:o5pur9drtw0&q='  + query
           + '&cr=country' + countryCode
-          + '&num=10&safe=active&dateRestrict=d1&fields=items'
-          + '(title,snippet,htmlTitle,link)');
+          + '&num=10&safe=active&dateRestrict=d1'
+          + '&fields=items(title,snippet,htmlTitle,link)');
   let searchResults =  await response.json();
   return await search.formatCountryResults(searchResults);
 }
@@ -201,7 +201,8 @@ function formatSearchResult(searchResult) {
  * @param {Object} searchResult Object for one search result.
  */
 function getSentiment(searchResult) {
-  return fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment',{
+  return
+      fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {
     method: 'POST',  // Send a request to the URL.
     headers: new Headers({
       'Content-Type': 'text/plain',
@@ -286,7 +287,7 @@ function sleepForOneMinute() {
   return new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
 }
 
-// Necessary for t
+// Necessary for unit testing.
 const search = {
   retrieveSearchResultFromDatastore,
   updateSearchResults,

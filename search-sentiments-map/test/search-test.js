@@ -21,8 +21,8 @@ describe('Search', function() {
       retrieveGlobalTrendsStub = 
           sinon.stub(search, 'retrieveGlobalTrends')
               .resolves([
-                {trendTopic: "trend1"},
-                {trendTopic: "trend2"}
+                {trendTopic: 'trend1'},
+                {trendTopic: 'trend2'},
               ]);
       updateSearchResultsForTopicStub =
           sinon.stub(search, 'updateSearchResultsForTopic')
