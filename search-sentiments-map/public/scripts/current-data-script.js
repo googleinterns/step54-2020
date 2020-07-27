@@ -73,3 +73,4 @@ function updateTrends() {
     setTopTrends(); 
   });
 }
+
