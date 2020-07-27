@@ -140,12 +140,11 @@ google.charts.load('45', {'packages':['corechart']});
  *  @param {Object} results Results to use to update the sentiment chart.
  */
 function drawSentimentChart(chartElement, results) {
-  let sentimentDataArray = [];
-  sentimentDataArray.push(["Search Result", "Score", {role: "style"}]);
+  let sentimentDataArray = [["Search Result", "Score", {role: "style"}]];
   for (let i = 0; i < results.length; i++) {
     let sentimentItem = [(i + 1).toString(), results[i].score];
     results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : 
-      sentimentItem.push(NEGATIVE_COLOR);
+        sentimentItem.push(NEGATIVE_COLOR);
     sentimentDataArray.push(sentimentItem);
   }
 
