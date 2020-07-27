@@ -43,20 +43,11 @@ router.get('/', (req, res) => {
 
 /** Renders the popularity data of the country given by the request parameter. */
 router.post('/', jsonParser, (req, res) => {
-  console.log('what is going on:' + req.body.topic + ' ' + req.body.code)
-  // googleTrends.interestOverTime({keyword: 'Valentines Day'})
-  //     .then(function(results){
-  //       console.log(results);
-  //     })
-  //     .catch(function(err){
-  //       console.error(err);
-  //     });
   googleTrends.interestOverTime({
     keyword: req.body.topic,
     startTime: new Date(Date.now() - (DATA_FROM_8_DAYS_AGO_MS)),
     geo: req.body.code,
   }).then(data => {
-    console.log('what is going on 2: ' + data);
     res.setHeader('Content-Type', 'application/json');
     res.send(data);
     })

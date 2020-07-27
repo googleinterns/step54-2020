@@ -122,9 +122,9 @@ function setCountryTrends(countryCode) {
 }
 
 /** 
- * Displays the popularity timeline in a country for the current search trend on modal.
- * @return {!Array<JSON>} 10 globally trending topics and the number of countries 
- * where they are trending.
+ * Displays the popularity timeline in a country for the current search topic 
+ * in the modal.
+ * @param {string} countryCode The two-letter code of the selected country.
  */
 function displayPopularityTimeline(countryCode) {
   const popTimelineElement = document.getElementById('pop-timeline-tab');
@@ -139,8 +139,9 @@ function displayPopularityTimeline(countryCode) {
       topic: getCurrentSearchData().topic,
       code: countryCode,
     })
-  }).then(interestData =>
-    interestData.json()).then(timelineJSON => {
+  })
+  .then(interestData => interestData.json())
+  .then(timelineJSON => {
       if (timelineJSON.length === 0) {
         popTimelineElement.innerText = 
             'Popularity Timeline is not available for the selected country.';
@@ -149,20 +150,22 @@ function displayPopularityTimeline(countryCode) {
             getCurrentSearchData().topic);
       }
     });
-
 }
 
+// Use version 45 to allow for chart ticks to be drawn when the div container is
+// hidden.
 google.charts.load('45', {'packages':['corechart']});
 /** 
- * Draw the popularity timeline in a country for the current search trend on modal.
- * @param {string} countryCode Two letter country code for selected country.
+ * Draw the popularity timeline in a country for the current search trend on
+ * modal.
+ * @param {!Array<JSON>} 10 globally trending topics and the number of countries
+ * @param {Object} popTimelineElement Tab element to update with the sentiment
+ * chart. ds d sdd   dddd where they are trending.
  */
 function drawPopularityTimeline(timelineJSON, popTimelineElement, topic) {
   var data = new google.visualization.DataTable();
   data.addColumn('string');
   data.addColumn('number');
-  console.log('in popularity timeline draw' + timelineJSON);
-  console.log(timelineJSON.timelineData);
   const timelineData = timelineJSON.timelineData;
   for (let i = 0; i < timelineData.length; i++) {
     data.addRows([[timelineData[i].formattedAxisTime, timelineData[i].value[0]]]);
