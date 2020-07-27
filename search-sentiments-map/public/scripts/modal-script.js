@@ -87,14 +87,22 @@ function displayTopResultsForCurrentTrend(countryCode) {
         countryData[0].interest + '</b><br>';
     resultElement.innerHTML += '<b>Average Sentiment Score: ' + 
         countryData[0].averageSentiment.toFixed(1) + '</b><br>';
-
+    
     // Get search results for the specified country.
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
-      resultElement.innerHTML += '<a href=' + results[i].link + '>' +
-        results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'
-        + '<i>Sentiment Score: ' + results[i].score.toFixed(1) + '</i><br>';
+      fetch('/sentiment-words/' + 'cats are stupid')
+          .then(resultsJsonArray => resultsJsonArray.json())
+          .then(sentimentWordsResult => {
+            if (sentimentWordsResult != null) {
+              '<b>Positive Words: ' + sentimentWordsResult.positive + '</b><br>';
+            }
+            resultElement.innerHTML += '<a href=' + results[i].link + '>' +
+              results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'
+              + '<i>Sentiment Score: ' + results[i].score.toFixed(1) + '</i><br>';
+            resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
+          });
     }
   }
-  resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
+  
 }
