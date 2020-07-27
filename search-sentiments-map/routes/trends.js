@@ -24,13 +24,16 @@ const datastore = new Datastore();
 const TRENDS_DATA_KIND = 'TrendsEntry';
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
 const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
+// Time interval between data updates.
+const TIME_RANGE_INTERVAL_12_HRS_MS = 12 * 60 * 60000;
 
 /** 
  * Renders a JSON array of the top 20 (or fewer) global search trends maintained
- * for the current 12-hour range.
+ * for the specfied 12-hour range.
  */
-router.get('/', (req, res) => {
-  retrieveGlobalTrends().then(globalTrends => {
+router.get('/:timeRange', (req, res) => {
+  let timeRange = parseInt(req.params.timeRange);
+  retrieveGlobalTrendsForTimeRange(timeRange).then(globalTrends => {
     res.setHeader('Content-Type', 'application/json');
     res.send(globalTrends);
   });
@@ -38,26 +41,30 @@ router.get('/', (req, res) => {
 
 /** 
  * Get the global trends from the most recent Datastore entry.
- * @return {!Array<JSON>} A JSON array of global trends and their originating 
- * countries.
+ * @param {number} timeRange The new time range interval value.
+ * @return {!Array<JSON>} A JSON array of global trends and their originating
+ *     countries.
  */
-async function retrieveGlobalTrends() {
+async function retrieveGlobalTrendsForTimeRange(timeRange) {
+  let timeRangeLimit = TIME_RANGE_INTERVAL_12_HRS_MS * timeRange;
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp', {
     descending: true,
-  }).limit(2);
+  }).filter('timestamp', '<', Date.now() - timeRangeLimit).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
   return {
     timestamp: trendsEntry[0].timestamp,
     // Returns the most recent trends with search results data retrieved.
     globalTrends: 
-        (Date.now() - trendsEntry[0].timestamp > RETRIEVE_RESULTS_TIME_MS) ?
-        trendsEntry[0].globalTrends : trendsEntry[1].globalTrends,
+        (Date.now() - trendsEntry[0].timestamp > 
+            RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
+                trendsEntry[0].globalTrends : trendsEntry[1].globalTrends,
   }
 }
 
 /** 
- * Updates Datastore storage of daily search trends and corresponding search results
- * for the countries where trends are available using the Google Trends API.
+ * Updates Datastore storage of daily search trends and corresponding search
+ * results for the countries where trends are available using the Google Trends
+ * API.
  */
 async function updateDailyTrends() {
   const countryJson = require('./../public/countries-with-trends.json');

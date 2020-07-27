@@ -24,7 +24,7 @@ const NUM_SHOWN = 7;
 function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
   trendsList.innerHTML = '';
-  let trends = getTopTrends().globalTrends;
+  let trends = getCurrentTopTrends().globalTrends;
 
   for (let i = 0; i < trends.length; i++) {
     const trendElement = document.createElement('li');
@@ -59,7 +59,7 @@ function setTopTrends() {
     trendsList.append(showMoreOrLessToggleItem);
   }
   document.getElementById('trends-timestamp').innerText = 
-      'Last Updated: ' + new Date(getTopTrends().timestamp);
+      'Last Updated: ' + new Date(getCurrentTopTrends().timestamp);
 }
 
 /**

@@ -85,6 +85,8 @@ function initMap() {
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
       .push(document.getElementById('legend'));
+  map.controls[google.maps.ControlPosition.BOTTOM_RIGHT]
+      .push(document.getElementById('timeline-slider-div'));
 
   infowindow = new google.maps.InfoWindow({});
 
@@ -133,19 +135,39 @@ function loadRegionDataByMode() {
  * depending on what mode has been specified.
  */
 function loadCountryData() {
-  map.data.forEach(row => {
-    let dataByCountry = getCurrentSearchData().dataByCountry;
-    let countryData = dataByCountry
-        .filter(data => data.country === row.getId());
+  // Minimum and maximum average sentiment values for current topic. 
+  let dataVariableMax = Number.MIN_VALUE;
+  let dataVariableMin = Number.MAX_VALUE; 
 
+  // Countries with the minimum and maximum average sentiment values for current 
+  // topic. 
+  let countryMax = '';
+  let countryMin = '';
+  map.data.forEach(row => {
+    let countryData = getCurrentSearchData().dataByCountry
+        .filter(data => data.country === row.getId());
+    const country = row.getProperty('name');
     let dataVariable = null;
-    if (countryData.length != 0) {
-      dataVariable = isSentimentMode ? 
-          countryData[0].averageSentiment : countryData[0].interest;
+    if (countryData.length !== 0) {
+      dataVariable = 
+          isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
+      if (dataVariable > dataVariableMax) {
+        dataVariableMax = dataVariable;
+        countryMax = country;
+      }
+      if (dataVariable < dataVariableMin) {
+        dataVariableMin = dataVariable;
+        countryMin = country;
+      }
     }
 
     row.setProperty('country_data', dataVariable);
   });
+
+  const extremaHeader = document.getElementById('extrema-sentiment');
+  extremaHeader.innerText = 
+      'Most Positive Country: ' + countryMax + ', Most Negative Country: ' + countryMin;
+
 }
 
 /** 
