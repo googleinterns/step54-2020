@@ -15,8 +15,8 @@ describe('Search', function() {
       deleteAncientResultsStub = 
           sinon.stub(search, 'deleteAncientResults')
               .resolves('Not interested in the output');
-      sleepForOneMinuteStub = 
-          sinon.stub(search, 'sleepForOneMinute')
+      sleepStub = 
+          sinon.stub(search, 'sleep')
               .resolves('Not interested in the output');
       retrieveGlobalTrendsStub = 
           sinon.stub(search, 'retrieveGlobalTrends')
@@ -24,8 +24,11 @@ describe('Search', function() {
                 {trendTopic: 'trend1'},
                 {trendTopic: 'trend2'},
               ]);
-      updateSearchResultsForTopicStub =
-          sinon.stub(search, 'updateSearchResultsForTopic')
+      getSearchResultsForCountriesForTopicStub =
+          sinon.stub(search, 'getSearchResultsForCountriesForTopic')
+              .resolves('Not interested in the output');
+      addWorldDataByTopicToDatastoreStub =
+          sinon.stub(search, 'addWorldDataByTopicToDatastore')
               .resolves('Not interested in the output');
     })
 
@@ -37,10 +40,10 @@ describe('Search', function() {
       await search.updateSearchResults();
       deleteAncientResultsStub.callCount.should.equal(1);
       retrieveGlobalTrendsStub.callCount.should.equal(1);
-      updateSearchResultsForTopicStub.getCall(0).args[0].should.equal('trend1');
-      updateSearchResultsForTopicStub.getCall(1).args[0].should.equal('trend2');
-      updateSearchResultsForTopicStub.callCount.should.equal(2);
-      sleepForOneMinuteStub.callCount.should.equal(2);
+      getSearchResultsForCountriesForTopicStub.getCall(0).args[1].should.equal('trend1');
+      getSearchResultsForCountriesForTopicStub.getCall(1).args[1].should.equal('trend2');
+      getSearchResultsForCountriesForTopicStub.callCount.should.equal(2);
+      sleepStub.callCount.should.equal(2);
     });
   });
 
