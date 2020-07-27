@@ -77,7 +77,7 @@ async function updateSearchResults() {
     await search.updateSearchResultsForTopic(trends[i].trendTopic);
     // Note: when testing ,use i < 1 to test for only one trend, and comment 
     // out `await new Promise` line to avoid 1 minute pauses.
-    await search.sleepForOneMinute();
+    await search.sleep(PAUSE_ONE_MIN_MS);
   }
 }
 
@@ -114,7 +114,7 @@ async function updateSearchResultsForTopic(query) {
       // Use a limited number of queries per minute for the Custom Search API, 
       // and include a pause to prevent surpassing limit.
       if (i !== 0 && i % QUERIES_PER_MIN === 0) {
-        await search.sleepForOneMinute();
+        await search.sleep(PAUSE_ONE_MIN_MS);
       }
       let countryResults = await search.getCustomSearchResultsForCountry(
           countryCode, query);
@@ -283,8 +283,8 @@ async function addWorldDataByTopicToDatastore(topic, countriesData) {
 }
 
 /** Sleep for one minute. */
-function sleepForOneMinute() {
-  return new Promise(resolve => setTimeout(resolve, PAUSE_ONE_MIN_MS));
+function sleep(sleepTime) {
+  return new Promise(resolve => setTimeout(resolve, sleepTime));
 }
 
 // Necessary for unit testing.
@@ -299,7 +299,7 @@ const search = {
   getSentiment,
   deleteAncientResults,
   addWorldDataByTopicToDatastore,
-  sleepForOneMinute,
+  sleep,
 }
 module.exports.search = search;
 
