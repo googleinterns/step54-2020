@@ -60,8 +60,8 @@ function setNewTrend(trend) {
   trendElements.forEach(function(trendElement) {
     trendElement.innerHTML = (trendElement.innerText === currentTrend) ?
         '<span class="font-weight-bold font-italic">' + currentTrend +
-        '</span>' : trendElement.innerHTML = trendElement.innerText;
-  })
+        '</span>' : trendElement.innerText;
+  });
 
   fetch('/search/' + trend + '&' + currentTimeRange)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
@@ -84,6 +84,7 @@ function setUserSearchTopic(topic, countries) {
   document.getElementById('timeline-slider').value = 0;
 
   let trendElements = document.getElementById('trends-list').childNodes;
+  // Loop through elements and get rid of the html bold span if it exists.
   trendElements.forEach(function(trendElement) {
     trendElement.innerHTML = trendElement.innerText;
   });
