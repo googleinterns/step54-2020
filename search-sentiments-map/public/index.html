@@ -63,7 +63,6 @@
 
     <div id="top-left-div">
       <h3 id="topic-header">Worldwide sentiments</h3>
-      <span id="up-to-date-span" class="hidden">Scores are up to date.</span>
       <div id="switch-div">
         <label class="switch">
           <input id="sentiment-popularity-check" type="checkbox" onclick="loadRegionDataByMode()">
@@ -101,7 +100,7 @@
     </div>
 
     <div id="bottom-left-div">
-      <select id="zoom-level-select" class="form-control" onchange="resetMapZoomLevel()" data-toggle="popover" data-trigger="click" data-content="Note: At states level, only popularity mode is available." data-placement="top">
+      <select id="zoom-level-select" class="form-control" onchange="resetMapZoomLevel()" data-toggle="popover" data-trigger="hover" data-content="Zooming in allows you to see popularity scores for individual states." data-placement="right">
         <option value="world" selected>World Level</option>
         <option value="us">United States</option>
       </select>

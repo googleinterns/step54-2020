@@ -256,7 +256,6 @@ function resetMapZoomLevel() {
     map.data.remove(feature);
   });
   toggleDisplay('switch-trends-click');
-  toggleDisplay('up-to-date-span');
   toggleDisplay('switch-div');
   toggleDisplay('country-dropdown-button');
 
