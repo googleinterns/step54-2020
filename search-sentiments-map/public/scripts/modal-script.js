@@ -82,9 +82,9 @@ function displayTopResultsForCurrentTrend(countryCode) {
   let countryData = getCurrentSearchData().dataByCountry
       .filter(data => data.country === countryCode);
 
+  // Handle case where there are no search results for the topic.
   if (countryData.length === 0 ||
       countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
-    // Handle case where there are no search results for the topic.
     resultElement.innerHTML += 'No results.<br>';
   } else {
     resultElement.innerHTML += '<b>Topic Popularity Score: ' + 
@@ -98,8 +98,8 @@ function displayTopResultsForCurrentTrend(countryCode) {
       // i + 1 shows the index for each search result. 
       resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
           results[i].link + '>' + results[i].htmlTitle + '</a><br>' + 
-          results[i].snippet + '<br>' + 'Sentiment Score: ' + 
-          results[i].score.toFixed(1) + '<br>';
+          results[i].snippet + '<br>' + '<i>Sentiment Score: ' + 
+          results[i].score.toFixed(1) + '</i><br>';
     }
   }
   resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
@@ -134,7 +134,8 @@ function displaySentimentChartForCurrentTrend(countryCode) {
 // Use version 45 to allow for chart ticks to be drawn when the div container is
 // hidden. Needs to load before any functions are called. 
 google.charts.load('45', {'packages':['corechart']});
-/** Draws a sentiment chart and adds it to the given element. 
+/** 
+ * Draws a sentiment chart and adds it to the given element. 
  *  @param {Object} chartElement Tab element to update with the sentiment chart.
  *  @param {Object} results Results to use to update the sentiment chart.
  */
@@ -154,7 +155,7 @@ function drawSentimentChart(chartElement, results) {
     calc: 'stringify',
     sourceColumn: 1,
     type: 'string',
-    role: 'annotation'
+    role: 'annotation',
   }, 2]);
 
   let options = {
@@ -163,9 +164,7 @@ function drawSentimentChart(chartElement, results) {
     height: 400,
     bar: {groupWidth: '55%'},
     legend: {position: 'none'},
-    hAxis: {
-      title: 'Search Results Index',
-    },
+    hAxis: {title: 'Search Results Index'},
   };
   let chart = new google.visualization.ColumnChart(chartElement);
   chart.draw(view, options);
