@@ -97,7 +97,7 @@ public class GetDirectionsServlet extends HttpServlet {
       String apiKey, String rateCard) throws IOException, MalformedURLException {
     URL routesUrl;
     String rateCardString = "";
-    if (alpha) {
+    if (shouldUseAlphaApi) {
       routesUrl = new URL("https://routespreferred.googleapis.com/v1alpha:computeCustomRoutes");
       rateCardString = "\"routeObjective\": {\"rateCard\": " + rateCard + "},";
     } else {
