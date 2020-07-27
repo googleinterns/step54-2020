@@ -99,14 +99,20 @@ async function updateDailyTrends() {
 function constructCountryTrendsJson(trendingSearches, countryCode) {
   let trends = [];
   trendingSearches.forEach(trend => {
-    let articleTitles = [];
+    let articlesFormatted = [];
     trend.articles.forEach(article => {
-      articleTitles.push(article.title);
+      articlesFormatted.push({
+        title: article.title,
+        url: article.url,
+      });
     })
     trends.push({
       topic: trend.title.query,
-      articles: articleTitles,
-      sentimentScore: 0,
+      traffic: trend.formattedTraffic,
+      // Note: Can explore the topic by appending the explore link to 
+      // 'https://trends.google.com/trends'.
+      exploreLink: trend.title.exploreLink,
+      articles: articlesFormatted,
     });
   })
 
@@ -122,21 +128,21 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
  * Example data structure for a `trendsEntry`:
  * {timestamp: 111111111,
     trendsByCountry: [{
-        country: US,
-        trends: [{
-          topic: Donald Trump,
-          articles: [title1, ..., title7],
-          sentimentScore: 0.2,
-          }...
-        ]}, {
-        country: UK,
-        trends: [..., ...]
-      }...
-    ],
+      country: US,
+      trends: [{
+        topic: Donald Trump,
+        traffic: 200K+,
+        exploreLink: '/trends/explore?q=Donald+Trump&date=now+7-d&geo=US',
+        articles: [{title: title1, url: url1}, ...],
+      }, ...],
+    }, {
+      country: UK,
+      trends: [..., ...],
+    }, ...],
     globalTrends: [{
-        trendTopic: X,
-        count: 5,
-    }, ...]
+      trendTopic: X,
+      count: 5,
+    }, ...],
    }
  * @param {!Array<JSON>} trendsByCountry An array where each element is a country
  * and its trends.

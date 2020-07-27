@@ -20,29 +20,31 @@ const CLASSNAME_SHOWN = 'shown';
 const CLASSNAME_HIDDEN = 'hidden';
 const NUM_SHOWN = 7;
 
-/** 
- * Displays the top trends on the DOM.
- * @param {boolean} setNewTrendIsEnabled Boolean for whether or not to change
- *     the trend that the user is viewing.
- */
-function setTopTrends(setNewTrendIsEnabled) {
+/** Displays the top trends on the DOM. */
+function setTopTrends() {
   const trendsList = document.getElementById('trends-list');
   trendsList.innerHTML = '';
   let trends = getCurrentTopTrends().globalTrends;
 
   for (let i = 0; i < trends.length; i++) {
     const trendElement = document.createElement('li');
-    trendElement.innerText = `${trends[i].trendTopic}`;
-    // Display the number of countries where the search topic is trending,
-    // when hovered.
-    trendElement.title = `Trending in ${trends[i].count} countries`;
-
+    trendElement.innerHTML = `${trends[i].trendTopic}`;
+    trendElement.id = 'trend' + i;
     // Show a certain number of trending topics by default and hide the rest.
     trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;
     trendElement.addEventListener('click', (event) => {
       setNewTrend(event.currentTarget.innerText);
     });
     trendsList.append(trendElement);
+
+    // Display the number of countries where the search topic is trending,
+    // when hovered.
+    let options = {
+      content: `Trending in ${trends[i].count} countries`,
+      placement: 'right',
+      trigger: 'hover',
+    }
+    $('#' + trendElement.id).popover(options);
   }
 
   // Add a toggle button to the list to show more or less topics depending
@@ -58,11 +60,6 @@ function setTopTrends(setNewTrendIsEnabled) {
   }
   document.getElementById('trends-timestamp').innerText = 
       'Last Updated: ' + new Date(getCurrentTopTrends().timestamp);
-
-  if (setNewTrendIsEnabled) {
-    // Set the map to display data on the top-ranking trend.
-    setNewTrend(trends[0].trendTopic);
-  }
 }
 
 /**

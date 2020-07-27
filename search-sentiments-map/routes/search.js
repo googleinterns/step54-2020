@@ -399,7 +399,7 @@ async function addWorldDataByTopicToDatastore(topic, countriesData) {
     await datastore.save(entity);
     console.log(`Custom Search Result ${worldDataByTopicKey.id} created successfully.`);
   } catch (err) {
-    console.error('ERROR: ', err);
+    console.error('ERROR:', err);
   }
 }
 
