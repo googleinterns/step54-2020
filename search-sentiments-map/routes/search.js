@@ -142,7 +142,7 @@ async function getCustomSearchResultsForCountry(countryCode, query) {
   const {searchApiKey} = require('./config.js');
   let response = 
       await fetch('https://www.googleapis.com/customsearch/v1?key='
-          + searchApiKey + '&cx=017187910465527070415:o5pur9drtw0&q='  + query
+          + searchApiKey + '&cx=017187910465527070415:o5pur9drtw0&q=' + query
           + '&cr=country' + countryCode
           + '&num=10&safe=active&dateRestrict=d1'
           + '&fields=items(title,snippet,htmlTitle,link)');
