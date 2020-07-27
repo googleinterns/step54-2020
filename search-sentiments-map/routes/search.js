@@ -83,7 +83,7 @@ async function retrieveSearchResultFromDatastore(topic) {
       dataByCountry: worldDataByTopic[0].dataByCountry,
     };
   } catch (err) {
-    console.error('ERROR: retrieving data for topic', topic, err);
+    console.error('Error: retrieving data for topic', topic, err);
   }
 }
 

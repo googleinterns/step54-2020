@@ -55,6 +55,7 @@ async function getSentimentScore(searchResultTitleSnippet) {
     // Detect the sentiment of the text.
     const [result] = await client.analyzeSentiment({ document: document });
     const sentiment = result.documentSentiment;
+
     return sentiment.score;
   } catch (err) {
     // Occurs when the language is not supported for document sentiment

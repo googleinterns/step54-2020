@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="scripts/current-data-script.js"></script>
     <script src="scripts/map-script.js"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="scripts/modal-script.js"></script>
     <script src="scripts/trends-script.js"></script>
     <script src="scripts/search-topic-script.js"></script>
@@ -30,11 +31,15 @@
                   <a class="nav-link active" href="#search-results-tab" aria-controls="search-results-tab" role="tab" data-toggle="tab">Search Results</a>
                 </li>
                 <li role="presentation" class="nav-item">
+                  <a class="nav-link" href="#sentiment-chart-tab" aria-controls="sentiment-chart-tab" role="tab" data-toggle="tab">Sentiment Chart</a>
+                </li>
+                <li role="presentation" class="nav-item">
                   <a class="nav-link" href="#top-trends-tab" aria-controls="top-trends-tab" role="tab" data-toggle="tab">Top Trends</a>
                 </li>
               </ul>
               <div class="tab-content">
                 <div role="tabpanel" class="tab-pane fade show active" id="search-results-tab"></div>
+                <div role="tabpanel" class="tab-pane fade" id="sentiment-chart-tab"></div>
                 <div role="tabpanel" class="tab-pane fade" id="top-trends-tab"></div>
               </div>
             </div>
@@ -63,6 +68,7 @@
 
     <div id="top-left-div">
       <h3 id="topic-header">Worldwide sentiments</h3>
+      <h6 id="extrema-sentiment"></h6>
       <label class="switch">
         <input id="sentiment-popularity-check" type="checkbox" onclick="loadCountryDataByMode()">
         <span class="slider"></span>
