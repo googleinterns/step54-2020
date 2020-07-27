@@ -48,7 +48,7 @@ function searchWorldTopic(topic) {
       'aria-hidden="true"></span>Searching...';
   document.getElementById('submit-user-topic').disabled = true;
 
-  setUserSearchTopic(topic, countryCodeList);  
+  setUserSearchTopic(topic, countryCodeList);
 }
 
 /**

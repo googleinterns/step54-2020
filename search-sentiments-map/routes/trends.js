@@ -168,9 +168,7 @@ async function saveTrendsAndDeletePrevious(trendsByCountry) {
   }
 }
 
-/** 
- * Deletes the oldest trend record if it was saved more than 7 days ago. 
- */
+/** Deletes the oldest trend record if it was saved more than 7 days ago. */
 async function deleteAncientTrend() {
   // Query entries in ascending order of the time of creation.
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp');
@@ -183,22 +181,6 @@ async function deleteAncientTrend() {
     const trendsEntryKey = trendsEntries[0][datastore.KEY];
     await datastore.delete(trendsEntryKey);
     console.log(`TrendsEntry ${trendsEntryKey.id} deleted.`);
-  }
-}
-
-/** 
- * Deletes all trends entries in the Datastore. 
- * Call this function when there is an update of the trends data structure. 
- * TODO(chenyuz): Delete this function when everything is done.
- */
-async function deleteAllTrends() {
-  const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp');
-  const [trendsEntries] = await datastore.runQuery(query);
-
-  for (let i = 0; i < trendsEntries.length; i++) {
-    const trendKey = trendsEntries[i][datastore.KEY];
-    await datastore.delete(trendKey);
-    console.log(`Trend ${trendsEntryKey.id} deleted.`)
   }
 }
 
