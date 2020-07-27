@@ -34,7 +34,7 @@ function setTopTrends(globalTrends = true) {
   const trendsList = document.getElementById('trends-list');
   trendsList.innerHTML = '';
   let trends = globalTrends ? 
-      getTopTrends().globalTrends : getTopTrends().usTrends;
+      getCurrentTopTrends().globalTrends : getCurrentTopTrends().usTrends;
 
   addTrendsToList(trendsList, trends, globalTrends);
 
@@ -50,7 +50,7 @@ function setTopTrends(globalTrends = true) {
     trendsList.append(showMoreOrLessToggleItem);
   }
   document.getElementById('trends-timestamp').innerText = 
-      'Last Updated: ' + new Date(getTopTrends().timestamp);
+      'Last Updated: ' + new Date(getCurrentTopTrends().timestamp);
 }
 
 /** Helper function for the `setTopTrends` function. */
@@ -84,7 +84,7 @@ function addTrendsToList(trendsList, trends, globalTrends) {
       placement: 'right',
       trigger: 'hover',
     }
-    $('#trend' + i).popover(options);
+    $('#' + trendElement.id).popover(options);
   }
 }
 

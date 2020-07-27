@@ -104,39 +104,44 @@ function updateCoordinates(lat, lng, containerId) {
  */
 function updateDeepLinkingUrl() {
   var originPosition = originDestinationMarkers[0].position;
-  var destinationPosition = originDestinationMarkers[1]
+  var destinationPosition = originDestinationMarkers[1].position;
   if (document.getElementById('origin-coordinates').innerHTML !== '' && 
       document.getElementById('destination-coordinates').innerHTML !== '') {
     document.getElementById(url_ids.IOS_URL_ID).innerHTML =
-        '<a href=navsdkdemo://advanced?originLat=' + originDestinationMarkers[0].position.lat() + 
-        '&originLng=' + originDestinationMarkers[0].position.lng() + '&destLat=' +
+        '<a href=navsdkdemo://advanced?originLat=' +
+        originDestinationMarkers[0].position.lat() + '&originLng=' +
+        originDestinationMarkers[0].position.lng() + '&destLat=' +
         originDestinationMarkers[1].position.lat() + '&destLng=' +
-        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
-        originDestinationMarkers[1].position.lng() + '&routeToken=TOKEN>' +  
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred
+        // API.
+        originDestinationMarkers[1].position.lng() + '&routeToken=TOKEN>' +
         'IOS Test App' + '</a>';
     document.getElementById(url_ids.V1_ANDROID_URL_ID).innerHTML =
-        '<a href=navsdk://fragmentactivity?originlat=' + originDestinationMarkers[0].position.lat() +
-        '&originlng=' + originDestinationMarkers[0].position.lng() + '&destinationlat=' +
+        '<a href=navsdk://fragmentactivity?originlat=' +
+        originDestinationMarkers[0].position.lat() + '&originlng=' +
+        originDestinationMarkers[0].position.lng() + '&destinationlat=' +
         originDestinationMarkers[1].position.lat() + '&destinationlng=' +
-        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
-        originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' +
-        'Android V1 Test App' + '</a>';
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred
+        // API.
+        originDestinationMarkers[1].position.lng() +
+        '&precomputedroutetoken=TOKEN>' + 'Android V1 Test App' + '</a>';
     document.getElementById(url_ids.V2_ANDROID_URL_ID).innerHTML =
         '<a href=navsdk://supportnavmapfragmentactivity?originlat=' +
         originDestinationMarkers[0].position.lat() + '&originlng=' +
         originDestinationMarkers[0].position.lng() + '&destinationlat=' +
         originDestinationMarkers[1].position.lat() + '&destinationlng=' + 
-        // TODO(ntarn): Update Route Token if we get access to Routes Preferred API.
-        originDestinationMarkers[1].position.lng() + '&precomputedroutetoken=TOKEN>' +
-        'Android V2 Test App' + '</a>';
-  } else if (document.getElementById('origin-coordinates').innerHTML === '' || 
-      document.getElementById('destination-coordinates').innerHTML === '') { 
+        // TODO(ntarn): Update Route Token if we get access to Routes Preferred
+        // API.
+        originDestinationMarkers[1].position.lng() +
+        '&precomputedroutetoken=TOKEN>' + 'Android V2 Test App' + '</a>';
+  } else if (document.getElementById('origin-coordinates').innerHTML === '' ||
+      document.getElementById('destination-coordinates').innerHTML === '') {
     for (const id in url_ids) {
       document.getElementById(url_ids[id]).innerHTML = '';
     }
   }
-  
 }
+
 /**
  * Hides 'place marker' button and waits for user to select coordinate for
  * marker. Updates marker to be in correct location, and show 'delete marker'
@@ -237,8 +242,9 @@ function generateRoutes() {
   let apiKey = document.getElementById('api-key').value;
 
   // Get the routes and display them on map.
-  fetch('/get-directions?origin=' + origin + '&destination=' + destination + 
-      '&endpoint=' + serviceEndpoint + '&apiKey=' + apiKey)
+  fetch('/get-directions?origin=' + origin + '&destination=' + destination +
+      '&endpoint=' + serviceEndpoint + '&apiKey=' + apiKey + '&rateCard=' +
+      JSON.stringify(createRateCard()))
       .then(response => response.json()).then(directions => {
         // Log the response status from the Directions API.
         // TODO(chenyuz): Find equivalence for Routes Preferred API.
@@ -339,6 +345,35 @@ function selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMete
       '\nDuration: ' + formatDuration(totalDurationSec) +
       '\nDistance: ' + formatDistance(totalDistanceMeters) +
       '\nRoute Token: ';
+}
+
+/** Shows or hides rate-card-data div when service endpoint changed. */
+function changeServiceEndpoint() {
+  let serviceEndpoint = document.getElementById('service-endpoint').value;
+
+  // Only display rate card div if compute custom routes is selected.
+  document.getElementById('rate-card-data').style.display = 
+      (serviceEndpoint === 'compute-routes-alpha') ? 'block' : 'none';
+}
+
+/**
+ * Creates formatted rate card object based on form input.
+ * @returns {Object} Rate Card JSON Object.
+ */
+function createRateCard() {
+  let costPerMin = parseFloat(document.getElementById('cost-per-minute').value);
+  let costPerKm = parseFloat(document.getElementById('cost-per-km').value);
+  let includeTolls = ('true' === document.getElementById('include-tolls').value);
+
+  let rateCard = {'includeTolls': includeTolls};
+  if (!isNaN(costPerMin)) {
+    rateCard['costPerMinute'] = {'value': costPerMin};
+  }
+  if (!isNaN(costPerKm)) {
+    rateCard['costPerKm'] = {'value': costPerKm};
+  }
+
+  return rateCard;
 }
 
 /** 

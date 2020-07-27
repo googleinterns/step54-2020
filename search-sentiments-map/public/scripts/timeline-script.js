@@ -12,17 +12,13 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-const express = require('express');
-const router = express.Router();  // Using Router to divide the app into modules.
-const trends = require('./trends.js');
-const search = require('./search.js').search;
+/**
+ * Changes current data being viewed to show data from new time range.
+ */
+function timelineSliderChanged() {
+  let sliderVal = document.getElementById('timeline-slider').value;
+  document.getElementById('timeline-slider-label').innerText =
+      'See results from ' + ' from ' + sliderVal * 0.5 + ' days ago';
 
-// Router that updates trends data.
-// Scheduled to run at minute 0 past every 12th hour (11am and 11pm every day).
-router.get('/', async (req, res) => {
-  console.log('Updating Search Results Data.');
-  await trends.updateTrendsFunction();
-  search.updateSearchResults();
-});
-
-module.exports.router = router;
+  setTimeRange(parseInt(sliderVal));
+}

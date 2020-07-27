@@ -10,8 +10,10 @@
     <link rel="stylesheet" href="style.css">
     <script src="scripts/current-data-script.js"></script>
     <script src="scripts/map-script.js"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="scripts/modal-script.js"></script>
     <script src="scripts/trends-script.js"></script>
+    <script src="scripts/timeline-script.js"></script>
     <script src="scripts/search-topic-script.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
@@ -30,11 +32,15 @@
                   <a class="nav-link active" href="#search-results-tab" aria-controls="search-results-tab" role="tab" data-toggle="tab">Search Results</a>
                 </li>
                 <li role="presentation" class="nav-item">
+                  <a class="nav-link" href="#sentiment-chart-tab" aria-controls="sentiment-chart-tab" role="tab" data-toggle="tab">Sentiment Chart</a>
+                </li>
+                <li role="presentation" class="nav-item">
                   <a class="nav-link" href="#top-trends-tab" aria-controls="top-trends-tab" role="tab" data-toggle="tab">Top Trends</a>
                 </li>
               </ul>
               <div class="tab-content">
                 <div role="tabpanel" class="tab-pane fade show active" id="search-results-tab"></div>
+                <div role="tabpanel" class="tab-pane fade" id="sentiment-chart-tab"></div>
                 <div role="tabpanel" class="tab-pane fade" id="top-trends-tab"></div>
               </div>
             </div>
@@ -61,19 +67,34 @@
       <div id="data-max">max</div>
     </div>
 
+    <div id="timeline-slider-div">
+      <label id="timeline-slider-label" for="timeline-slider">See results from 0 days ago</label>
+      <input type="range" min="0" max="13" value="0" class="custom-range" id="timeline-slider" oninput=timelineSliderChanged()>
+    </div>
+
     <div id="top-left-div">
       <h3 id="topic-header">Worldwide sentiments</h3>
+      <h6 id="extrema-sentiment"></h6>
       <div id="switch-div">
         <label class="switch">
           <input id="sentiment-popularity-check" type="checkbox" onclick="loadRegionDataByMode()">
           <span class="slider"></span>
         </label>
-        <span id="switch-info">Switch between <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide sentiments on selected topic" data-placement="top">Sentiment Mode</span> 
-            & <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows worldwide interest on selected topic" data-placement="top">Popularity Mode</span>.</span>
+        <span id="switch-info">
+          Switch between 
+          <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows sentiment scores on selected search topic." data-placement="top">
+            Sentiment Mode
+          </span> 
+          & 
+          <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows interest scores on selected search topic." data-placement="top">
+            Popularity Mode
+          </span>
+          .
+        </span>
       </div>
     </div>
 
-    <!-- The inner text is a dash, which is longer than a hyphen. -->
+    <!-- The inner text is a dash, which is longer than a hyphen. Copy-paste it if needed. -->
     <button id="show-hide-right-div" type="button" class="btn btn-light" onclick="toggleRightPanel()" aria-pressed="true" data-toggle="popover" data-trigger="hover" data-content="Toggle the Panel">–</button>
 
     <div id="right-div" class="shown">

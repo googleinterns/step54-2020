@@ -14,27 +14,40 @@
 
 // String for the topic that the user is currently viewing.
 let currentTopic = '';
+
 // JSON object for the data that is currently displayed, including topic,
 // timestamp, and custom search data by country.
 let currentSearchData = {};
+
 // JSON object for the current top trends, including US trends if applicable,
 // and their timestamp.
 // Format: {globalTrends:..., usTrends:..., timestamp:...,}
-let topTrends = {};
+let topTrendsData = {};
+
+// The current time range for the data that the user is viewing.
+let currentTimeRange = 0;
 
 /** Returns current topic that the user is viewing. */
 function getCurrentTopic() {
   return currentTopic;
 }
 
-/** Returns the current top trends. */
-function getTopTrends() {
-  return topTrends;
-}
-
-/** Returns current custom search data for trend that the user is viewing. */
+/** 
+ * Returns current custom search data for the trend that the user is viewing.
+ */
 function getCurrentSearchData() {
   return currentSearchData;
+}
+
+/** Returns top trends for `currentTimeRange` that the user is viewing. */
+function getCurrentTopTrends() {
+  return topTrendsData;
+}
+
+
+/** Returns the current time range for the data that the user is viewing. */
+function getCurrentTimeRange() {
+  return currentTimeRange;
 }
 
 /** 
@@ -44,7 +57,16 @@ function getCurrentSearchData() {
  */
 function setNewTrend(trend) {
   currentTopic = trend;
-  fetch('/search/' + trend)
+
+  // Bold and italicize the currently viewed trend.
+  let trendElements = document.getElementById('trends-list').childNodes;
+  trendElements.forEach(function(trendElement) {
+    trendElement.innerHTML = (trendElement.innerText === currentTopic) ?
+        '<span class="font-weight-bold font-italic">' + currentTopic +
+        '</span>' : trendElement.innerText;
+  });
+
+  fetch('/search/' + trend + '&' + currentTimeRange)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
         currentSearchData = topicData;
       }).then(() => {
@@ -61,6 +83,20 @@ function setNewTrend(trend) {
  */
 function setUserSearchTopic(topic, countries) {
   currentTopic = topic;
+  currentTimeRange = 0;
+  document.getElementById('timeline-slider').value = 0;
+
+  let trendElements = document.getElementById('trends-list').childNodes;
+  // Loop through elements and get rid of the html bold span if it exists.
+  trendElements.forEach(function(trendElement) {
+    trendElement.innerHTML = trendElement.innerText;
+  });
+
+  // Reset current trends to show trends from the last 12 hours. Pass false as
+  // the parameter to prevent a new trend from being set and overriding the
+  // user search topic.
+  updateTrends(false);
+
   fetch('/search/' + topic + '/' + JSON.stringify(countries))
       .then(response => response.json())
       .then(topicResults => {
@@ -88,19 +124,38 @@ function setStateInterestsData(topic) {
       });
 }
 
+/** 
+ * Changes `currentTimeRange` parameter and updates trends for new time range.
+ * @param {number} timeRange The new time range interval value.
+ */
+function setTimeRange(timeRange) {
+  if (currentTimeRange === timeRange) {
+    return;
+  }
+  currentTimeRange = timeRange;
+  getIsWorldLevel() ?
+      updateGlobalTrendsAndDisplayFirst() : updateUsTrendsAndDisplayFirst();
+}
+
 /**
  * Fetches current top global trends from the backend, displays them on the 
  * website, and shows map data for the first trend.
+ * @param {boolean=} setNewTrendEnabled Boolean for whether or not to change
+ *     the trend that the user is viewing.
  */
-function updateGlobalTrendsAndDisplayFirst() {
-  fetch('/trends').then(globalTrends => globalTrends.json()).then(trends => {
-    topTrends['globalTrends'] = trends.globalTrends;
-    topTrends['timestamp'] = trends.timestamp;
+function updateGlobalTrendsAndDisplayFirst(setNewTrendEnabled = true) {
+  fetch('/trends/' + currentTimeRange)
+      .then(globalTrends => globalTrends.json())
+      .then(trends => {
+        topTrendsData['globalTrends'] = trends.globalTrends;
+        topTrendsData['timestamp'] = trends.timestamp;
 
-    setTopTrends(true);  // Set global trends.
-    // Set the map to display data on the top-ranking trend.
-    setNewTrend(trends.globalTrends[0].trendTopic);
-  });
+        setTopTrends(true);  // Set global trends.
+        if (setNewTrendEnabled) {
+          // Set the map to display data on the top-ranking trend.
+          setNewTrend(trends.globalTrends[0].trendTopic);
+        }
+      });
 }
 
 /**
@@ -110,7 +165,7 @@ function updateGlobalTrendsAndDisplayFirst() {
 function updateUsTrendsAndDisplayFirst() {
   fetch('/country-trends/US').then(usTrends => usTrends.json())
       .then(trends => {
-        topTrends['usTrends'] = trends;
+        topTrendsData['usTrends'] = trends;
 
         setTopTrends(true);  // Set global trends.
         // Set the map to display data on the top-ranking trend.
