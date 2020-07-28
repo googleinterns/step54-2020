@@ -325,8 +325,7 @@ function formatSearchResult(searchResult) {
  * @param {Object} searchResult Object for one search result.
  */
 function getSentiment(searchResult) {
-  return
-      fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {
+  return fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {
     method: 'POST',  // Send a request to the URL.
     headers: new Headers({
       'Content-Type': 'text/plain',
