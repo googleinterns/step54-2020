@@ -99,24 +99,26 @@ async function displayTopResultsForCurrentTrend(countryCode) {
       await fetch('/sentiment-words/' + results[i].title + results[i].snippet)
           .then(resultsJsonArray => resultsJsonArray.json())
           .then(sentimentWordsResult => {
+            // i + 1 shows the index for each search result.
+            resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
+                results[i].link + '>' + results[i].htmlTitle + '</a><br>';
             // Check to make sure that there is detection of positive and 
             // negative words from the Node.js sentiment API.
             if (sentimentWordsResult != null && 
                 sentimentWordsResult.positive.length != 0) {
-              // i + 1 shows the index for each search result.
-              resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
-                  results[i].link + '>' + results[i].htmlTitle + '</a><br>';
               var snippetArray = results[i].snippet.split(" ");
               snippetArray.forEach((word) => {
+                // Replace quotations or other symbols that may be attached to 
+                // the word.  
                 let checkWordInArray = word.replace(/[^a-z0-9+]+/gi, '');
                 if (results[i].score > 0 && sentimentWordsResult.positive
                     .includes(checkWordInArray)) {
-                  resultElement.innerHTML += '<span style=\'color: green;\'>' + 
-                      word + ' </span>';
+                  resultElement.innerHTML += '<span style=\'color: ' + 
+                      POSITIVE_COLOR + ';\'>' + word + ' </span>';
                 } else if (results[i].score < 0 && sentimentWordsResult.negative
                     .includes(checkWordInArray)) {
-                  resultElement.innerHTML += '<span style=\'color: red;\'>' + 
-                      word + ' </span>';
+                  resultElement.innerHTML += '<span style=\'color: ' + 
+                      NEGATIVE_COLOR + ';\'>' + word + ' </span>';
                 } else {
                   resultElement.innerHTML += word + ' ';
                 }
@@ -124,10 +126,7 @@ async function displayTopResultsForCurrentTrend(countryCode) {
               resultElement.innerHTML += '<br><i>Sentiment Score: ' + 
                   results[i].score.toFixed(1) + '</i><br>';
             } else {
-              // i + 1 shows the index for each search result.
-              resultElement.innerHTML += (i + 1).toString() + '. ' +
-                  '<a href=' + results[i].link + '>' + results[i].htmlTitle + 
-                  '</a><br>' + results[i].snippet + '<br>' + 
+              resultElement.innerHTML += results[i].snippet + '<br>' + 
                   '<i>Sentiment Score: ' + results[i].score.toFixed(1) + 
                   '</i><br>';
             }
