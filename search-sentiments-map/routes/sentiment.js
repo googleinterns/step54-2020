@@ -14,7 +14,6 @@
 
 /** Server-side script that uses the Google Cloud Natural Language API to get the sentiment score. */
 const express = require('express');
-var router = express.Router();  // Using Router to divide the app into modules.
 const language = require('@google-cloud/language');
 
 /** 
@@ -36,7 +35,6 @@ async function getSentimentScore(searchResultTitleSnippet) {
     // Detect the sentiment of the text.
     const [result] = await client.analyzeSentiment({ document: document });
     const sentiment = result.documentSentiment;
-    console.log('ntarn debug score in sentiment:' + sentiment.score);
     return sentiment.score;
   } catch (err) {
     // Occurs when the language is not supported for document sentiment
@@ -46,5 +44,4 @@ async function getSentimentScore(searchResultTitleSnippet) {
   }
 }
 
-module.exports.router = router;
 module.exports.getSentimentScore = getSentimentScore;

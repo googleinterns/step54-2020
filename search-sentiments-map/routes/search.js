@@ -187,7 +187,7 @@ async function updateSearchResults() {
   let countries = countriesJson.map(country => country.id);
 
   const trends = await search.retrieveGlobalTrends();
-  for (let i = 0; i < trends.length; i++) { 
+  for (let i = 0; i < trends.length; i++) {
     let topic = trends[i].trendTopic;
     console.log('Creating WorldDataByTopic entity for', topic)
     let countriesData = await search.getSearchResultsForCountriesForTopic(
@@ -196,7 +196,7 @@ async function updateSearchResults() {
 
     // Note: When testing, use i < 1 to test for only one trend, and comment 
     // out `await new Promise` line to avoid 1 minute pauses.
-    // await search.sleep(PAUSE_ONE_MIN_MS);
+    await search.sleep(PAUSE_ONE_MIN_MS);
   }
 }
 
@@ -227,7 +227,7 @@ async function getSearchResultsForCountriesForTopic(countries, topic) {
   await searchInterestsModule.getGlobalSearchInterests(topic)
       .then(async (searchInterests) => {
     // Note: Use i < 3 countries when testing.
-    for (let i = 0; i < countries.length; i++) { 
+    for (let i = 0; i < countries.length; i++) {
       let countryCode = countries[i];
       let interest = searchInterests.filter(interestsByCountry => 
           interestsByCountry.geoCode === countryCode);
@@ -310,13 +310,12 @@ async function formatCountryResults(searchResultsJson) {
 function formatSearchResult(searchResult) {
   return sentiment.getSentimentScore(searchResult.title + searchResult.snippet)
       .then((result) => {
-        console.log('ntarn debug score:' + result);
         return {
           title: searchResult.title,
           snippet: searchResult.snippet,
           htmlTitle: searchResult.htmlTitle,
           link: searchResult.link,
-          score: SCORE_SCALE_MULTIPLIER * result, //result.score
+          score: SCORE_SCALE_MULTIPLIER * result,
         };
       });
 }
