@@ -33,7 +33,7 @@ function getCurrentTopic() {
 }
 
 /** 
- * Returns current custom search data for the trend that the user is viewing.
+ * Returns current custom search data for the topic that the user is viewing.
  */
 function getCurrentSearchData() {
   return currentSearchData;

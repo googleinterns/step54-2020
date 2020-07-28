@@ -22,21 +22,21 @@ const NUM_SHOWN = 7;
 
 /** 
  * Displays the top trends on the DOM and sets their onclick method. 
- * @param {boolean=} globalTrends Whether the trends to display are global
+ * @param {boolean=} useGlobalTrends Whether the trends to display are global
  *     trends. Display US trends otherwise.
  */
-function setTopTrends(globalTrends = true) {
-  document.getElementById('switch-trends-click').innerText = globalTrends ?
+function setTopTrends(useGlobalTrends = true) {
+  document.getElementById('switch-trends-click').innerText = useGlobalTrends ?
       'US trends' : 'Global trends';
-  document.getElementById('trends-title').innerText = globalTrends ?
+  document.getElementById('trends-title').innerText = useGlobalTrends ?
       'Globally Trending Search Topics' : 'US Trending Search Topics';
 
   const trendsList = document.getElementById('trends-list');
   trendsList.innerHTML = '';
-  let trends = globalTrends ? 
+  let trends = useGlobalTrends ? 
       getCurrentTopTrends().globalTrends : getCurrentTopTrends().usTrends;
 
-  addTrendsToList(trendsList, trends, globalTrends);
+  addTrendsToList(trendsList, trends, useGlobalTrends);
 
   // Add a toggle button to the list to show more or less topics depending
   // on the number of topics displayed.
@@ -54,12 +54,12 @@ function setTopTrends(globalTrends = true) {
 }
 
 /** Helper function for the `setTopTrends` function. */
-function addTrendsToList(trendsList, trends, globalTrends) {
+function addTrendsToList(trendsList, trends, useGlobalTrends) {
   for (let i = 0; i < trends.length; i++) {
     const trendElement = document.createElement('li');
 
     // TODO(chenyuz): change the backend to call them both 'topic'.
-    trendElement.innerHTML = globalTrends ? 
+    trendElement.innerHTML = useGlobalTrends ? 
         trends[i].trendTopic : trends[i].topic;
     trendElement.id = 'trend' + i;
     // Show a certain number of trending topics by default and hide the rest.
@@ -79,11 +79,11 @@ function addTrendsToList(trendsList, trends, globalTrends) {
     // Display the number of countries where the topic is trending (world-level),
     // or the traffic or the topic (us-level), when hovered.
     let options = {
-      content: globalTrends ? `Trending in ${trends[i].count} countries` : 
+      content: useGlobalTrends ? `Trending in ${trends[i].count} countries` : 
           `${trends[i].traffic} searches`,
       placement: 'right',
       trigger: 'hover',
-    }
+    };
     $('#' + trendElement.id).popover(options);
   }
 }

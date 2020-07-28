@@ -170,7 +170,8 @@ function loadCountryData() {
 
   document.getElementById('extrema-sentiment').innerText = 
       isSentimentMode ?
-          'Most Positive Country: ' + countryMax + ', Most Negative Country: ' + countryMin :
+          'Most Positive Country: ' + countryMax + 
+              ', Most Negative Country: ' + countryMin :
           'Most Popular Country: ' + countryMax;
 }
 
