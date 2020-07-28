@@ -12,22 +12,31 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+// The default score assigned to countries with no search results.
+const POSITIVE_COLOR = 'green';
+const NEGATIVE_COLOR = 'red';
+let countryCode = '';
 /**
- * Displays the information modal when a country on the map is clicked.
+ * Displays the information modal when a region on the map is clicked.
  * @param {?google.maps.MouseEvent} e Click event.
  */
-function onClickCountry(e) {
-  if (e.feature.getProperty('country_data') != null) {
-    $('#region-info-modal').modal('show');
-
-    // Update Modal with information for relevant country.
-    const countryName = e.feature.getProperty('name');
-    const countryId = e.feature.getId();
-    document.getElementById('modal-title').innerText = countryName;
-    displayTopResultsForCurrentTrend(countryId);
-    setCountryTrends(countryId);
-    displayPopularityTimeline(countryId);
+function onClickRegion(e) {
+  // Don't display anything when the map is on state level, or when the clicked
+  // country has no data.
+  if (e.feature.getProperty('country_data') == null) {
+    return;
   }
+  $('#region-info-modal').modal('show');
+
+  // Update Modal with information for relevant country.
+  const countryName = e.feature.getProperty('name');
+  const countryId = e.feature.getId();
+  countryCode = e.feature.getId();
+  document.getElementById('modal-title').innerText = countryName;
+  displayTopResultsForCurrentTrend(countryId);
+  setCountryTrends(countryId);
+  displaySentimentChartForCurrentTrend(countryId);
+  displayPopularityTimeline(countryId);
 }
 
 /**
@@ -45,23 +54,32 @@ function setCountryTrends(countryCode) {
         } else {
           for (let i = 0; i < trends.length; i++) {
             let articlesId = 'trend' + i + 'Article';
-            let articlesHtml = 'Search results: <br>';
+            let articlesHtml = '';
             trends[i].articles.forEach(article => {
-              articlesHtml += '<span>' + article + '</span><br>';
-            });
+              articlesHtml += '<li><a href="' + article.url + '">' + 
+                  article.title + '</a></li>';
+            })
+            let exploreLink = 
+                'https://trends.google.com' + trends[i].exploreLink;
+            articlesHtml += 'Click <a href=' + exploreLink + 
+                '>here</a> to explore the topic on google trends website.';
             topTrendsTab.innerHTML += 
-                '<h5 class="country-trend" onclick="toggleDisplay(\''+ 
-                articlesId + '\')">' + trends[i].topic + '</h5>' + 
-                '<div id="'+ articlesId + '" class="hidden">' + 
-                articlesHtml + '</div>';
+                '<h5 class="country-trend" onclick="toggleDisplay(\''+
+                articlesId + '\')">' + trends[i].topic + '</h5>' +
+                '<i>' + trends[i].traffic + ' searches</i><br>' + '<ul id="' +
+                articlesId + '" class="hidden">' + articlesHtml + '</ul>';
           }
         }
         topTrendsTab.innerHTML += 
-            '<i>Last updated on ' + new Date(getTopTrends().timestamp) + '</i>';
+            '<i>Last updated on ' + new Date(getCurrentTopTrends().timestamp) +
+            '</i>';
       });
 }
 
-/** Toggles whether the element with the given id is displayed or not. */
+/** 
+ * Toggles whether the element with the given id is displayed or not, given 
+ * that the element has class 'shown' or 'hidden'. 
+ */
 function toggleDisplay(id) {
   document.getElementById(id).classList.toggle('shown');
   document.getElementById(id).classList.toggle('hidden');
@@ -72,16 +90,16 @@ function toggleDisplay(id) {
  * @param {string} countryCode Two letter country code for selected country.
  */
 function displayTopResultsForCurrentTrend(countryCode) {
-  let dataByCountry = getCurrentSearchData().dataByCountry;
   let date = new Date(getCurrentSearchData().timestamp);
   let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
 
-  let countryData = dataByCountry.filter(data => data.country === countryCode);
+  let countryData = getCurrentSearchData().dataByCountry
+      .filter(data => data.country === countryCode);
 
+  // Handle case where there are no search results for the topic.
   if (countryData.length === 0 ||
       countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
-    // Handle case where there are no results.
     resultElement.innerHTML += 'No results.<br>';
   } else {
     resultElement.innerHTML += '<b>Topic Popularity Score: ' + 
@@ -92,9 +110,11 @@ function displayTopResultsForCurrentTrend(countryCode) {
     // Get search results for the specified country.
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
-      resultElement.innerHTML += '<a href=' + results[i].link + '>' +
-        results[i].htmlTitle + '</a><br>' + results[i].snippet + '<br>'
-        + '<i>Sentiment Score: ' + results[i].score.toFixed(1) + '</i><br>';
+      // i + 1 shows the index for each search result. 
+      resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
+          results[i].link + '>' + results[i].htmlTitle + '</a><br>' + 
+          results[i].snippet + '<br>' + '<i>Sentiment Score: ' + 
+          results[i].score.toFixed(1) + '</i><br>';
     }
   }
   resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
@@ -132,7 +152,7 @@ function displayPopularityTimeline(countryCode) {
 }
 
 // Use version 45 to allow for chart ticks to be drawn when the div container is
-// hidden.
+// hidden. Needs to load before any functions are called. 
 google.charts.load('45', {'packages':['corechart']});
 /** 
  * Draw the popularity timeline in a country for the current search trend on
@@ -169,4 +189,68 @@ function drawPopularityTimeline(timelineData, popularityTimelineElement, topic) 
   };
   var chart = new google.visualization.LineChart(popularityTimelineElement);
   chart.draw(data, options);
+  window.addEventListener('resize', drawPopularityTimeline(timelineData, 
+      popularityTimelineElement, topic), false);
+}
+
+/** 
+ * Displays sentiment chart of search results for the current country on the modal.
+ * @param {string} countryCode Two letter country code for selected country.
+ */
+function displaySentimentChartForCurrentTrend(countryCode) {
+  let countryData = getCurrentSearchData().dataByCountry
+      .filter(data => data.country === countryCode);
+  let date = new Date(getCurrentSearchData().timestamp);
+  let chartElement = document.getElementById('sentiment-chart-tab');
+  chartElement.innerHTML = '';
+
+  // Handle case where there are no search results for the topic.
+  if (countryData.length === 0 ||
+      countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
+    chartElement.innerHTML += 'No results.<br><i>Last updated on ' +
+        date.toString() + '<i><br>';
+  } else {
+    let results = countryData[0].results;
+    drawSentimentChart(chartElement, results);
+    chartElement.innerHTML += 'Average Sentiment Score: ' + 
+        countryData[0].averageSentiment.toFixed(1) + '<br>';
+    chartElement.innerHTML += '<i>Last updated on ' + date.toString() +
+        '<i><br>';
+  }
+}
+
+/** 
+ * Draws a sentiment chart and adds it to the given element. 
+ *  @param {Object} chartElement Tab element to update with the sentiment chart.
+ *  @param {Object} results Results to use to update the sentiment chart.
+ */
+function drawSentimentChart(chartElement, results) {
+  let sentimentDataArray = [["Search Result", "Score", {role: "style"}]];
+  for (let i = 0; i < results.length; i++) {
+    let sentimentItem = [(i + 1).toString(), results[i].score];
+    results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : 
+        sentimentItem.push(NEGATIVE_COLOR);
+    sentimentDataArray.push(sentimentItem);
+  }
+
+  let sentimentDataTable = google.visualization.arrayToDataTable(sentimentDataArray);
+  let view = new google.visualization.DataView(sentimentDataTable);
+  view.setColumns([0, 1, {
+    calc: 'stringify',
+    sourceColumn: 1,
+    type: 'string',
+    role: 'annotation',
+  }, 2]);
+
+  let options = {
+    title: 'Sentiment Scores of Search Results',
+    width: 750,
+    height: 400,
+    bar: {groupWidth: '55%'},
+    legend: {position: 'none'},
+    hAxis: {title: 'Search Results Index'},
+  };
+  let chart = new google.visualization.ColumnChart(chartElement);
+  chart.draw(view, options);
+  window.addEventListener('resize', drawSentimentChart(chartElement, results), false);
 }

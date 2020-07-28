@@ -26,6 +26,16 @@ i {
   width: 360px;
 }
 
+#timeline-slider-div {
+  background: #fff;
+  border: 3px solid #000;
+  display: flex;
+  display: -webkit-box;
+  margin: 10px;
+  padding: 10px;
+  width: 360px;
+}
+
 .color-key {
   background: linear-gradient(to right,
     hsl(5, 69%, 54%) 0%,
@@ -43,18 +53,28 @@ i {
 }
 
 #top-left-div {
-  position: absolute;
-  top: 50px;
+  background-color: rgba(255, 255, 255, 0.5);
   left: 40px;
+  padding: 20px 20px 55px 20px;
+  position: absolute;
+  top: 40px;
+}
+
+.mode-span {
+  font-weight: bold;
+}
+
+.mode-span:hover {
+  color: #2268d6;
 }
 
 /* The switch - the box around the slider. */
 .switch {
   display: inline-block;
   height: 40px;
-  margin-top: 20px;
+  margin-top: 25px;
   position: absolute;
-  width: 100px;
+  width: 80px;
 }
 
 .slider {
@@ -77,24 +97,47 @@ i {
   left: 4px;
   position: absolute;
   transition: .4s;
-  width: 46px;
+  width: 36px;
   -webkit-transition: .4s;
 }
 
 input:checked + .slider:before {
-  transform: translateX(46px);
-  -ms-transform: translateX(46px);
-  -webkit-transform: translateX(46px);
+  transform: translateX(36px);
+  -ms-transform: translateX(36px);
+  -webkit-transform: translateX(36px);
+}
+
+#bottom-left-div {
+  background-color: rgba(255, 255, 255, 0.5);
+  bottom: 100px;
+  left: 40px;
+  position: absolute;
 }
 
 #right-div {
-  height: 60vh;
+  background-color: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  padding: 30px 0 20px 0;
   position: absolute;
-  right: 30px;
+  right: 40px;
   top: 40px;
 }
 
-#search-div {
+#show-hide-right-div {
+  font-size: 40px;
+  font-weight: 500;
+  height: 40px;
+  line-height: 40px;
+  padding: 0;
+  position: absolute;
+  right: 45px;
+  top: 45px;
+  width: 40px;
+  z-index: 9;
+}
+
+#search-div,
+#trends-div {
   margin: 20px;
 }
 
@@ -104,11 +147,12 @@ input:checked + .slider:before {
   display: block;
   font-weight: normal;
   line-height: 1.42857143;
-  margin:0;
+  margin: 0;
   padding: 3px 10px;
   transition: background-color .4s ease;
   white-space: nowrap;
 }
+
 .checkbox-menu li input {
   margin: 0px 5px;
   position: relative;
@@ -130,8 +174,14 @@ input:checked + .slider:before {
   background-color: #b8b8ff;
 }
 
+.dropdown-menu {         
+  max-height: 200px;
+  overflow-y: auto;
+}
+
 #trends-list li {
   font-family: "Lucida Console", Courier, monospace;
+  width: fit-content;
 }
 
 #trends-list li:hover {
@@ -149,6 +199,11 @@ input:checked + .slider:before {
   cursor: pointer;
 }
 
+.country-trend {
+  display: inline-block;
+  margin-right: 10px;
+}
+
 .country-trend:hover {
   color: #2268d6;
   cursor: pointer;
@@ -160,4 +215,9 @@ input:checked + .slider:before {
 
 .hidden {
   display: none;
+}
+
+.dropdown-menu {         
+  max-height: 200px;
+  overflow-y: auto;
 }
