@@ -139,14 +139,13 @@ function loadRegionDataByMode() {
  * depending on what mode has been specified.
  */
 function loadCountryData() {
-  // Minimum and maximum average sentiment values for current topic. 
-  let dataVariableMax = Number.MIN_VALUE;
-  let dataVariableMin = Number.MAX_VALUE; 
-
-  // Countries with the minimum and maximum average sentiment values for current 
-  // topic. 
+  // Minimum and maximum scores for current topic. 
+  let dataVariableMax = Number.MIN_VALUE;  // Smallest positive number.
+  let dataVariableMin = Number.MAX_VALUE;
+  // Countries with the minimum and maximum scores for current topic. 
   let countryMax = '';
   let countryMin = '';
+
   map.data.forEach(row => {
     let countryData = getCurrentSearchData().dataByCountry
         .filter(data => data.country === row.getId());
@@ -159,7 +158,8 @@ function loadCountryData() {
         dataVariableMax = dataVariable;
         countryMax = country;
       }
-      if (dataVariable < dataVariableMin) {
+      if (dataVariable < dataVariableMin && 
+          dataVariable !== NO_RESULTS_DEFAULT_SCORE) {
         dataVariableMin = dataVariable;
         countryMin = country;
       }
@@ -168,23 +168,45 @@ function loadCountryData() {
     row.setProperty('country_data', dataVariable);
   });
 
-  const extremaHeader = document.getElementById('extrema-sentiment');
-  extremaHeader.innerText = 
-      'Most Positive Country: ' + countryMax + ', Most Negative Country: ' + countryMin;
-
+  document.getElementById('extrema-sentiment').innerText = 
+      isSentimentMode ?
+          'Most Positive Country: ' + countryMax + ', Most Negative Country: ' + countryMin :
+          'Most Popular Country: ' + countryMax;
 }
 
 /** Loads the search interest data for US states on the map. */
 function loadStateData() {
+  // Minimum and maximum scores for current topic. 
+  let dataVariableMax = Number.MIN_VALUE;
+  let dataVariableMin = Number.MAX_VALUE; 
+  // States with the minimum and maximum scores for current topic. 
+  let stateMax = '';
+  let stateMin = '';
+
   let stateInterests = getCurrentSearchData();
   map.data.forEach(function(row) {
+    let stateName = row.getProperty('NAME');
     let interest = stateInterests.filter(stateInterest => 
-        stateInterest.geoName === row.getProperty('NAME'));
+        stateInterest.geoName === stateName);
     let dataVariable = interest.length === 0 ? 
         NO_RESULTS_DEFAULT_SCORE : interest[0].value[0];
 
+    if (dataVariable > dataVariableMax) {
+      dataVariableMax = dataVariable;
+      stateMax = stateName;
+      console.log('max', stateMax, dataVariableMax)
+    }
+    if (dataVariable < dataVariableMin && 
+        dataVariable !== NO_RESULTS_DEFAULT_SCORE) {
+      dataVariableMin = dataVariable;
+      stateMin = stateName;
+    }
+
     row.setProperty('state_data', dataVariable);
   });
+
+  document.getElementById('extrema-sentiment').innerText = 
+      'Most Popular State: ' + stateMax;
 }
 
 /**
