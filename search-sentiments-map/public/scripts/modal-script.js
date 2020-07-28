@@ -15,7 +15,6 @@
 // The default score assigned to countries with no search results.
 const POSITIVE_COLOR = 'green';
 const NEGATIVE_COLOR = 'red';
-let countryCode = '';
 /**
  * Displays the information modal when a region on the map is clicked.
  * @param {?google.maps.MouseEvent} e Click event.
@@ -31,7 +30,6 @@ function onClickRegion(e) {
   // Update Modal with information for relevant country.
   const countryName = e.feature.getProperty('name');
   const countryId = e.feature.getId();
-  countryCode = e.feature.getId();
   document.getElementById('modal-title').innerText = countryName;
   displayTopResultsForCurrentTrend(countryId);
   setCountryTrends(countryId);
@@ -189,8 +187,6 @@ function drawPopularityTimeline(timelineData, popularityTimelineElement, topic) 
   };
   var chart = new google.visualization.LineChart(popularityTimelineElement);
   chart.draw(data, options);
-  window.addEventListener('resize', drawPopularityTimeline(timelineData, 
-      popularityTimelineElement, topic), false);
 }
 
 /** 
@@ -252,5 +248,4 @@ function drawSentimentChart(chartElement, results) {
   };
   let chart = new google.visualization.ColumnChart(chartElement);
   chart.draw(view, options);
-  window.addEventListener('resize', drawSentimentChart(chartElement, results), false);
 }
