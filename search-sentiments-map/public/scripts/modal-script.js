@@ -12,9 +12,11 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-// The default score assigned to countries with no search results.
+// The colors assigned depending on if the sentiment score is positive or 
+// negative.
 const POSITIVE_COLOR = 'green';
 const NEGATIVE_COLOR = 'red';
+
 /**
  * Displays the information modal when a region on the map is clicked.
  * @param {?google.maps.MouseEvent} e Click event.
@@ -143,8 +145,8 @@ function displayPopularityTimeline(countryCode) {
         popularityTimelineElement.innerText = 
             'Popularity Timeline is not available for the selected country.';
       } else {
-        drawPopularityTimeline(timelineJSON.default.timelineData, popularityTimelineElement, 
-            getCurrentSearchData().topic);
+        drawPopularityTimeline(timelineJSON.default.timelineData, 
+            popularityTimelineElement, getCurrentSearchData().topic);
       }
     });
 }
@@ -155,7 +157,7 @@ google.charts.load('45', {'packages':['corechart']});
 /** 
  * Draw the popularity timeline in a country for the current search trend on
  * modal.
- * @param {!Array<JSON>} timelineData The past week's search interest values of
+ * @param {!Array<JSON>} timelineData The past week's search interest values for
  * the given topic
  * @param {Object} popularityTimelineElement The element where the popularity 
  * timeline is updated.
@@ -221,7 +223,7 @@ function displaySentimentChartForCurrentTrend(countryCode) {
  *  @param {Object} results Results to use to update the sentiment chart.
  */
 function drawSentimentChart(chartElement, results) {
-  let sentimentDataArray = [["Search Result", "Score", {role: "style"}]];
+  let sentimentDataArray = [['Search Result', 'Score', {role: 'style'}]];
   for (let i = 0; i < results.length; i++) {
     let sentimentItem = [(i + 1).toString(), results[i].score];
     results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : 
