@@ -45,7 +45,7 @@ router.get('/', (req, res) => {
 router.post('/', jsonParser, (req, res) => {
   googleTrends.interestOverTime({
     keyword: req.body.topic,
-    startTime: new Date(Date.now() - (DATA_FROM_8_DAYS_AGO_MS)),
+    startTime: new Date(Date.now() - DATA_FROM_8_DAYS_AGO_MS),
     geo: req.body.code,
   }).then(data => {
     res.setHeader('Content-Type', 'application/json');
@@ -55,27 +55,6 @@ router.post('/', jsonParser, (req, res) => {
     console.error(err);
   });
 });
-
-
-/** 
- * Returns search interest relative to the past 7 days for a given topic.
- * @param {String} topic The given topic
- * @param {string} countryCode Two letter country code for selected country.
- * @return {!Array<JSON>} 10 globally trending topics and the number of countries 
- * where they are trending.
- */
-function getPastWeekInterest(topic, countryCode) {
-  return googleTrends.interestOverTime({
-    keyword: topic,
-    startTime: new Date(Date.now() - (4 * 60 * 60 * 1000)),
-    geo: countryCode,
-  }).then(results => {
-      return results;
-      })
-    .catch(err => {
-      console.error(err);
-    });
- }
 
 /** 
  * Get the global trends from the most recent Datastore entry.
@@ -232,10 +211,10 @@ async function deleteAllTrends() {
 
 /** 
  * Finds the trending topics that appear the most across all recorded countries 
- * and gets the top 10 as the globally trending topics.
+ * and gets the top globally trending topics.
  * @param {!Array<JSON>} trendsByCountry An array where each element is a country
  * and its trends.
- * @return {!Array<JSON>} 10 globally trending topics and the number of countries 
+ * @return {!Array<JSON>} Globally trending topics and the number of countries 
  * where they are trending.
  */
 function getGlobalTrends(trendsByCountry) {

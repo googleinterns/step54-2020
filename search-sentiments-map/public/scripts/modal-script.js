@@ -19,6 +19,7 @@
 function onClickCountry(e) {
   if (e.feature.getProperty('country_data') != null) {
     $('#region-info-modal').modal('show');
+
     // Update Modal with information for relevant country.
     const countryName = e.feature.getProperty('name');
     const countryId = e.feature.getId();
@@ -99,54 +100,32 @@ function displayTopResultsForCurrentTrend(countryCode) {
   resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
 }
 
-/**
- * Sets trends under the top-trends modal tab for the selected country.
- * @param {string} countryCode The two-letter code of the selected country.
- */
-function setCountryTrends(countryCode) {
-  const topTrendsTab = document.getElementById('top-trends-tab');
-  topTrendsTab.innerHTML = '';
-  fetch('/country-trends/' + countryCode).then(countryTrends =>
-      countryTrends.json()).then(trends => {
-        if (trends.length === 0) {
-          topTrendsTab.innerText = 
-              'Trends are not available for the selected country.';
-        } else {
-          trends.forEach(trend => {
-            const trendHeader = document.createElement('h5');
-            trendHeader.innerText = trend.topic;
-            topTrendsTab.appendChild(trendHeader);
-          });
-        }
-      });
-}
-
 /** 
- * Displays the popularity timeline in a country for the current search topic 
- * in the modal.
+ * Displays the popularity timeline for the current search topic in the 
+ * selected country's modal.
  * @param {string} countryCode The two-letter code of the selected country.
  */
 function displayPopularityTimeline(countryCode) {
-  const popTimelineElement = document.getElementById('pop-timeline-tab');
-  popTimelineElement.innerHTML = '';
+  const popularityTimelineElement = document.getElementById('popularity-timeline-tab');
+  popularityTimelineElement.innerHTML = '';
   fetch('/trends/', {
     method: 'post',
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       topic: getCurrentSearchData().topic,
       code: countryCode,
-    })
+    }),
   })
   .then(interestData => interestData.json())
   .then(timelineJSON => {
       if (timelineJSON.length === 0) {
-        popTimelineElement.innerText = 
+        popularityTimelineElement.innerText = 
             'Popularity Timeline is not available for the selected country.';
       } else {
-        drawPopularityTimeline(timelineJSON.default, popTimelineElement, 
+        drawPopularityTimeline(timelineJSON.default.timelineData, popularityTimelineElement, 
             getCurrentSearchData().topic);
       }
     });
@@ -158,23 +137,24 @@ google.charts.load('45', {'packages':['corechart']});
 /** 
  * Draw the popularity timeline in a country for the current search trend on
  * modal.
- * @param {!Array<JSON>} 10 globally trending topics and the number of countries
- * @param {Object} popTimelineElement Tab element to update with the sentiment
- * chart. ds d sdd   dddd where they are trending.
+ * @param {!Array<JSON>} timelineData The past week's search interest values of
+ * the given topic
+ * @param {Object} popularityTimelineElement The element where the popularity 
+ * timeline is updated.
+ * @param {String} topic The search topic that the popularity timeline is based on.
  */
-function drawPopularityTimeline(timelineJSON, popTimelineElement, topic) {
+function drawPopularityTimeline(timelineData, popularityTimelineElement, topic) {
   var data = new google.visualization.DataTable();
   data.addColumn('string');
   data.addColumn('number');
-  const timelineData = timelineJSON.timelineData;
   for (let i = 0; i < timelineData.length; i++) {
     data.addRows([[timelineData[i].formattedAxisTime, timelineData[i].value[0]]]);
   }
   var options = {
-    title: "Popularity of " + topic,
+    title: 'Popularity of ' + topic,
     width: 750,
     height: 400,
-    legend: {position: "none"},
+    legend: {position: 'none'},
     hAxis: {
       title: 'Date',
     },
@@ -187,6 +167,6 @@ function drawPopularityTimeline(timelineJSON, popTimelineElement, topic) {
       1: {type: 'linear', color: '#111', opacity: .3},
     },
   };
-  var chart = new google.visualization.LineChart(popTimelineElement);
+  var chart = new google.visualization.LineChart(popularityTimelineElement);
   chart.draw(data, options);
 }
