@@ -57,14 +57,7 @@ function getCurrentTimeRange() {
  */
 function setNewTrend(trend) {
   currentTopic = trend;
-
-  // Bold and italicize the currently viewed trend.
-  let trendElements = document.getElementById('trends-list').childNodes;
-  trendElements.forEach(function(trendElement) {
-    trendElement.innerHTML = (trendElement.innerText === currentTopic) ?
-        '<span class="font-weight-bold font-italic">' + currentTopic +
-        '</span>' : trendElement.innerText;
-  });
+  highlightCurrentTrend();
 
   fetch('/search/' + trend + '&' + currentTimeRange)
       .then(resultsJsonArray => resultsJsonArray.json()).then(topicData => {
@@ -74,6 +67,16 @@ function setNewTrend(trend) {
         // coloring.
         loadRegionDataByMode();
       });
+}
+
+/** Bold and italicize the currently viewed trend. */
+function highlightCurrentTrend() {
+  let trendElements = document.getElementById('trends-list').childNodes;
+  trendElements.forEach(function(trendElement) {
+    trendElement.innerHTML = (trendElement.innerText === currentTopic) ?
+        '<span class="font-weight-bold font-italic">' + currentTopic +
+        '</span>' : trendElement.innerText;
+  });
 }
 
 /** 
@@ -116,6 +119,8 @@ function setUserSearchTopic(topic, countries) {
  */
 function setStateInterestsData(topic) {
   currentTopic = topic;
+  highlightCurrentTrend();
+
   fetch('/search-interests/' + topic).then(response => response.json())
       .then(stateInterests => {
         currentSearchData = stateInterests;
@@ -167,7 +172,7 @@ function updateUsTrendsAndDisplayFirst() {
       .then(trends => {
         topTrendsData['usTrends'] = trends;
 
-        setTopTrends(true);  // Set global trends.
+        setTopTrends(false);  // Set US trends.
         // Set the map to display data on the top-ranking trend.
         setStateInterestsData(trends[0].topic);
       });

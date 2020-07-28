@@ -114,4 +114,5 @@ function showMoreOrLess() {
  */
 function switchTrends(event) {
   setTopTrends(event.currentTarget.innerText === 'Global trends');
+  highlightCurrentTrend();
 }
