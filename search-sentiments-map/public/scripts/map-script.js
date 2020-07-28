@@ -194,7 +194,6 @@ function loadStateData() {
     if (dataVariable > dataVariableMax) {
       dataVariableMax = dataVariable;
       stateMax = stateName;
-      console.log('max', stateMax, dataVariableMax)
     }
     if (dataVariable < dataVariableMin && 
         dataVariable !== NO_RESULTS_DEFAULT_SCORE) {

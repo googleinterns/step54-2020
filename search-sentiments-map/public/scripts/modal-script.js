@@ -44,8 +44,9 @@ function onClickRegion(e) {
 function setCountryTrends(countryCode) {
   const topTrendsTab = document.getElementById('top-trends-tab');
   topTrendsTab.innerHTML = '<h4>Trending topics in selected country: </h4>';
-  fetch('/country-trends/' + countryCode).then(countryTrends =>
-      countryTrends.json()).then(trends => {
+  fetch('/country-trends/' + getCurrentTimeRange() + '/' + countryCode)
+      .then(countryTrends => countryTrends.json())
+      .then(trends => {
         if (trends.length === 0) {
           topTrendsTab.innerHTML = 
               'Trends are not available for the selected country.<br>';

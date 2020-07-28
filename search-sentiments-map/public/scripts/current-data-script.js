@@ -168,7 +168,8 @@ function updateGlobalTrendsAndDisplayFirst(setNewTrendEnabled = true) {
  * and shows map data for the first trend.
  */
 function updateUsTrendsAndDisplayFirst() {
-  fetch('/country-trends/US').then(usTrends => usTrends.json())
+  fetch('/country-trends/' + currentTimeRange + '/US')
+      .then(usTrends => usTrends.json())
       .then(trends => {
         topTrendsData['usTrends'] = trends;
 

@@ -25,7 +25,7 @@ const TRENDS_DATA_KIND = 'TrendsEntry';
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
 const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
 // Time interval between data updates.
-const TIME_RANGE_INTERVAL_12_HRS_MS = 12 * 60 * 60000;
+const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
 
 /** 
  * Renders a JSON array of the top 20 (or fewer) global search trends maintained
@@ -41,12 +41,13 @@ router.get('/:timeRange', (req, res) => {
 
 /** 
  * Get the global trends from the most recent Datastore entry.
- * @param {number} timeRange The new time range interval value.
+ * @param {number} timeRange An integer representing how many time ranges 
+ *     previous to get data from.
  * @return {!Array<JSON>} A JSON array of global trends and their originating
  *     countries.
  */
 async function retrieveGlobalTrendsForTimeRange(timeRange) {
-  let timeRangeLimit = TIME_RANGE_INTERVAL_12_HRS_MS * timeRange;
+  let timeRangeLimit = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * timeRange;
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp', {
     descending: true,
   }).filter('timestamp', '<', Date.now() - timeRangeLimit).limit(2);
