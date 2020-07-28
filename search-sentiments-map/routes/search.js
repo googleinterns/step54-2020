@@ -405,7 +405,6 @@ const search = {
   getCustomSearchResultsForCountry,
   formatCountryResults,
   formatSearchResult,
-  getSentiment,
   deleteAncientResults,
   addWorldDataByTopicToDatastore,
   sleep,
