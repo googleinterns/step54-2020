@@ -2,5 +2,5 @@ cron:
 - description: "update trends and search data job"
   url: /update-data
   # Uncomment the next line to test updateSearchResults.
-  # schedule: every 12 hours from 11:00 to 23:05
+  schedule: every 12 hours from 1:45 to 23:05 #11:00
   timezone: America/New_York

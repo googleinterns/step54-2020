@@ -19,6 +19,7 @@ const express = require('express');
 let router = express.Router();
 
 const fetch = require('node-fetch'); // Used to access custom search.
+const sentiment = require('./sentiment.js')
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 const WORLD_DATA_KIND = 'WorldDataByTopic';
@@ -186,16 +187,16 @@ async function updateSearchResults() {
   let countries = countriesJson.map(country => country.id);
 
   const trends = await search.retrieveGlobalTrends();
-  for (let i = 0; i < trends.length; i++) {
+  for (let i = 0; i < trends.length; i++) { 
     let topic = trends[i].trendTopic;
     console.log('Creating WorldDataByTopic entity for', topic)
     let countriesData = await search.getSearchResultsForCountriesForTopic(
         countries, topic);
     search.addWorldDataByTopicToDatastore(topic, countriesData);
 
-    // Note: when testing ,use i < 1 to test for only one trend, and comment 
+    // Note: When testing, use i < 1 to test for only one trend, and comment 
     // out `await new Promise` line to avoid 1 minute pauses.
-    await search.sleep(PAUSE_ONE_MIN_MS);
+    // await search.sleep(PAUSE_ONE_MIN_MS);
   }
 }
 
@@ -226,7 +227,7 @@ async function getSearchResultsForCountriesForTopic(countries, topic) {
   await searchInterestsModule.getGlobalSearchInterests(topic)
       .then(async (searchInterests) => {
     // Note: Use i < 3 countries when testing.
-    for (let i = 0; i < countries.length; i++) {
+    for (let i = 0; i < countries.length; i++) { 
       let countryCode = countries[i];
       let interest = searchInterests.filter(interestsByCountry => 
           interestsByCountry.geoCode === countryCode);
@@ -307,34 +308,17 @@ async function formatCountryResults(searchResultsJson) {
  * @return {Object} Formatted search result data in JSON form.
  */
 function formatSearchResult(searchResult) {
-  return search.getSentiment(searchResult)
-      .then(response => response.json())
+  return sentiment.getSentimentScore(searchResult.title + searchResult.snippet)
       .then((result) => {
+        console.log('ntarn debug score:' + result);
         return {
           title: searchResult.title,
           snippet: searchResult.snippet,
           htmlTitle: searchResult.htmlTitle,
           link: searchResult.link,
-          score: SCORE_SCALE_MULTIPLIER * result.score,
+          score: SCORE_SCALE_MULTIPLIER * result, //result.score
         };
       });
-}
-
-/** 
- * Gets the sentiment score of a search result. 
- * @param {Object} searchResult Object for one search result.
- */
-function getSentiment(searchResult) {
-  return
-      fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {
-    method: 'POST',  // Send a request to the URL.
-    headers: new Headers({
-      'Content-Type': 'text/plain',
-    }),
-    body: searchResult.title + searchResult.snippet
-  }).catch(err => {
-    console.log(err);
-  });
 }
 
 /** Deletes stale search results. */
