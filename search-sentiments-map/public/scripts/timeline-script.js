@@ -16,9 +16,10 @@
  * Changes current data being viewed to show data from new time range.
  */
 function timelineSliderChanged() {
-  let sliderVal = document.getElementById('timeline-slider').value;
+  let sliderVal = 
+      Math.abs(parseInt(document.getElementById('timeline-slider').value));
   document.getElementById('timeline-slider-label').innerText =
       'See results from ' + ' from ' + sliderVal * 0.5 + ' days ago';
 
-  setTimeRange(parseInt(sliderVal));
+  setTimeRange(sliderVal);
 }
