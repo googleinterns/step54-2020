@@ -53,8 +53,7 @@ router.post('/', jsonParser, (req, res) => {
   }).then(data => {
     res.setHeader('Content-Type', 'application/json');
     res.send(data);
-    })
-  .catch(err => {
+  }).catch(err => {
     console.error(err);
   });
 });
