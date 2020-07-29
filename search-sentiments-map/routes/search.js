@@ -19,6 +19,7 @@ const express = require('express');
 let router = express.Router();
 
 const fetch = require('node-fetch'); // Used to access custom search.
+const sentiment = require('./sentiment.js')
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 const WORLD_DATA_KIND = 'WorldDataByTopic';
@@ -193,7 +194,7 @@ async function updateSearchResults() {
         countries, topic);
     search.addWorldDataByTopicToDatastore(topic, countriesData);
 
-    // Note: when testing ,use i < 1 to test for only one trend, and comment 
+    // Note: When testing, use i < 1 to test for only one trend, and comment 
     // out `await new Promise` line to avoid 1 minute pauses.
     await search.sleep(PAUSE_ONE_MIN_MS);
   }
@@ -307,34 +308,16 @@ async function formatCountryResults(searchResultsJson) {
  * @return {Object} Formatted search result data in JSON form.
  */
 function formatSearchResult(searchResult) {
-  return search.getSentiment(searchResult)
-      .then(response => response.json())
+  return sentiment.getSentimentScore(searchResult.title + searchResult.snippet)
       .then((result) => {
         return {
           title: searchResult.title,
           snippet: searchResult.snippet,
           htmlTitle: searchResult.htmlTitle,
           link: searchResult.link,
-          score: SCORE_SCALE_MULTIPLIER * result.score,
+          score: SCORE_SCALE_MULTIPLIER * result,
         };
       });
-}
-
-/** 
- * Gets the sentiment score of a search result. 
- * @param {Object} searchResult Object for one search result.
- */
-function getSentiment(searchResult) {
-  return
-      fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {
-    method: 'POST',  // Send a request to the URL.
-    headers: new Headers({
-      'Content-Type': 'text/plain',
-    }),
-    body: searchResult.title + searchResult.snippet
-  }).catch(err => {
-    console.log(err);
-  });
 }
 
 /** Deletes stale search results. */
@@ -422,7 +405,6 @@ const search = {
   getCustomSearchResultsForCountry,
   formatCountryResults,
   formatSearchResult,
-  getSentiment,
   deleteAncientResults,
   addWorldDataByTopicToDatastore,
   sleep,

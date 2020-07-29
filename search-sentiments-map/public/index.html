@@ -73,7 +73,7 @@
 
     <div id="timeline-slider-div">
       <label id="timeline-slider-label" for="timeline-slider">See results from 0 days ago</label>
-      <input type="range" min="0" max="13" value="0" class="custom-range" id="timeline-slider" oninput=timelineSliderChanged()>
+      <input type="range" min="-13" max="0" value="0" class="custom-range" id="timeline-slider" onchange=timelineSliderChanged()>
     </div>
 
     <div id="top-left-div">
@@ -112,7 +112,6 @@
           <button type="submit" class="btn btn-primary" id="submit-user-topic" onclick="searchTopic()">Search</button>
         </div>
       </form>
-      <br>
       <div id="trends-div">
         <h3>Trending Search Topics</h3>
         <ul id="trends-list">
