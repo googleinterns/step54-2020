@@ -24,7 +24,7 @@ const datastore = new Datastore();
 const TRENDS_DATA_KIND = 'TrendsEntry';
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
 // Constant for getting popularity data from 8 days ago.
-const DATA_FROM_8_DAYS_AGO_MS = 8 * 24 * 60 * 60000; 
+const DATA_THRESHOLD_8_DAYS_AGO_MS = 8 * 24 * 60 * 60000; 
 const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
 // Time interval between data updates.
 const TIME_RANGE_INTERVAL_12_HRS_MS = 12 * 60 * 60000;

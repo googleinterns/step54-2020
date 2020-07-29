@@ -141,24 +141,25 @@ function displayPopularityTimeline(countryCode) {
   })
   .then(interestData => interestData.json())
   .then(timelineJSON => {
-      if (timelineJSON.length === 0) {
-        popularityTimelineElement.innerText = 
-            'Popularity Timeline is not available for the selected country.';
-      } else {
-        drawPopularityTimeline(timelineJSON.default.timelineData, 
-            popularityTimelineElement, getCurrentSearchData().topic);
-      }
-    });
+    if (timelineJSON.length === 0) {
+      popularityTimelineElement.innerText = 
+          'Popularity Timeline is not available for the selected country.';
+    } else {
+      drawPopularityTimeline(timelineJSON.default.timelineData, 
+          popularityTimelineElement, getCurrentSearchData().topic);
+    }
+  });
 }
 
 // Use version 45 to allow for chart ticks to be drawn when the div container is
 // hidden. Needs to load before any functions are called. 
 google.charts.load('45', {'packages':['corechart']});
+
 /** 
  * Draw the popularity timeline in a country for the current search trend on
  * modal.
- * @param {!Array<JSON>} timelineData The past week's search interest values for
- * the given topic
+ * @param {!Array<JSON>} timelineData TThe past week's search interest data for 
+ * the given topic.
  * @param {Object} popularityTimelineElement The element where the popularity 
  * timeline is updated.
  * @param {String} topic The search topic that the popularity timeline is based on.
