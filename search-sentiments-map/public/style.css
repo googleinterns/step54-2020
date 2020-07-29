@@ -221,3 +221,12 @@ input:checked + .slider:before {
   max-height: 200px;
   overflow-y: auto;
 }
+
+/* .modal-content,
+.modal-body {
+  width: 100vw;
+}
+
+div[role=tabpanel] {
+  width: 100vw;
+} */

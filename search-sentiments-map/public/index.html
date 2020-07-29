@@ -12,13 +12,15 @@
     <script src="scripts/current-data-script.js"></script>
     <script src="scripts/map-script.js"></script>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <!-- Use version 45 to allow for chart ticks to be drawn when the div container is hidden. Needs to load before any functions are called.  -->
+    <script>google.charts.load('45', {'packages':['corechart']});</script>
     <script src="scripts/modal-script.js"></script>
     <script src="scripts/trends-script.js"></script>
     <script src="scripts/timeline-script.js"></script>
     <script src="scripts/search-topic-script.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
-  <body onload="initMap(); updateTrends(); countrySelectSetUp();">    
+  <body onload="initMap(); updateTrends(); countrySelectSetUp(); loadCharts()">    
     <div class="modal fade" id="region-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -33,13 +35,13 @@
                   <a class="nav-link active" href="#search-results-tab" aria-controls="search-results-tab" role="tab" data-toggle="tab">Search Results</a>
                 </li>
                 <li role="presentation" class="nav-item">
-                  <a class="nav-link" href="#sentiment-chart-tab" aria-controls="sentiment-chart-tab" role="tab" data-toggle="tab">Sentiment Chart</a>
+                  <a class="nav-link" id="sentiment-chart-link" href="#sentiment-chart-tab" aria-controls="sentiment-chart-tab" role="tab" data-toggle="tab">Sentiment Chart</a>
                 </li>
                 <li role="presentation" class="nav-item">
                   <a class="nav-link" href="#top-trends-tab" aria-controls="top-trends-tab" role="tab" data-toggle="tab">Top Trends</a>
                 </li>
                 <li role="presentation" class="nav-item">
-                    <a class="nav-link" href="#popularity-timeline-tab" aria-controls="popularity-timeline-tab" role="tab" data-toggle="tab">Popularity Timeline</a>
+                    <a class="nav-link" id="popularity-timeline-link"href="#popularity-timeline-tab" aria-controls="popularity-timeline-tab" role="tab" data-toggle="tab">Popularity Timeline</a>
                 </li>
               </ul>
               <div class="tab-content">

@@ -15,8 +15,9 @@
 // The default score assigned to countries with no search results.
 const POSITIVE_COLOR = 'green';
 const NEGATIVE_COLOR = 'red';
+// The country code for the country that the user has selected.
 let countryCode = '';
-let resized = false;
+// The cache for the popularity timeline data.
 let cachePopularityTimeline = {};
  
 // Create trigger to resizeEnd event.     
@@ -30,16 +31,11 @@ $(window).resize(function() {
 // Redraw graph when window resize is completed. 
 $(window).on('resizeEnd', function() {
   if (countryCode !== ''){
-    // Use version 45 to allow for chart ticks to be drawn when the div container is
-    // hidden. Needs to load before any functions are called. 
-    // google.charts.load('45', {'packages':['corechart']});
     google.charts.setOnLoadCallback(displaySentimentChartForCurrentTrend);
     google.charts.setOnLoadCallback(displayPopularityTimeline); 
-    // displaySentimentChartForCurrentTrend();
-    // displayPopularityTimeline();
-    
   }
 });
+
 /**
  * Displays the information modal when a region on the map is clicked.
  * @param {?google.maps.MouseEvent} e Click event.
@@ -59,9 +55,21 @@ function onClickRegion(e) {
   document.getElementById('modal-title').innerText = countryName;
   displayTopResultsForCurrentTrend(countryId);
   setCountryTrends(countryId);
-  google.charts.load('45', {'packages':['corechart']});
-  google.charts.setOnLoadCallback(displaySentimentChartForCurrentTrend);
-  google.charts.setOnLoadCallback(displayPopularityTimeline); 
+}
+
+
+/**
+ * Loads the chart only when the tab is clicked on in order to get a width from 
+ * the parent containers.
+ */
+function loadCharts() {
+    $('#sentiment-chart-link').on('shown.bs.tab', function(){
+      displaySentimentChartForCurrentTrend();
+    });
+
+    $('#popularity-timeline-link').on('shown.bs.tab', function(){
+      displayPopularityTimeline();
+    });
 }
  
 /**
@@ -148,29 +156,36 @@ function displayTopResultsForCurrentTrend(countryCode) {
 /** 
  * Displays the popularity timeline for the current search topic in the 
  * selected country's modal.
- * @param {string} countryCode The two-letter code of the selected country.
  */
 function displayPopularityTimeline() {
   const popularityTimelineElement = document.getElementById('popularity-timeline-tab');
   popularityTimelineElement.innerHTML = '';
-  postTrendsToGetPopularityTimelineData.then(timelineJSON => {
-    if (timelineJSON.length === 0) {
-        popularityTimelineElement.innerText = 
-            'Popularity Timeline is not available for the selected country.';
-    } else {
-      drawPopularityTimeline(timelineJSON.default.timelineData, popularityTimelineElement, 
-          getCurrentSearchData().topic);
-    }
-  });
-   
+  postTrendsToGetPopularityTimelineData(getCurrentSearchData().topic, countryCode)
+      .then(timelineJSON => {
+        if (timelineJSON.length === 0) {
+            popularityTimelineElement.innerText = 
+                'Popularity Timeline is not available for the selected country.';
+        } else {
+          drawPopularityTimeline(timelineJSON.default.timelineData, popularityTimelineElement, 
+              getCurrentSearchData().topic);
+        }
+      });
+      
 }
-//helper function topic, countrycode, but wants to check if the countrycode and topic is in the cache
-function postTrendsToGetPopularityTimelineData(topic, countryCode) { //async functions return everything in a promise, now this function returns a promise wrapped around the timelineJSOn value
-  //check if counctry code and topic is in cache already
+/** 
+ * Gets the popularity timeline data from the Google Trends API if it is not
+ * stored in the local cache. Prevents making too many calls to the API if the 
+ * user continuously resizes the window.
+ * @param {string} topic The search topic that the popularity timeline is based on.
+ * @param {string} countryCode Two letter country code for selected country.
+ * @return {Promise} The promise which resolves to the the timeline JSON data.
+ */
+function postTrendsToGetPopularityTimelineData(topic, countryCode) {
+  // Check if counctry code and topic is in the cache already.
   if (cachePopularityTimeline[topic]) {
-    return Promise.resolve(cachePopularityTimeline[topic][countryCode]); //returns only a object
+    return Promise.resolve(cachePopularityTimeline[topic][countryCode]);
   }
-  return fetch('/trends/', { // await converts a promise into a value, returns timelineJSON, without the await returns a promise wrapped around the timelineJSoN value
+  return fetch('/trends/', { 
     method: 'post',
     headers: {
       'Accept': 'application/json',
@@ -186,14 +201,15 @@ function postTrendsToGetPopularityTimelineData(topic, countryCode) { //async fun
     if (!cachePopularityTimeline[topic]) {
       cachePopularityTimeline[topic] = {};
     }
+    // For each search topic, you cache the result of the fetch.
+    // Example: {Sophie Turner: {US: timelineJSON}}
     cachePopularityTimeline[topic][countryCode] = timelineJSON;
     return timelineJSON;
   }).catch((err) => {
     console.log(err);
   });
 }
- //for each search term you cache the result of the fetch, map of countrycode + search term value: timelineData
- //2. javascript object option topic: Sophie Turner { country: US {timelineData}}
+
 /** 
  * Draw the popularity timeline in a country for the current search trend on
  * modal.
@@ -212,8 +228,6 @@ function drawPopularityTimeline(timelineData, popularityTimelineElement, topic) 
   }
   var options = {
     title: 'Popularity of ' + topic,
-    // width: 750,
-    // height: 400,
     legend: {position: 'none'},
     hAxis: {
       title: 'Date',
@@ -281,9 +295,6 @@ function drawSentimentChart(chartElement, results) {
   }, 2]);
  
   let options = {
-    title: 'Sentiment Scores of Search Results',
-    // width: 750,
-    // height: 400,
     bar: {groupWidth: '55%'},
     legend: {position: 'none'},
     hAxis: {title: 'Search Results Index'},
