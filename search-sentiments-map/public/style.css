@@ -37,6 +37,10 @@ i {
   width: 33%;
 }
 
+#timeline-slider {
+  width: 120% !important;
+}
+
 .color-key {
   background: linear-gradient(to right,
     hsl(5, 69%, 54%) 0%,
