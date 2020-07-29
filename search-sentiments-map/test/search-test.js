@@ -2,7 +2,8 @@ const chai = require('chai');
 const assert = chai.assert;
 const sinon = require('sinon');
 const search = require('./../routes/search').search;
-const sentiment = require('./../routes/sentiment.js')
+const searchInterestsModule = require('./search-interests.js');
+const sentiment = require('./../routes/sentiment.js');
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 const fetch = require('node-fetch'); // Used to access custom search.
@@ -22,7 +23,7 @@ describe('Search', function() {
         {trendTopic: "trend2"},
         {trendTopic: "trend3"},
       ];
-      // Stubbing because it is tested separately.
+      // Functions are stubbed because they are tested separately.
       deleteAncientResultsStub = 
           sinon.stub(search, 'deleteAncientResults')
               .resolves('Not interested in the output');
@@ -30,12 +31,12 @@ describe('Search', function() {
           sinon.stub(search, 'getSearchResultsForCountriesForTopic')
               .resolves('Not interested in the output');
 
-      // Stubbing to avoid 1 minute wait
+      // Sleep function is stubbed to avoid 1 minute pauses.
       sleepStub = 
           sinon.stub(search, 'sleep')
               .resolves('Not interested in the output');
 
-      // Stubbing calls to datastore
+      // Calls to the datastore are stubbed.
       sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
         trendsEntries = [{
           globalTrends: globalTrends
@@ -70,37 +71,56 @@ describe('Search', function() {
     });
   });
 
-  // describe('RetrieveSearchResultFromDatastore', function() {
-  //   beforeEach(() => {
-  //     sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
-  //       results = [{
-  //         topic: 'testTopic',
-  //         timestamp: 0,
-  //         dataByCountry: {},
-  //       }];
-  //       return [results];
-  //     });
-  //   });
+  describe('GetSearchResultsForCountriesForTopic', function() {
+    beforeEach(() => {
+      // Functions are stubbed because they are tested separately.
+      sinon.stub(search, 'formatCountryResults').callsFake((searchResults) => {
+        let results = []
+        searchResults.items.forEach(result => {
+          results.push({
+            title: result.title,
+            snippet: result.snippet,
+            htmlTitle: result.htmlTitle,
+            link: result.link,
+            score: 100,
+          });
+        });
+        Promise.resolve({
+          score: 100,
+          results: results,
+        });
+      });
+              
+      sinon.stub(searchInterestsModule, 'getGlobalSearchInterests').resolves({
+        {geoCode: 'AU'},
+        {geoCode: 'US'},
+      });
 
-  //   afterEach(() => {
-  //     sinon.restore();
-  //   });
+      // Sleep function is stubbed to avoid 1 minute pauses.
+      sleepStub = 
+          sinon.stub(search, 'sleep').resolves('Not interested in the output');
 
-  //   it('should return latest datastore data', async function() {
-  //     const results = await search.retrieveSearchResultFromDatastore('testTopic');
+     // need to stub custom search call
+    });
 
-  //     results.topic.should.equal('testTopic');
-  //     results.timestamp.should.equal(0);
-  //     expect(results.dataByCountry).to.be.empty;
-  //   });
-  // });
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    it('should return latest datastore data', async function() {
+      const results = await search.getSearchResultsForCountriesForTopic(['AU', 'US'], 'testTopic');
+      
+      console.log(results);
+    });
+  });
 
 
   describe('FormatCountryResults', function() {
     beforeEach(() => {
-      // let getSentimentScoreStub = sinon.stub(sentiment, 'getSentimentScore');
-      // getSentimentScoreStub.onCall(0).returns({score: 10});
-      // getSentimentScoreStub.onCall(1).returns({score: 20});
+      // Function is stubbed because it is tested separately.
+      let getSentimentScoreStub = sinon.stub(sentiment, 'getSentimentScore');
+      getSentimentScoreStub.onCall(0).resolves(10);
+      getSentimentScoreStub.onCall(1).resolves(20);
     });
 
     afterEach(() => {
@@ -119,13 +139,13 @@ describe('Search', function() {
             [{
               title: 'item1Title',
               snippet: 'item1Snippet',
-              htmlSnippet: 'item1HtmlSnippet',
+              htmlTitle: 'item1HtmlTitle',
               link: 'item1Link',
             },
             {
               title: 'item2Title',
               snippet: 'item2Snippet',
-              htmlSnippet: 'item2HtmlSnippet',
+              htmlTitle: 'item2HtmlTitle',
               link: 'item2Link',
             }],
       };
@@ -133,24 +153,23 @@ describe('Search', function() {
       const formattedResult1 = {
         title: 'item1Title',
         snippet: 'item1Snippet',
-        htmlSnippet: 'item1HtmlSnippet',
+        htmlTitle: 'item1HtmlTitle',
         link: 'item1Link',
-        score: 1000,
+        score: 1000
       };
 
       const formattedResult2 = {
         title: 'item2Title',
         snippet: 'item2Snippet',
-        htmlSnippet: 'item2HtmlSnippet',
+        htmlTitle: 'item2HtmlTitle',
         link: 'item2Link',
-        score: 2000,
+        score: 2000
       };
 
-      // const results = await search.formatCountryResults(searchParameter);
-
+      const results = await search.formatCountryResults(searchParameter);
       assert.equal(results.score, 1500);
-      assert.equal(results.results[0], formattedResult1);
-      assert.equal(results.results[1], formattedResult2);
+      assert.deepEqual(results.results[0], formattedResult1);
+      assert.deepEqual(results.results[1], formattedResult2);
     });
   });
 
@@ -165,7 +184,7 @@ describe('Search', function() {
       datastoreEntities[2][datastore.KEY] = datastore.key(['WorldDataByTopic', 2]);
       entitiesToDelete = [];
 
-      // Stubbing calls to datastore
+      // Calls to the datastore are stubbed.
       sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
         return [datastoreEntities];
       });
