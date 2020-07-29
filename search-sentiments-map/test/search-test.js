@@ -2,7 +2,7 @@ const chai = require('chai');
 const assert = chai.assert;
 const sinon = require('sinon');
 const search = require('./../routes/search').search;
-const searchInterestsModule = require('./search-interests.js');
+const searchInterestsModule = require('./../routes/search-interests.js');
 const sentiment = require('./../routes/sentiment.js');
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
@@ -85,16 +85,22 @@ describe('Search', function() {
             score: 100,
           });
         });
-        Promise.resolve({
+        return Promise.resolve({
           score: 100,
           results: results,
         });
       });
               
-      sinon.stub(searchInterestsModule, 'getGlobalSearchInterests').resolves({
-        {geoCode: 'AU'},
-        {geoCode: 'US'},
-      });
+    sinon.stub(searchInterestsModule, 'getGlobalSearchInterests').resolves([
+        {
+          geoCode: 'AU',
+          value: [10],
+        },
+        {
+          geoCode: 'US',
+          value: [10],
+        }
+      ]);
 
       // Sleep function is stubbed to avoid 1 minute pauses.
       sleepStub = 
@@ -108,7 +114,7 @@ describe('Search', function() {
     });
 
     it('should return latest datastore data', async function() {
-      const results = await search.getSearchResultsForCountriesForTopic(['AU', 'US'], 'testTopic');
+      const results = await search.getSearchResultsForCountriesForTopic(['AU', 'US', 'GB'], 'testTopic');
       
       console.log(results);
     });
