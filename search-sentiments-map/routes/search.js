@@ -88,6 +88,7 @@ async function retrieveSearchResultFromDatastore(topic, timeRange) {
 
   try {
     const [worldDataByTopic] = await datastore.runQuery(query);
+    console.log(worldDataByTopic);
     return {
       topic: worldDataByTopic[0].topic,
       timestamp: worldDataByTopic[0].timestamp,

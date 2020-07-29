@@ -4,6 +4,7 @@ const sinon = require('sinon');
 const search = require('./../routes/search').search;
 const sentiment = require('./../routes/sentiment.js')
 const {Datastore} = require('@google-cloud/datastore');
+const datastore = new Datastore();
 const fetch = require('node-fetch'); // Used to access custom search.
 
 describe('Search', function() {
@@ -150,6 +151,41 @@ describe('Search', function() {
       assert.equal(results.score, 1500);
       assert.equal(results.results[0], formattedResult1);
       assert.equal(results.results[1], formattedResult2);
+    });
+  });
+
+  describe('DeleteAncientResults', function() {
+    let datastoreEntities;
+    const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
+
+    beforeEach(() => {
+      datastoreEntities = [{timestamp: 1593455070000}, {timestamp: 1593541470000}, {timestamp: Date.now()}];
+      datastoreEntities[0][datastore.KEY] = datastore.key(['WorldDataByTopic', 0]);
+      datastoreEntities[1][datastore.KEY] = datastore.key(['WorldDataByTopic', 1]);
+      datastoreEntities[2][datastore.KEY] = datastore.key(['WorldDataByTopic', 2]);
+      entitiesToDelete = [];
+
+      // Stubbing calls to datastore
+      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
+        return [datastoreEntities];
+      });
+
+      sinon.stub(Datastore.prototype, 'delete').callsFake((entity) => {
+        entitiesToDelete.push(entity);
+      });
+    })
+
+    afterEach(() => {
+      sinon.restore();
+    })
+
+    it('should update search results for all global trends', async function() {
+      await search.deleteAncientResults();
+      entitiesToDelete.forEach((entity) => {
+        datastoreEntities.splice(entity.id, 1);
+      })
+      assert.equal(datastoreEntities.length, 1);
+      assert.isAbove(Date.now() - datastoreEntities[0].timestamp, STALE_DATA_THRESHOLD_7_DAYS_MS);
     });
   });
 });
