@@ -53,14 +53,17 @@ function setTopTrends(useGlobalTrends = true) {
       'Last Updated: ' + new Date(getCurrentTopTrends().timestamp);
 }
 
-/** Helper function for the `setTopTrends` function. */
+/** 
+ * Add the trends to the list element on the DOM. Helper function for the 
+ * `setTopTrends` function. 
+ */
 function addTrendsToList(trendsList, trends, useGlobalTrends) {
   for (let i = 0; i < trends.length; i++) {
     const trendElement = document.createElement('li');
 
     // TODO(chenyuz): change the backend to call them both 'topic'.
-    trendElement.innerHTML = useGlobalTrends ? 
-        trends[i].trendTopic : trends[i].topic;
+    trendElement.innerHTML = 
+        useGlobalTrends ? trends[i].trendTopic : trends[i].topic;
     trendElement.id = 'trend' + i;
     // Show a certain number of trending topics by default and hide the rest.
     trendElement.className = i < NUM_SHOWN ? CLASSNAME_SHOWN : CLASSNAME_HIDDEN;

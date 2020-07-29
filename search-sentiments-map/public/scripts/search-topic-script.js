@@ -29,7 +29,7 @@ function searchTopic() {
 /** 
  * Updates the current data on the map for the user-selected countries and
  * topic at world level.
- * @param {string} topic The topic that the user inputted.
+ * @param {string} topic The topic that the user entered.
  */
 function searchWorldTopic(topic) {
   // Make sure there is at least 1 selected country and a non-empty topic.

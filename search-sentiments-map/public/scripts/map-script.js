@@ -155,11 +155,13 @@ function loadCountryData() {
       dataVariable = 
           isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
       if (dataVariable > dataVariableMax) {
+        // Keep track of the maximum score and corresponding country.
         dataVariableMax = dataVariable;
         countryMax = country;
       }
       if (dataVariable < dataVariableMin && 
           dataVariable !== NO_RESULTS_DEFAULT_SCORE) {
+        // Keep track of the minimum score and corresponding country.
         dataVariableMin = dataVariable;
         countryMin = country;
       }
@@ -184,20 +186,21 @@ function loadStateData() {
   let stateMax = '';
   let stateMin = '';
 
-  let stateInterests = getCurrentSearchData();
   map.data.forEach(function(row) {
     let stateName = row.getProperty('NAME');
-    let interest = stateInterests.filter(stateInterest => 
+    let interest = getCurrentSearchData().filter(stateInterest => 
         stateInterest.geoName === stateName);
     let dataVariable = interest.length === 0 ? 
         NO_RESULTS_DEFAULT_SCORE : interest[0].value[0];
 
     if (dataVariable > dataVariableMax) {
+      // Keep track of the maximum score and corresponding state.
       dataVariableMax = dataVariable;
       stateMax = stateName;
     }
     if (dataVariable < dataVariableMin && 
         dataVariable !== NO_RESULTS_DEFAULT_SCORE) {
+      // Keep track of the minimum score and corresponding state.
       dataVariableMin = dataVariable;
       stateMin = stateName;
     }

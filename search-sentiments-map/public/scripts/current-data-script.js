@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-// String for the topic that the user is currently viewing.
+// The topic that the user is currently viewing.
 let currentTopic = '';
 
 // JSON object for the data that is currently displayed, including topic,
@@ -73,9 +73,10 @@ function setNewTrend(trend) {
 function highlightCurrentTrend() {
   let trendElements = document.getElementById('trends-list').childNodes;
   trendElements.forEach(function(trendElement) {
-    trendElement.innerHTML = (trendElement.innerText === currentTopic) ?
-        '<span class="font-weight-bold font-italic">' + currentTopic +
-        '</span>' : trendElement.innerText;
+    trendElement.innerHTML = (trendElement.innerText === currentTopic) 
+        ? '<span class="font-weight-bold font-italic">' + currentTopic 
+            + '</span>'
+        : trendElement.innerText;
   });
 }
 
