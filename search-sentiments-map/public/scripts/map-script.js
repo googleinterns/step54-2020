@@ -85,8 +85,6 @@ function initMap() {
   });
   map.controls[google.maps.ControlPosition.BOTTOM_LEFT]
       .push(document.getElementById('legend'));
-  map.controls[google.maps.ControlPosition.BOTTOM_RIGHT]
-      .push(document.getElementById('timeline-slider-div'));
 
   infowindow = new google.maps.InfoWindow({});
 
