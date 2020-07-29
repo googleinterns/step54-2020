@@ -16,8 +16,8 @@ i {
 }
 
 #legend {
-  background: #fff;
-  border: 3px solid #000;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #000;
   display: flex;
   display: -webkit-box;
   height: 45px;
@@ -34,7 +34,7 @@ i {
   padding: 10px 10px 0 10px;
   position: absolute;
   right: 50px;
-  width: 33%;
+  width: 33% !important;
 }
 
 #timeline-slider {
@@ -63,6 +63,7 @@ i {
   padding: 20px 20px 55px 20px;
   position: absolute;
   top: 50px;
+  width: 55%;
 }
 
 .mode-span {
