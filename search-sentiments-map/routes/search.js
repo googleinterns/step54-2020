@@ -308,7 +308,10 @@ async function formatCountryResults(searchResultsJson) {
  */
 function formatSearchResult(searchResult) {
   return search.getSentiment(searchResult)
-      .then(response => response.json())
+      .then(response => {
+        console.log(response);
+        response.json()
+      })
       .then((result) => {
         return {
           title: searchResult.title,
