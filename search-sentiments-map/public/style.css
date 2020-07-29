@@ -27,13 +27,14 @@ i {
 }
 
 #timeline-slider-div {
-  background: #fff;
-  border: 3px solid #000;
+  background-color: rgba(255, 255, 255, 0.5);
+  bottom: 50px;
   display: flex;
   display: -webkit-box;
-  margin: 10px;
-  padding: 10px;
-  width: 360px;
+  padding: 10px 10px 0 10px;
+  position: absolute;
+  right: 50px;
+  width: 33%;
 }
 
 .color-key {
@@ -57,7 +58,7 @@ i {
   left: 40px;
   padding: 20px 20px 55px 20px;
   position: absolute;
-  top: 40px;
+  top: 50px;
 }
 
 .mode-span {
@@ -131,8 +132,9 @@ input:checked + .slider:before {
   overflow: hidden;
   padding: 30px 0 20px 0;
   position: absolute;
-  right: 40px;
-  top: 40px;
+  right: 50px;
+  top: 50px;
+  width: 33%;
 }
 
 #show-hide-right-div {
@@ -142,8 +144,8 @@ input:checked + .slider:before {
   line-height: 40px;
   padding: 0;
   position: absolute;
-  right: 45px;
-  top: 45px;
+  right: 55px;
+  top: 55px;
   width: 40px;
   z-index: 9;
 }
