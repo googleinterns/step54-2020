@@ -12,9 +12,15 @@ describe('Search', function() {
     let getSearchResultsForCountriesForTopicStub;
     let sleepStub;
     let datastoreEntities;
+    let globalTrends;
 
     beforeEach(() => {
-      let datastoreEntities = [];
+      datastoreEntities = [];
+      globalTrends = [
+        {trendTopic: "trend1"},
+        {trendTopic: "trend2"},
+        {trendTopic: "trend3"},
+      ];
       // Stubbing because it is tested separately.
       deleteAncientResultsStub = 
           sinon.stub(search, 'deleteAncientResults')
@@ -31,11 +37,7 @@ describe('Search', function() {
       // Stubbing calls to datastore
       sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
         trendsEntries = [{
-          globalTrends: [
-            {trendTopic: "trend1"},
-            {trendTopic: "trend2"},
-            {trendTopic: "trend3"},
-          ]
+          globalTrends: globalTrends
         }];
         return [trendsEntries];
       });
@@ -45,9 +47,9 @@ describe('Search', function() {
       });
 
       sinon.stub(Datastore.prototype, 'save').callsFake((entity) => {
-        return datastoreEntities.push(entity);
+        datastoreEntities.push(entity);
       });
-})
+    })
 
     afterEach(() => {
       sinon.restore();
@@ -56,8 +58,14 @@ describe('Search', function() {
     it('should update search results for all global trends', async function() {
       await search.updateSearchResults();
       assert.equal(deleteAncientResultsStub.callCount, 1);
-      assert.equal(sleepStub.callCount, 3);
-      console.log(datastoreEntities);
+      assert.equal(sleepStub.callCount, globalTrends.length);
+      for (let i = 0; i < datastoreEntities.length; i++) {
+        assert.equal(datastoreEntities[i].key, 'fakeKey');
+        assert.equal(datastoreEntities[i].data.topic,
+            globalTrends[i].trendTopic);
+        assert.equal(datastoreEntities[i].data.lowercaseTopic,
+            globalTrends[i].trendTopic.toLowerCase());
+      }
     });
   });
 
