@@ -15,22 +15,26 @@
 // The default score assigned to countries with no search results.
 const POSITIVE_COLOR = 'green';
 const NEGATIVE_COLOR = 'red';
+
 /**
- * Displays the information modal when a country on the map is clicked.
+ * Displays the information modal when a region on the map is clicked.
  * @param {?google.maps.MouseEvent} e Click event.
  */
-function onClickCountry(e) {
-  if (e.feature.getProperty('country_data') != null) {
-    $('#region-info-modal').modal('show');
-
-    // Update Modal with information for relevant country.
-    const countryName = e.feature.getProperty('name');
-    const countryId = e.feature.getId();
-    document.getElementById('modal-title').innerText = countryName;
-    displayTopResultsForCurrentTrend(countryId);
-    setCountryTrends(countryId);
-    displaySentimentChartForCurrentTrend(countryId);
+function onClickRegion(e) {
+  // Don't display anything when the map is on state level, or when the clicked
+  // country has no data.
+  if (e.feature.getProperty('country_data') == null) {
+    return;
   }
+  $('#region-info-modal').modal('show');
+
+  // Update Modal with information for relevant country.
+  const countryName = e.feature.getProperty('name');
+  const countryId = e.feature.getId();
+  document.getElementById('modal-title').innerText = countryName;
+  displayTopResultsForCurrentTrend(countryId);
+  setCountryTrends(countryId);
+  displaySentimentChartForCurrentTrend(countryId);
 }
 
 /**
@@ -48,23 +52,32 @@ function setCountryTrends(countryCode) {
         } else {
           for (let i = 0; i < trends.length; i++) {
             let articlesId = 'trend' + i + 'Article';
-            let articlesHtml = 'Search results: <br>';
+            let articlesHtml = '';
             trends[i].articles.forEach(article => {
-              articlesHtml += '<span>' + article + '</span><br>';
-            });
+              articlesHtml += '<li><a href="' + article.url + '">' + 
+                  article.title + '</a></li>';
+            })
+            let exploreLink = 
+                'https://trends.google.com' + trends[i].exploreLink;
+            articlesHtml += 'Click <a href=' + exploreLink + 
+                '>here</a> to explore the topic on google trends website.';
             topTrendsTab.innerHTML += 
-                '<h5 class="country-trend" onclick="toggleDisplay(\''+ 
-                articlesId + '\')">' + trends[i].topic + '</h5>' + 
-                '<div id="'+ articlesId + '" class="hidden">' + 
-                articlesHtml + '</div>';
+                '<h5 class="country-trend" onclick="toggleDisplay(\''+
+                articlesId + '\')">' + trends[i].topic + '</h5>' +
+                '<i>' + trends[i].traffic + ' searches</i><br>' + '<ul id="' +
+                articlesId + '" class="hidden">' + articlesHtml + '</ul>';
           }
         }
         topTrendsTab.innerHTML += 
-            '<i>Last updated on ' + new Date(getTopTrends().timestamp) + '</i>';
+            '<i>Last updated on ' + new Date(getCurrentTopTrends().timestamp) +
+            '</i>';
       });
 }
 
-/** Toggles whether the element with the given id is displayed or not. */
+/** 
+ * Toggles whether the element with the given id is displayed or not, given 
+ * that the element has class 'shown' or 'hidden'. 
+ */
 function toggleDisplay(id) {
   document.getElementById(id).classList.toggle('shown');
   document.getElementById(id).classList.toggle('hidden');

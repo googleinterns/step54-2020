@@ -16,10 +16,15 @@
     "request": "^2.81.0",
     "sentiment": "^5.0.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.1",
+    "sinon": "^7.5.0",
+    "faker": "^4.1.0"
+  },
   "scripts": {
     "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "",
   "license": "ISC"

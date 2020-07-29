@@ -13,6 +13,7 @@
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="scripts/modal-script.js"></script>
     <script src="scripts/trends-script.js"></script>
+    <script src="scripts/timeline-script.js"></script>
     <script src="scripts/search-topic-script.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
@@ -66,17 +67,35 @@
       <div id="data-max">max</div>
     </div>
 
+    <div id="timeline-slider-div">
+      <label id="timeline-slider-label" for="timeline-slider">See results from 0 days ago</label>
+      <input type="range" min="-13" max="0" value="0" class="custom-range" id="timeline-slider" onchange=timelineSliderChanged()>
+    </div>
+
     <div id="top-left-div">
       <h3 id="topic-header">Worldwide sentiments</h3>
       <h6 id="extrema-sentiment"></h6>
       <label class="switch">
-        <input id="sentiment-popularity-check" type="checkbox" onclick="loadCountryDataByMode()">
+        <input id="sentiment-popularity-check" type="checkbox" onclick="loadRegionDataByMode()">
         <span class="slider"></span>
       </label>
-      <span id="switch-info">Switch between Sentiment Mode & Popularity Mode.</span>
+      <span id="switch-info">
+        Switch between 
+        <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows sentiment scores on selected search topic." data-placement="top">
+          Sentiment Mode
+        </span> 
+        & 
+        <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows interest scores on selected search topic." data-placement="top">
+          Popularity Mode
+        </span>
+        .
+      </span>    
     </div>
 
-    <div id="right-div">
+    <!-- The inner text is a dash, which is longer than a hyphen. Copy-paste it if needed. -->
+    <button id="show-hide-right-div" type="button" class="btn btn-light" onclick="toggleRightPanel()" aria-pressed="true" data-toggle="popover" data-trigger="hover" data-content="Toggle the Panel">–</button>
+
+    <div id="right-div" class="shown">
       <form onsubmit="return false">
         <div id="search-div">
           <input type="text" class="form-control" id="search-topic" name="search-topic" placeholder="Search for a topic">
@@ -84,18 +103,24 @@
             <button class="btn btn-default dropdown-toggle" type="button"  id="country-dropdown-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
               Countries to view results for(max 3)<span class="caret"></span>
             </button>
-            <ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="dropdownMenu1" id="country-select-dropdown" ></ul>
+            <ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="dropdownMenu1" id="country-select-dropdown"></ul>
           </div>
           <button type="submit" class="btn btn-primary" id="submit-user-topic" onclick="searchTopic()">Search</button>
         </div>
       </form>
-      <br><br>
       <div id="trends-div">
         <h3>Trending Search Topics</h3>
         <ul id="trends-list">
         </ul>
         <i id="trends-timestamp"></i>
       </div>
+    </div>
+
+    <div id="bottom-left-div">
+      <select id="zoom-level-select" class="form-control" onchange="resetMapZoomLevel()">
+        <option value="world" selected>World Level</option>
+        <option value="us">United States</option>
+      </select>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
