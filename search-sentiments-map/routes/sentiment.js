@@ -12,32 +12,18 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-/** Server-side script that uses the Google Cloud Natural Language API to get the sentiment score. */
+/** 
+ * Server-side script that uses the Google Cloud Natural Language API to get 
+ * the sentiment score. 
+ */
 const express = require('express');
-var router = express.Router();  // Using Router to divide the app into modules.
-var allSettled = require('promise.allsettled');
 const language = require('@google-cloud/language');
-
-var bodyParser = require('body-parser');
-var textParser = bodyParser.text();
-
-router.post('/', textParser, (req, res) => {
-  getSentimentScore(req.body).then((sentimentScore) => {
-    response = {
-      score: sentimentScore,
-    };
-    res.end(JSON.stringify(response));
-  }).catch(err => {
-    console.log(err);
-  });
-});
 
 /** 
  *  Gets the sentiment score of a given search result title and snippet.
  *  @param {string} searchResultTitleSnippet The concatenated title and snippet
  *      of the search result.
  *  @return {number} The sentiment score of the combined title and snippet.
- *  TODO(ntarn): Export this method to use directly with search.js
  */
 async function getSentimentScore(searchResultTitleSnippet) {
   try {
@@ -51,8 +37,6 @@ async function getSentimentScore(searchResultTitleSnippet) {
 
     // Detect the sentiment of the text.
     const [result] = await client.analyzeSentiment({ document: document });
-    const sentiment = result.documentSentiment;
-
     return sentiment.score;
   } catch (err) {
     // Occurs when the language is not supported for document sentiment
@@ -62,4 +46,4 @@ async function getSentimentScore(searchResultTitleSnippet) {
   }
 }
 
-module.exports.router = router;
+module.exports.getSentimentScore = getSentimentScore;

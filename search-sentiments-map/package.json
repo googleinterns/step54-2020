@@ -13,7 +13,8 @@
     "express": "^4.17.1",
     "google-trends-api": "^4.9.0",
     "promise.allsettled": "^1.0.2",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "sentiment": "^5.0.2"
   },
   "devDependencies": {
     "chai": "^4.2.0",
