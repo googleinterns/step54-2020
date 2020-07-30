@@ -12,7 +12,8 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-// The default score assigned to countries with no search results.
+// The colors assigned depending on if the sentiment score is positive or 
+// negative.
 const POSITIVE_COLOR = 'green';
 const NEGATIVE_COLOR = 'red';
 
@@ -35,6 +36,7 @@ function onClickRegion(e) {
   displayTopResultsForCurrentTrend(countryId);
   setCountryTrends(countryId);
   displaySentimentChartForCurrentTrend(countryId);
+  displayPopularityTimeline(countryId);
 }
 
 /**
@@ -44,8 +46,9 @@ function onClickRegion(e) {
 function setCountryTrends(countryCode) {
   const topTrendsTab = document.getElementById('top-trends-tab');
   topTrendsTab.innerHTML = '<h4>Trending topics in selected country: </h4>';
-  fetch('/country-trends/' + countryCode).then(countryTrends =>
-      countryTrends.json()).then(trends => {
+  fetch('/country-trends/' + getCurrentTimeRange() + '/' + countryCode)
+      .then(countryTrends => countryTrends.json())
+      .then(trends => {
         if (trends.length === 0) {
           topTrendsTab.innerHTML = 
               'Trends are not available for the selected country.<br>';
@@ -74,20 +77,18 @@ function setCountryTrends(countryCode) {
       });
 }
 
-/** 
- * Toggles whether the element with the given id is displayed or not, given 
- * that the element has class 'shown' or 'hidden'. 
- */
+/** Toggles whether the element with the given id is displayed or not. */
 function toggleDisplay(id) {
-  document.getElementById(id).classList.toggle('shown');
   document.getElementById(id).classList.toggle('hidden');
 }
 
 /** 
- * Displays the top results in a country for current search trend on modal. 
+ * Displays the top results in a country for the current search trend on modal
+ * and show positive words if the sign of the sentiment score is positive,
+ * and negative words if the sign is negative. 
  * @param {string} countryCode Two letter country code for selected country.
  */
-function displayTopResultsForCurrentTrend(countryCode) {
+async function displayTopResultsForCurrentTrend(countryCode) {
   let date = new Date(getCurrentSearchData().timestamp);
   let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
@@ -108,14 +109,139 @@ function displayTopResultsForCurrentTrend(countryCode) {
     // Get search results for the specified country.
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
-      // i + 1 shows the index for each search result. 
-      resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
-          results[i].link + '>' + results[i].htmlTitle + '</a><br>' + 
-          results[i].snippet + '<br>' + '<i>Sentiment Score: ' + 
-          results[i].score.toFixed(1) + '</i><br>';
+      let snippet = results[i].snippet;
+      await fetch('/sentiment-words/' + snippet)
+          .then(resultsJsonArray => resultsJsonArray.json())
+          .then(sentimentWordsResult => {
+            // i + 1 shows the index for each search result.
+            resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
+                results[i].link + '>' + results[i].htmlTitle + '</a><br>';
+
+            // Check that positive and negative words are detected by the Node.js 
+            // sentiment API.
+            if (sentimentWordsResult != null) {
+              let positiveWords = sentimentWordsResult.positive;
+              let negativeWords = sentimentWordsResult.negative;
+              if (results[i].score > 0 && positiveWords.length !== 0) {
+                highlightWords(
+                  snippet, new Set(positiveWords), true, resultElement);
+              } else if (results[i].score < 0 && negativeWords.length !== 0) {
+                highlightWords(
+                  snippet, new Set(negativeWords), false, resultElement);
+              } else {
+                resultElement.innerHTML += snippet;
+              }
+            }
+            resultElement.innerHTML += '<br><i>Sentiment Score: ' + 
+                  results[i].score.toFixed(1) + '</i><br>';
+          });
     }
+    resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
   }
-  resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
+}
+
+/**
+ * Highlights the positive words green if the sign of the sentiment score 
+ * is positive and negative words red if the sign is negative.
+ * @param {string} snippet Snippet to display in the search results tab.
+ * @param {Set} wordsToHighlight Words to highlight a different color.
+ * @param {boolean} scoreIsPositive Boolean for whether or not the sentiment 
+ *     score is positive.
+ * @param {Object} resultElement Tab element to update with the search result 
+ *     snippet.
+ */
+function highlightWords(
+    snippet, wordsToHighlight, scoreIsPositive, resultElement) {
+  let startDisplayingSnippetIndex = 0;
+  wordsToHighlight.forEach((word) => {
+    let wordIndex = snippet.toLowerCase().indexOf(word);
+    if (wordIndex !== -1){
+      let positiveHighlight = '<span style="color: ' +
+          POSITIVE_COLOR + ';">' +
+          snippet.substring(wordIndex, wordIndex + word.length) +
+          '</span>';
+      let negativeHighlight = '<span style="color: ' +
+          NEGATIVE_COLOR + ';">' +
+          snippet.substring(wordIndex,  wordIndex + word.length) +
+          '</span>';
+      snippet = scoreIsPositive ?
+          snippet.replace(new RegExp( '\\b'+ word + '\\b', 'gi'), positiveHighlight) : 
+          snippet.replace(new RegExp('\\b' + word + '\\b', 'gi'), negativeHighlight);
+    }
+  });
+  resultElement.innerHTML += snippet;
+}
+
+/** 
+ * Displays the popularity timeline for the current search topic in the 
+ * selected country's modal.
+ * @param {string} countryCode The two-letter code of the selected country.
+ */
+function displayPopularityTimeline(countryCode) {
+  const popularityTimelineElement = document.getElementById('popularity-timeline-tab');
+  popularityTimelineElement.innerHTML = '';
+  fetch('/trends/', {
+    method: 'post',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      topic: getCurrentSearchData().topic,
+      code: countryCode,
+    }),
+  })
+  .then(interestData => interestData.json())
+  .then(timelineJSON => {
+    if (timelineJSON.length === 0) {
+      popularityTimelineElement.innerText = 
+          'Popularity Timeline is not available for the selected country.';
+    } else {
+      drawPopularityTimeline(timelineJSON.default.timelineData, 
+          popularityTimelineElement, getCurrentSearchData().topic);
+    }
+  });
+}
+
+// Use version 45 to allow for chart ticks to be drawn when the div container is
+// hidden. Needs to load before any functions are called. 
+google.charts.load('45', {'packages':['corechart']});
+
+/** 
+ * Draw the popularity timeline in a country for the current search trend on
+ * modal.
+ * @param {!Array<JSON>} timelineData The past week's search interest data for 
+ * the given topic.
+ * @param {Object} popularityTimelineElement The element where the popularity 
+ * timeline is updated.
+ * @param {String} topic The search topic that the popularity timeline is based on.
+ */
+function drawPopularityTimeline(timelineData, popularityTimelineElement, topic) {
+  var data = new google.visualization.DataTable();
+  data.addColumn('string');
+  data.addColumn('number');
+  for (let i = 0; i < timelineData.length; i++) {
+    data.addRows([[timelineData[i].formattedAxisTime, timelineData[i].value[0]]]);
+  }
+  var options = {
+    title: 'Popularity of ' + topic,
+    width: 750,
+    height: 400,
+    legend: {position: 'none'},
+    hAxis: {
+      title: 'Date',
+    },
+    vAxis: {
+      title: 'Popularity',
+      ticks: [0, 20 , 40, 60, 80, 100],
+    },
+    trendlines: {
+      0: {type: 'exponential', color: '#333', opacity: 1},
+      1: {type: 'linear', color: '#111', opacity: .3},
+    },
+  };
+  var chart = new google.visualization.LineChart(popularityTimelineElement);
+  chart.draw(data, options);
 }
 
 /** 
@@ -144,16 +270,13 @@ function displaySentimentChartForCurrentTrend(countryCode) {
   }
 }
 
-// Use version 45 to allow for chart ticks to be drawn when the div container is
-// hidden. Needs to load before any functions are called. 
-google.charts.load('45', {'packages':['corechart']});
 /** 
  * Draws a sentiment chart and adds it to the given element. 
- *  @param {Object} chartElement Tab element to update with the sentiment chart.
- *  @param {Object} results Results to use to update the sentiment chart.
+ * @param {Object} chartElement Tab element to update with the sentiment chart.
+ * @param {Object} results Results to use to update the sentiment chart.
  */
 function drawSentimentChart(chartElement, results) {
-  let sentimentDataArray = [["Search Result", "Score", {role: "style"}]];
+  let sentimentDataArray = [['Search Result', 'Score', {role: 'style'}]];
   for (let i = 0; i < results.length; i++) {
     let sentimentItem = [(i + 1).toString(), results[i].score];
     results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : 

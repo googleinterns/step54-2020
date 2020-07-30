@@ -25,6 +25,7 @@ const datastore = new Datastore();
 const WORLD_DATA_KIND = 'WorldDataByTopic';
 
 const searchInterestsModule = require('./search-interests.js');
+// List of countries that is alphabetically ordered by 2-letter country codes.
 const countriesJson = require('./../public/country-code.json');
 global.Headers = fetch.Headers;
 
@@ -184,6 +185,8 @@ async function addNewCountryData(countriesData, worldDataEntity) {
  */
 async function updateSearchResults() {
   await search.deleteAncientResults();
+
+  // Create a list of 2-letter country codes from the JSON.
   let countries = countriesJson.map(country => country.id);
 
   const trends = await search.retrieveGlobalTrends();
@@ -229,10 +232,10 @@ async function getSearchResultsForCountriesForTopic(countries, topic) {
     // Note: Use i < 3 countries when testing.
     for (let i = 0; i < countries.length; i++) {
       let countryCode = countries[i];
-      let interest = searchInterests.filter(interestsByCountry => 
-          interestsByCountry.geoCode === countryCode);
-      let interestScore = interest.length === 0 ? 
-        NO_RESULTS_DEFAULT_SCORE : interest[0].value[0];
+      let interest = searchInterests.filter(countryInterest => 
+          countryInterest.geoCode === countryCode);
+      let interestScore = interest.length === 0 ?
+          NO_RESULTS_DEFAULT_SCORE : interest[0].value[0];
 
       // Use a limited number of queries per minute for the Custom Search API, 
       // and include a pause to prevent surpassing limit.
