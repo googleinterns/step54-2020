@@ -73,10 +73,10 @@ function setNewTrend(trend) {
 function highlightCurrentTrend() {
   let trendElements = document.getElementById('trends-list').childNodes;
   trendElements.forEach(function(trendElement) {
-    trendElement.innerHTML = (trendElement.innerText === currentTopic) 
-        ? '<span class="font-weight-bold font-italic">' + currentTopic 
-            + '</span>'
-        : trendElement.innerText;
+    trendElement.innerHTML = (trendElement.innerText === currentTopic) ? 
+        '<span class="font-weight-bold font-italic">' + currentTopic 
+            + '</span>' : 
+        trendElement.innerText;
   });
 }
 

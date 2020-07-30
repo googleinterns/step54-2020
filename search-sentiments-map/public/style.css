@@ -79,7 +79,7 @@ i {
 }
 
 .slider {
-  background-color: #2196F3;
+  background-color: #2196F3;  /* Blue. */
   bottom: 0;
   cursor: pointer;
   left: 0;
@@ -198,7 +198,7 @@ input:checked + .slider:before {
 }
 
 #switch-trends-click {
-  color: #2196F3;
+  color: #2196F3;  /* Blue. */
   font-size: 15px;
   margin-left: 10px;
 }
@@ -211,17 +211,17 @@ input:checked + .slider:before {
 .country-trend:hover,
 #switch-trends-click:hover,
 #trends-list li:hover {
-  color: #2268d6;
+  color: #2268d6;  /* Dark blue. */
   cursor: pointer;
 }
 
 #show-more-or-less {
-  color: #308ECA;
+  color: #308ECA;  /* Ocean blue. */
   list-style-type: none;
 }
 
 #show-more-or-less:hover {
-  color: #3aa7d6;
+  color: #3aa7d6;  /* Light blue. */
   cursor: pointer;
 }
 
