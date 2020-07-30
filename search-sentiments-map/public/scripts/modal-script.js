@@ -124,11 +124,11 @@ async function displayTopResultsForCurrentTrend(countryCode) {
               let positiveWords = sentimentWordsResult.positive;
               let negativeWords = sentimentWordsResult.negative;
               if (results[i].score > 0 && positiveWords.length !== 0) {
-                highlightWords(snippet, new Set(positiveWords), true, 
-                    resultElement);
+                highlightWords(
+                  snippet, new Set(positiveWords), true, resultElement);
               } else if (results[i].score < 0 && negativeWords.length !== 0) {
-                highlightWords(snippet, new Set(negativeWords), false, 
-                    resultElement);
+                highlightWords(
+                  snippet, new Set(negativeWords), false, resultElement);
               } else {
                 resultElement.innerHTML += snippet;
               }
@@ -158,15 +158,16 @@ function highlightWords(
     let wordIndex = snippet.toLowerCase().indexOf(word);
     if (wordIndex !== -1){
       let positiveHighlight = '<span style="color: ' +
-            POSITIVE_COLOR + ';">' + snippet.substring(wordIndex, 
-            wordIndex + word.length) + '</span>';
+          POSITIVE_COLOR + ';">' +
+          snippet.substring(wordIndex, wordIndex + word.length) +
+          '</span>';
       let negativeHighlight = '<span style="color: ' +
-            NEGATIVE_COLOR + ';">' + snippet.substring(wordIndex, 
-            wordIndex + word.length) + '</span>';
-      snippet = scoreIsPositive ? snippet.replace(new RegExp(
-          '\\b'+ word + '\\b', 'gi'), positiveHighlight) : 
-          snippet.replace(new RegExp('\\b' + word + '\\b', 'gi'), 
-          negativeHighlight);
+          NEGATIVE_COLOR + ';">' +
+          snippet.substring(wordIndex,  wordIndex + word.length) +
+          '</span>';
+      snippet = scoreIsPositive ?
+          snippet.replace(new RegExp( '\\b'+ word + '\\b', 'gi'), positiveHighlight) : 
+          snippet.replace(new RegExp('\\b' + word + '\\b', 'gi'), negativeHighlight);
     }
   });
   resultElement.innerHTML += snippet;
