@@ -199,8 +199,8 @@ async function deleteAncientTrend() {
   if (trendsEntries.length === 0) {
     return;  // Nothing to delete.
   }
-  if (Date.now() - trendsEntries[0].timestamp > STALE_DATA_DAYS_THRESHOLD *
-      ONE_DAY_MS) {
+  if (Date.now() - trendsEntries[0].timestamp > 
+      STALE_DATA_DAYS_THRESHOLD * ONE_DAY_MS) {
     const trendsEntryKey = trendsEntries[0][datastore.KEY];
     await datastore.delete(trendsEntryKey);
     console.log(`TrendsEntry ${trendsEntryKey.id} deleted.`);
