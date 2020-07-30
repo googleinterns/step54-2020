@@ -45,5 +45,8 @@ async function getSentimentScore(searchResultTitleSnippet) {
     return 0;
   }
 }
-
+const sentiment = {
+  getSentimentScore,
+}
+module.exports.search = sentiment;
 module.exports.getSentimentScore = getSentimentScore;
