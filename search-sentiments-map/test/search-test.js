@@ -23,10 +23,14 @@ describe('Search', function() {
         {trendTopic: "trend2"},
         {trendTopic: "trend3"},
       ];
-      // Functions are stubbed because they are tested separately.
+
+      // Function is stubbed because it is tested separately.
       deleteAncientResultsStub = 
           sinon.stub(search, 'deleteAncientResults')
               .resolves('Not interested in the output');
+
+
+      // Function is stubbed because it is tested separately.
       getSearchResultsForCountriesForTopicStub =
           sinon.stub(search, 'getSearchResultsForCountriesForTopic')
               .resolves('Not interested in the output');
@@ -44,10 +48,12 @@ describe('Search', function() {
         return [trendsEntries];
       });
 
+      // Calls to the datastore are stubbed.
       sinon.stub(Datastore.prototype, 'key').callsFake(() => {
         return 'fakeKey';
       });
 
+      // Calls to the datastore are stubbed.
       sinon.stub(Datastore.prototype, 'save').callsFake((entity) => {
         datastoreEntities.push(entity);
       });
@@ -73,7 +79,7 @@ describe('Search', function() {
 
   describe('GetSearchResultsForCountriesForTopic', function() {
     beforeEach(() => {
-      // Functions are stubbed because they are tested separately.
+      // Function is stubbed because it is tested separately.
       sinon.stub(search, 'formatCountryResults').callsFake((searchResults) => {
         let results = []
         searchResults.items.forEach(result => {
@@ -91,7 +97,8 @@ describe('Search', function() {
         });
       });
               
-    sinon.stub(searchInterestsModule, 'getGlobalSearchInterests').resolves([
+      // Function is stubbed because it is tested separately.
+      sinon.stub(searchInterestsModule, 'getGlobalSearchInterests').resolves([
         {
           geoCode: 'AU',
           value: [10],
@@ -106,7 +113,26 @@ describe('Search', function() {
       sleepStub = 
           sinon.stub(search, 'sleep').resolves('Not interested in the output');
 
-     // need to stub custom search call
+      // Stub Custom Search API call.
+      let json = {
+        items: [
+          {
+            title: 'mockTitle',
+            snippet: 'mockSnippet',
+            htmlTitle: 'mockHtmlTitle',
+            link: 'mockLink'
+          }
+        ]
+      };
+
+      let responseObject = {
+        status: "200",
+        json: () => {
+          return json;
+        }
+      };
+
+      sinon.stub(fetch, 'Promise').returns(Promise.resolve(responseObject));
     });
 
     afterEach(() => {
@@ -116,7 +142,48 @@ describe('Search', function() {
     it('should return latest datastore data', async function() {
       const results = await search.getSearchResultsForCountriesForTopic(['AU', 'US', 'GB'], 'testTopic');
       
-      console.log(results);
+      const formattedResult1 = {
+        country: 'AU',
+        results: [{
+          title: 'mockTitle',
+          snippet: 'mockSnippet',
+          htmlTitle: 'mockHtmlTitle',
+          link: 'mockLink',
+          score: 100,
+        }],
+        averageSentiment: 100,
+        interest: 10,
+      };
+
+      const formattedResult2 = {
+        country: 'US',
+        results: [{
+          title: 'mockTitle',
+          snippet: 'mockSnippet',
+          htmlTitle: 'mockHtmlTitle',
+          link: 'mockLink',
+          score: 100,
+        }],
+        averageSentiment: 100,
+        interest: 10,
+      };
+
+      const formattedResult3 = {
+        country: 'GB',
+        results: [{
+          title: 'mockTitle',
+          snippet: 'mockSnippet',
+          htmlTitle: 'mockHtmlTitle',
+          link: 'mockLink',
+          score: 100,
+        }],
+        averageSentiment: 100,
+        interest: -500, // Check situation of no interest score.
+      };
+
+      assert.deepEqual(results[0], formattedResult1);
+      assert.deepEqual(results[1], formattedResult2);
+      assert.deepEqual(results[2], formattedResult3);
     });
   });
 
@@ -195,6 +262,7 @@ describe('Search', function() {
         return [datastoreEntities];
       });
 
+      // Calls to the datastore are stubbed.
       sinon.stub(Datastore.prototype, 'delete').callsFake((entity) => {
         entitiesToDelete.push(entity);
       });
