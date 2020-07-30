@@ -41,18 +41,18 @@
           <option value="compute-routes">ComputeRoutes API(V1)</option>
           <option value="compute-routes-alpha">ComputeCustomRoutes API(V1 alpha)</option>
         </select>
-        <input id="api-key" class="form-control" placeholder="API Key (Defaults to use Directions API Key)"></input>
+        <input id="api-key" class="form-control" placeholder="API Key (Optional, Default Key Exists)"></input>
         <div id="rate-card-data" class="hidden">
           <div class="row">
             <label for="cost-per-minute" class="col-sm-5">Cost Per Minute:</label>
             <div class="col-sm-7">
-              <input type="number" id="cost-per-minute" class="form-control"></input>
+              <input type="number" id="cost-per-minute" class="form-control" placeholder="Required"></input>
             </div> 
           </div>
           <div class="row">
             <label for="cost-per-km" class="col-sm-5">Cost Per km:</label>
             <div class="col-sm-7">
-              <input type="number" id="cost-per-km" class="form-control"></input>
+              <input type="number" id="cost-per-km" class="form-control" placeholder="Required"></input>
             </div>
           </div>
           <div class="row">
@@ -67,7 +67,6 @@
         </div>
       </div>
       <div class="col-sm-3">
-        <div id="routes-options"></div>
         <button id="generate-routes" type="button" class="btn btn-primary hidden" onclick="generateRoutes()">Generate Routes</button><br>
         <div id="route-info"></div>
       </div>
