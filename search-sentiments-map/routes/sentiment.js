@@ -12,7 +12,10 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-/** Server-side script that uses the Google Cloud Natural Language API to get the sentiment score. */
+/** 
+ * Server-side script that uses the Google Cloud Natural Language API to get 
+ * the sentiment score. 
+ */
 const express = require('express');
 const language = require('@google-cloud/language');
 
@@ -34,7 +37,6 @@ async function getSentimentScore(searchResultTitleSnippet) {
 
     // Detect the sentiment of the text.
     const [result] = await client.analyzeSentiment({ document: document });
-    const sentiment = result.documentSentiment;
     return sentiment.score;
   } catch (err) {
     // Occurs when the language is not supported for document sentiment

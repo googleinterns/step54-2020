@@ -17,7 +17,7 @@
     <script src="scripts/search-topic-script.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
-  <body onload="initMap(); updateTrends(); countrySelectSetUp();">    
+  <body onload="initMap(); updateGlobalTrendsAndDisplayFirst(); countrySelectSetUp();">    
     <div class="modal fade" id="region-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -79,21 +79,23 @@
     <div id="top-left-div">
       <h3 id="topic-header">Worldwide sentiments</h3>
       <h6 id="extrema-sentiment"></h6>
-      <label class="switch">
-        <input id="sentiment-popularity-check" type="checkbox" onclick="loadRegionDataByMode()">
-        <span class="slider"></span>
-      </label>
-      <span id="switch-info">
-        Switch between 
-        <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows sentiment scores on selected search topic." data-placement="top">
-          Sentiment Mode
-        </span> 
-        & 
-        <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows interest scores on selected search topic." data-placement="top">
-          Popularity Mode
+      <div id="switch-div">
+        <label class="switch">
+          <input id="sentiment-popularity-check" type="checkbox" onclick="loadRegionDataByMode()">
+          <span class="slider"></span>
+        </label>
+        <span id="switch-info">
+          Switch between 
+          <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows sentiment scores on selected search topic." data-placement="top">
+            Sentiment Mode
+          </span> 
+          & 
+          <span class="mode-span" data-toggle="popover" data-trigger="hover" data-content="Shows interest scores on selected search topic." data-placement="top">
+            Popularity Mode
+          </span>
+          .
         </span>
-        .
-      </span>    
+      </div>
     </div>
 
     <!-- The inner text is a dash, which is longer than a hyphen. Copy-paste it if needed. -->
@@ -104,7 +106,7 @@
         <div id="search-div">
           <input type="text" class="form-control" id="search-topic" name="search-topic" placeholder="Search for a topic">
           <div class="dropdown">
-            <button class="btn btn-default dropdown-toggle" type="button"  id="country-dropdown-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            <button class="btn btn-default dropdown-toggle" type="button" id="country-dropdown-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
               Countries to view results for(max 3)<span class="caret"></span>
             </button>
             <ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="dropdownMenu1" id="country-select-dropdown"></ul>
@@ -113,7 +115,8 @@
         </div>
       </form>
       <div id="trends-div">
-        <h3>Trending Search Topics</h3>
+        <h3 id="trends-title">Globally Trending Search Topics</h3>
+        <span id="switch-trends-click" class="hidden" onclick="switchTrends(event)">US trends</span>
         <ul id="trends-list">
         </ul>
         <i id="trends-timestamp"></i>
@@ -121,7 +124,7 @@
     </div>
 
     <div id="bottom-left-div">
-      <select id="zoom-level-select" class="form-control" onchange="resetMapZoomLevel()">
+      <select id="zoom-level-select" class="form-control" onchange="resetMapZoomLevel()" data-toggle="popover" data-trigger="hover" data-content="US level allows you to see popularity scores for individual states." data-placement="right">
         <option value="world" selected>World Level</option>
         <option value="us">United States</option>
       </select>

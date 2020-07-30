@@ -45,6 +45,10 @@ let isSentimentMode = true;
 // Whether the map is zoomed on world level or US states level.
 let isWorldLevel = true;
 
+function getIsWorldLevel() {
+  return isWorldLevel;
+}
+
 // Multiplier for sentiment scores.
 const SCORE_SCALE_MULTIPLIER = 100;
 // The default score assigned to countries with no search results.
@@ -114,14 +118,14 @@ function updateLegends() {
 function loadRegionDataByMode() {
   const topicHeader = document.getElementById('topic-header');
   if (isWorldLevel) {
-    isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;  
+    isSentimentMode = !document.getElementById('sentiment-popularity-check').checked;
     topicHeader.innerText = isSentimentMode ?
-        'Worldwide sentiment scores of search results for "' + getCurrentSearchData().topic + '"' :
-        'Worldwide search interest scores for "' + getCurrentSearchData().topic + '"';
+        'Worldwide sentiment scores of search results for "' + getCurrentTopic() + '"' :
+        'Worldwide search interest scores for "' + getCurrentTopic() + '"';
   } else {
     isSentimentMode = false;  // Sentiment mode is not available at US level.    
     topicHeader.innerText = 
-        'State-level search interest scores for "' + getCurrentSearchData().topic + '"';
+        'State-level search interest scores for "' + getCurrentTopic() + '"';
   }
   updateLegends();
 
@@ -133,14 +137,13 @@ function loadRegionDataByMode() {
  * depending on what mode has been specified.
  */
 function loadCountryData() {
-  // Minimum and maximum average sentiment values for current topic. 
-  let dataVariableMax = Number.MIN_VALUE;
-  let dataVariableMin = Number.MAX_VALUE; 
-
-  // Countries with the minimum and maximum average sentiment values for current 
-  // topic. 
+  // Minimum and maximum scores for current topic. 
+  let dataVariableMax = Number.MIN_VALUE;  // Smallest positive number.
+  let dataVariableMin = Number.MAX_VALUE;
+  // Countries with the minimum and maximum scores for current topic. 
   let countryMax = '';
   let countryMin = '';
+
   map.data.forEach(row => {
     let countryData = getCurrentSearchData().dataByCountry
         .filter(data => data.country === row.getId());
@@ -150,10 +153,13 @@ function loadCountryData() {
       dataVariable = 
           isSentimentMode ? countryData[0].averageSentiment : countryData[0].interest;
       if (dataVariable > dataVariableMax) {
+        // Keep track of the maximum score and corresponding country.
         dataVariableMax = dataVariable;
         countryMax = country;
       }
-      if (dataVariable < dataVariableMin) {
+      if (dataVariable < dataVariableMin && 
+          dataVariable !== NO_RESULTS_DEFAULT_SCORE) {
+        // Keep track of the minimum score and corresponding country.
         dataVariableMin = dataVariable;
         countryMin = country;
       }
@@ -162,22 +168,46 @@ function loadCountryData() {
     row.setProperty('country_data', dataVariable);
   });
 
-  const extremaHeader = document.getElementById('extrema-sentiment');
-  extremaHeader.innerText = 
-      'Most Positive Country: ' + countryMax + ', Most Negative Country: ' + countryMin;
-
+  document.getElementById('extrema-sentiment').innerText = 
+      isSentimentMode ?
+          'Most Positive Country: ' + countryMax + 
+              ', Most Negative Country: ' + countryMin :
+          'Most Popular Country: ' + countryMax;
 }
 
-/** 
- * Loads the search interest data for US states on the map. 
- * TODO(chenyuz): Fetch data from the backend to replace the placeholder.
- */
+/** Loads the search interest data for US states on the map. */
 function loadStateData() {
+  // Minimum and maximum scores for current topic. 
+  let dataVariableMax = Number.MIN_VALUE;
+  let dataVariableMin = Number.MAX_VALUE; 
+  // States with the minimum and maximum scores for current topic. 
+  let stateMax = '';
+  let stateMin = '';
+
   map.data.forEach(function(row) {
-    let dataVariable = -10;
+    let stateName = row.getProperty('NAME');
+    let interest = getCurrentSearchData().filter(stateInterest => 
+        stateInterest.geoName === stateName);
+    let dataVariable = interest.length === 0 ? 
+        NO_RESULTS_DEFAULT_SCORE : interest[0].value[0];
+
+    if (dataVariable > dataVariableMax) {
+      // Keep track of the maximum score and corresponding state.
+      dataVariableMax = dataVariable;
+      stateMax = stateName;
+    }
+    if (dataVariable < dataVariableMin && 
+        dataVariable !== NO_RESULTS_DEFAULT_SCORE) {
+      // Keep track of the minimum score and corresponding state.
+      dataVariableMin = dataVariable;
+      stateMin = stateName;
+    }
 
     row.setProperty('state_data', dataVariable);
   });
+
+  document.getElementById('extrema-sentiment').innerText = 
+      'Most Popular State: ' + stateMax;
 }
 
 /**
@@ -272,11 +302,6 @@ function mouseOutOfRegion(e) {
 /**
  * Resets the map according to the zoom level (US or world) selected by the 
  * user by adjusting the map center, zoom level, polygons, and displayed data.
- * TODO(chenyuz): 
- * 1. On US level, add button to allow switching to US trends.
- * 2. Toggle the display of mode selector. Show on hover of the select that 
- * only popularity is available.
- * 3. Modify user search to be for popularity only.
  */
 function resetMapZoomLevel() {
   const zoomLevel = document.getElementById('zoom-level-select').value;
@@ -284,20 +309,26 @@ function resetMapZoomLevel() {
   map.data.forEach(function(feature) {
     map.data.remove(feature);
   });
+  toggleDisplay('switch-trends-click');
+  toggleDisplay('switch-div');
+  toggleDisplay('country-dropdown-button');
 
   if (zoomLevel === US.SELECT_VALUE) {
     map.setCenter(US.CENTER_COORDINATES);
     map.setZoom(US.ZOOM_LEVEL);
     isWorldLevel = false;
-    map.data.loadGeoJson(US.GEOJSON, {idPropertyName: 'STATE'}, function() {
-      loadRegionDataByMode();
+    isSentimentMode = false;  // Sentiment mode is not available at US level.
+
+    map.data.loadGeoJson(US.GEOJSON, {idPropertyName: 'gx_id'}, function() {
+      updateUsTrendsAndDisplayFirst();
     });
   } else { // Reset the map to world level.
     map.setCenter(WORLD.CENTER_COORDINATES);
     map.setZoom(WORLD.ZOOM_LEVEL);
     isWorldLevel = true;
+
     map.data.loadGeoJson(WORLD.GEOJSON, null, function() {
-      loadRegionDataByMode();
+      updateGlobalTrendsAndDisplayFirst();
     });
   }
 }

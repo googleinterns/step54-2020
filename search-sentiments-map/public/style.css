@@ -79,7 +79,7 @@ i {
 }
 
 .slider {
-  background-color: #2196F3;
+  background-color: #2196F3;  /* Blue. */
   bottom: 0;
   cursor: pointer;
   left: 0;
@@ -109,10 +109,22 @@ input:checked + .slider:before {
 }
 
 #bottom-left-div {
-  background-color: rgba(255, 255, 255, 0.5);
   bottom: 100px;
   left: 40px;
   position: absolute;
+}
+
+#zoom-level-select {
+  background: rgba(255, 255, 255, 0.5);
+  border: 0px;
+  border-radius: 5px;
+  font-weight: 800;
+  padding: 8px 12px;
+}
+
+#zoom-level-select option {
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
 }
 
 #right-div {
@@ -181,34 +193,41 @@ input:checked + .slider:before {
   overflow-y: auto;
 }
 
+#trends-title {
+  display: inline-block;
+}
+
+#switch-trends-click {
+  color: #2196F3;  /* Blue. */
+  font-size: 15px;
+  margin-left: 10px;
+}
+
 #trends-list li {
   font-family: "Lucida Console", Courier, monospace;
   width: fit-content;
 }
 
+.country-trend:hover,
+#switch-trends-click:hover,
 #trends-list li:hover {
-  color: #2268d6;
+  color: #2268d6;  /* Dark blue. */
   cursor: pointer;
 }
 
 #show-more-or-less {
-  color: #308ECA;
+  color: #308ECA;  /* Ocean blue. */
   list-style-type: none;
 }
 
 #show-more-or-less:hover {
-  color: #3aa7d6;
+  color: #3aa7d6;  /* Light blue. */
   cursor: pointer;
 }
 
 .country-trend {
   display: inline-block;
   margin-right: 10px;
-}
-
-.country-trend:hover {
-  color: #2268d6;
-  cursor: pointer;
 }
 
 .shown {

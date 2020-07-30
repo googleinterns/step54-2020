@@ -28,7 +28,7 @@ const POPULARITY_DATA_DAYS_THRESHOLD = 8;
 const ONE_DAY_MS = 24 * 60 * 60000;
 const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
 // Time interval between data updates.
-const TIME_RANGE_INTERVAL_12_HRS_MS = 12 * 60 * 60000;
+const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
 
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
@@ -61,12 +61,13 @@ router.post('/', jsonParser, (req, res) => {
 
 /** 
  * Get the global trends from the most recent Datastore entry.
- * @param {number} timeRange The new time range interval value.
+ * @param {number} timeRange An integer representing how many time ranges 
+ *     previous to get data from.
  * @return {!Array<JSON>} A JSON array of global trends and their originating
  *     countries.
  */
 async function retrieveGlobalTrendsForTimeRange(timeRange) {
-  let timeRangeLimit = TIME_RANGE_INTERVAL_12_HRS_MS * timeRange;
+  let timeRangeLimit = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * timeRange;
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp', {
     descending: true,
   }).filter('timestamp', '<', Date.now() - timeRangeLimit).limit(2);
@@ -111,10 +112,10 @@ async function updateDailyTrends() {
 /** 
  * Creates a JSON item for trends in the given country.
  * @param {?Array<JSON>} trendingSearches The JSON array containing the top trends 
- * of the given country.
+ *     of the given country.
  * @param {string} countryCode The two-letter code for the country considered.
  * @return {Object<JSON>} A JSON object that includes a country's code and its 
- * top trends.
+ *     top trends.
  */
 function constructCountryTrendsJson(trendingSearches, countryCode) {
   let trends = [];
@@ -165,7 +166,7 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
     }, ...],
    }
  * @param {!Array<JSON>} trendsByCountry An array where each element is a country
- * and its trends.
+ *     and its trends.
  */
 async function saveTrendsAndDeletePrevious(trendsByCountry) {
   await deleteAncientTrend();
@@ -188,9 +189,7 @@ async function saveTrendsAndDeletePrevious(trendsByCountry) {
   }
 }
 
-/** 
- * Deletes the oldest trend record if it was saved more than 7 days ago. 
- */
+/** Deletes the oldest trend record if it was saved more than 7 days ago. */
 async function deleteAncientTrend() {
   // Query entries in ascending order of the time of creation.
   const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp');
@@ -208,28 +207,12 @@ async function deleteAncientTrend() {
 }
 
 /** 
- * Deletes all trends entries in the Datastore. 
- * Call this function when there is an update of the trends data structure. 
- * TODO(chenyuz): Delete this function when everything is done.
- */
-async function deleteAllTrends() {
-  const query = datastore.createQuery(TRENDS_DATA_KIND).order('timestamp');
-  const [trendsEntries] = await datastore.runQuery(query);
-
-  for (let i = 0; i < trendsEntries.length; i++) {
-    const trendKey = trendsEntries[i][datastore.KEY];
-    await datastore.delete(trendKey);
-    console.log(`Trend ${trendsEntryKey.id} deleted.`)
-  }
-}
-
-/** 
  * Finds the trending topics that appear the most across all recorded countries 
  * and gets the top globally trending topics.
  * @param {!Array<JSON>} trendsByCountry An array where each element is a country
- * and its trends.
+ *     and its trends.
  * @return {!Array<JSON>} Globally trending topics and the number of countries 
- * where they are trending.
+ *     where they are trending.
  */
 function getGlobalTrends(trendsByCountry) {
   // Use a map to count the number of occurences of each trend.
