@@ -125,7 +125,7 @@ describe('Search', function() {
           assert.deepEqual(results.dataByCountry, mockCountryData);
         });
 
-    it('should fetch and retrieve search data if the some country data is missing',
+    it('should fetch and retrieve search data if some country data is missing',
         async function() {
           let mockCountryData = [
             {
