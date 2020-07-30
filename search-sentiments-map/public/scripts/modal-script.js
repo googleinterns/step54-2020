@@ -110,9 +110,10 @@ async function displayTopResultsForCurrentTrend(countryCode) {
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
       let snippet = results[i].snippet;
-      await fetch('/sentiment-words/' + snippet)
+      await fetch('/sentiment-words/' + encodeURIComponent(snippet))
           .then(resultsJsonArray => resultsJsonArray.json())
           .then(sentimentWordsResult => {
+            console.log(i + ' ' + snippet);
             // i + 1 shows the index for each search result.
             resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
                 results[i].link + '>' + results[i].htmlTitle + '</a><br>';
@@ -134,10 +135,12 @@ async function displayTopResultsForCurrentTrend(countryCode) {
             }
             resultElement.innerHTML += '<br><i>Sentiment Score: ' + 
                   results[i].score.toFixed(1) + '</i><br>';
+          }).catch((err) => {
+            console.log(err);
           });
     }
-    resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
   }
+  resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
 }
 
 /**
@@ -193,7 +196,7 @@ function displayPopularityTimeline(countryCode) {
   })
   .then(interestData => interestData.json())
   .then(timelineJSON => {
-    if (timelineJSON.length === 0) {
+    if (timelineJSON.default.timelineData.length === 0) {
       popularityTimelineElement.innerText = 
           'Popularity Timeline is not available for the selected country.';
     } else {

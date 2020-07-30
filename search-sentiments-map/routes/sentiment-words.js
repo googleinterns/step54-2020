@@ -25,6 +25,8 @@ router.get('/:snippet', (req, res) => {
     var sentimentWordsJsonArray = sentimentWords.analyze(req.params.snippet);
   } catch (err) {
     console.log(err);
+    console.log('what is going on');
+    console.log(req.params.snippet);
   }
   res.setHeader('Content-Type', 'application/json');
   res.send(sentimentWordsJsonArray);
