@@ -124,14 +124,9 @@ async function displayTopResultsForCurrentTrend(countryCode) {
               let positiveWords = sentimentWordsResult.positive;
               let negativeWords = sentimentWordsResult.negative;
               if (results[i].score > 0 && positiveWords.length !== 0) {
-                resultElement.innerHTML += 'Positive Words' + positiveWords;
-                console.log(i+1);
                 highlightWords(snippet, new Set(positiveWords), true, 
                     resultElement);
               } else if (results[i].score < 0 && negativeWords.length !== 0) {
-                console.log(i+1);
-                resultElement.innerHTML += 'Negative Words' + negativeWords;
-                resultElement.innerHTML += snippet;
                 highlightWords(snippet, new Set(negativeWords), false, 
                     resultElement);
               } else {
@@ -148,9 +143,8 @@ async function displayTopResultsForCurrentTrend(countryCode) {
 
 /** 
  * Highlights the positive words green if the sign of the sentiment score 
- * is positive and negative words red if the sign is negative in the given
- * snippet.
- * @param {string} snippet Snippet to display in search results tab.
+ * is positive and negative words red if the sign is negative.
+ * @param {string} snippet Snippet to display in the search results tab.
  * @param {Set} wordsToHighlight Words to highlight a different color.
  * @param {boolean} scoreIsPositive Boolean for whether or not the sentiment 
  *     score is positive.
@@ -160,7 +154,6 @@ async function displayTopResultsForCurrentTrend(countryCode) {
 function highlightWords(
     snippet, wordsToHighlight, scoreIsPositive, resultElement) {
   let startDisplayingSnippetIndex = 0;
-
   wordsToHighlight.forEach((word) => {
     let wordIndex = snippet.toLowerCase().indexOf(word);
     if (wordIndex !== -1){
@@ -170,17 +163,9 @@ function highlightWords(
       let negativeHighlight = '<span style="color: ' +
             NEGATIVE_COLOR + ';">' + snippet.substring(wordIndex, 
             wordIndex + word.length) + '</span>';
-      if (scoreIsPositive) {
-        snippet = snippet.replace(new RegExp('\\b'+ word + '\\b', 'gi'), 
-            positiveHighlight);
-        
-      } else {
-        snippet = snippet.replace(new RegExp('\\b' + word + '\\b', 'gi'), 
-            negativeHighlight);
-      }
       snippet = scoreIsPositive ? snippet.replace(new RegExp(
           '\\b'+ word + '\\b', 'gi'), positiveHighlight) : 
-          snippet.replace(new RegExp('\b' + word + '\b', 'gi'), 
+          snippet.replace(new RegExp('\\b' + word + '\\b', 'gi'), 
           negativeHighlight);
     }
   });
