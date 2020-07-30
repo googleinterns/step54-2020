@@ -22,10 +22,10 @@ const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
 const TRENDS_DATA_KIND = 'TrendsEntry';
-const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
+const STALE_DATA_DAYS_THRESHOLD = 7;
 // Constant for getting popularity data from 8 days ago.
 const POPULARITY_DATA_DAYS_THRESHOLD = 8;
-const ONE_DAY_MS = 24 * 60 *60000;
+const ONE_DAY_MS = 24 * 60 * 60000;
 const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
 // Time interval between data updates.
 const TIME_RANGE_INTERVAL_12_HRS_MS = 12 * 60 * 60000;
@@ -199,7 +199,8 @@ async function deleteAncientTrend() {
   if (trendsEntries.length === 0) {
     return;  // Nothing to delete.
   }
-  if (Date.now() - trendsEntries[0].timestamp > STALE_DATA_THRESHOLD_7_DAYS_MS) {
+  if (Date.now() - trendsEntries[0].timestamp > STALE_DATA_DAYS_THRESHOLD *
+      ONE_DAY_MS) {
     const trendsEntryKey = trendsEntries[0][datastore.KEY];
     await datastore.delete(trendsEntryKey);
     console.log(`TrendsEntry ${trendsEntryKey.id} deleted.`);
