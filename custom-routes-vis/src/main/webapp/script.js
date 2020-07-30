@@ -239,11 +239,11 @@ function createRateCard() {
 /**
  * Creates a polyline for a route on the map.
  * @param {num} routeNum The index of the route in the order that it is returned
- * from the selected API.
+ *     from the selected API.
  * @param {!Object} routeJson JSON object containing all information of the 
- * target route.
+ *     target route.
  * @param {boolean} serviceEndpoint The service endpoint selected by the user. 
- * Can be one of 'directions', 'compute-routes', or 'compute-routes-alpha'.
+ *     Can be one of 'directions', 'compute-routes', or 'compute-routes-alpha'.
  */
 function createRoutePolyline(routeNum, routeJson, serviceEndpoint) {
   let isDirectionsApi = false;
@@ -308,13 +308,13 @@ function createRouteFromCoordinates(
 
   // Select the first route as default.
   if (routeNum === 0) {
-    selectRouteDisplayDetails(0, totalDurationSec, totalDistanceMeters, 
-        routeToken);
+    selectRouteDisplayDetails(
+        0, totalDurationSec, totalDistanceMeters, routeToken);
   }
 
   route.addListener('click', function(event) {
-    selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMeters, 
-        routeToken);
+    selectRouteDisplayDetails(
+        routeNum, totalDurationSec, totalDistanceMeters, routeToken);
   });
 }
 
@@ -326,8 +326,8 @@ function createRouteFromCoordinates(
  * @param {num} totalDistanceMeters The distance of the route in meters.
  * @param {string} routeToken The route token of the currently selected route.
  */
-function selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMeters,
-    routeToken) {
+function selectRouteDisplayDetails(
+    routeNum, totalDurationSec, totalDistanceMeters, routeToken) {
   displayedRoutes[selectedRouteNum].setOptions({ strokeOpacity: 0.3, })
   selectedRouteNum = routeNum;
   displayedRoutes[routeNum].setOptions({ strokeOpacity: 1.0, });
@@ -339,7 +339,7 @@ function selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMete
 
   if (routeToken !== '') {
     routeInfoElement.innerText += '\nRoute Token: check the developer console';
-    console.log(routeToken);
+    console.log('Route token:', routeToken);
     updateDeepLinkingUrl(routeToken);
   }
 }
