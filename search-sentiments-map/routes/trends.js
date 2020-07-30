@@ -24,7 +24,8 @@ const datastore = new Datastore();
 const TRENDS_DATA_KIND = 'TrendsEntry';
 const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
 // Constant for getting popularity data from 8 days ago.
-const DATA_THRESHOLD_8_DAYS_AGO_MS = 8 * 24 * 60 * 60000; 
+const POPULARITY_DATA_DAYS_THRESHOLD = 8;
+const ONE_DAY_MS = 24 * 60 *60000;
 const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
 // Time interval between data updates.
 const TIME_RANGE_INTERVAL_12_HRS_MS = 12 * 60 * 60000;
@@ -48,7 +49,7 @@ router.get('/:timeRange', (req, res) => {
 router.post('/', jsonParser, (req, res) => {
   googleTrends.interestOverTime({
     keyword: req.body.topic,
-    startTime: new Date(Date.now() - DATA_FROM_8_DAYS_AGO_MS),
+    startTime: new Date(Date.now() - POPULARITY_DATA_DAYS_THRESHOLD * ONE_DAY_MS),
     geo: req.body.code,
   }).then(data => {
     res.setHeader('Content-Type', 'application/json');

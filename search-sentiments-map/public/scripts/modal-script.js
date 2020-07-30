@@ -158,7 +158,7 @@ google.charts.load('45', {'packages':['corechart']});
 /** 
  * Draw the popularity timeline in a country for the current search trend on
  * modal.
- * @param {!Array<JSON>} timelineData TThe past week's search interest data for 
+ * @param {!Array<JSON>} timelineData The past week's search interest data for 
  * the given topic.
  * @param {Object} popularityTimelineElement The element where the popularity 
  * timeline is updated.
