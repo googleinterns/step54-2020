@@ -7,6 +7,8 @@ Commands to run:
 `npm start`
 3. Deploy to trending-search-sentiments.appspot.com with
 `gcloud app deploy`
+4. Run the tests with
+`npm test`
 
 To set project ID: 
 `gcloud config set project PROJECT_ID` or `export GCLOUD_PROJECT=...`
@@ -19,3 +21,7 @@ SEARCH_API_KEY=key
 
 Northern Cyprus and Somaliland don't have country codes and therefore their IDs are marked as 'N/A' in countries.geojson. They are not present in the country-code.json file.
 We won't be able to get trends / search data for them, so we should color them grey.
+
+
+
+To run the tests, run `npm test`
