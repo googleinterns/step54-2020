@@ -22,10 +22,16 @@ const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
 const TRENDS_DATA_KIND = 'TrendsEntry';
-const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
+const STALE_DATA_DAYS_THRESHOLD = 7;
+// Constant for getting popularity data from 8 days ago.
+const POPULARITY_DATA_DAYS_THRESHOLD = 8;
+const ONE_DAY_MS = 24 * 60 * 60000;
 const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
 // Time interval between data updates.
 const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
+
+const bodyParser = require('body-parser');
+const jsonParser = bodyParser.json();
 
 /** 
  * Renders a JSON array of the top 20 (or fewer) global search trends maintained
@@ -36,6 +42,20 @@ router.get('/:timeRange', (req, res) => {
   retrieveGlobalTrendsForTimeRange(timeRange).then(globalTrends => {
     res.setHeader('Content-Type', 'application/json');
     res.send(globalTrends);
+  });
+});
+
+/** Renders the popularity data of the country given by the request parameter. */
+router.post('/', jsonParser, (req, res) => {
+  googleTrends.interestOverTime({
+    keyword: req.body.topic,
+    startTime: new Date(Date.now() - POPULARITY_DATA_DAYS_THRESHOLD * ONE_DAY_MS),
+    geo: req.body.code,
+  }).then(data => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(data);
+  }).catch(err => {
+    console.error(err);
   });
 });
 
@@ -178,7 +198,8 @@ async function deleteAncientTrend() {
   if (trendsEntries.length === 0) {
     return;  // Nothing to delete.
   }
-  if (Date.now() - trendsEntries[0].timestamp > STALE_DATA_THRESHOLD_7_DAYS_MS) {
+  if (Date.now() - trendsEntries[0].timestamp > 
+      STALE_DATA_DAYS_THRESHOLD * ONE_DAY_MS) {
     const trendsEntryKey = trendsEntries[0][datastore.KEY];
     await datastore.delete(trendsEntryKey);
     console.log(`TrendsEntry ${trendsEntryKey.id} deleted.`);
@@ -187,10 +208,10 @@ async function deleteAncientTrend() {
 
 /** 
  * Finds the trending topics that appear the most across all recorded countries 
- * and gets the top 10 as the globally trending topics.
+ * and gets the top globally trending topics.
  * @param {!Array<JSON>} trendsByCountry An array where each element is a country
  *     and its trends.
- * @return {!Array<JSON>} 10 globally trending topics and the number of countries 
+ * @return {!Array<JSON>} Globally trending topics and the number of countries 
  *     where they are trending.
  */
 function getGlobalTrends(trendsByCountry) {
