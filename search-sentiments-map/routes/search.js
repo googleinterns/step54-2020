@@ -232,7 +232,7 @@ async function getSearchResultsForCountriesForTopic(countries, topic) {
       let interest = searchInterests.filter(interestsByCountry => 
           interestsByCountry.geoCode === countryCode);
       let interestScore = interest.length === 0 ? 
-          SCORE_NO_RESULTS : interest[0].value[0];
+          NO_RESULTS_DEFAULT_SCORE : interest[0].value[0];
 
       // Use a limited number of queries per minute for the Custom Search API, 
       // and include a pause to prevent surpassing limit.
