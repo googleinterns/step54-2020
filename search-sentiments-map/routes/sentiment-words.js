@@ -20,22 +20,14 @@ const express = require('express');
 const router = express.Router();  // Using Router to divide the app into modules.
 const sentimentApi = require('sentiment');
 var sentimentWords = new sentimentApi(); 
-router.get('/:titleSnippet', (req, res) => {
-  let titleSnippet = req.params.titleSnippet;
-  getPositiveNegativeWords(titleSnippet).then(sentimentWordsJsonArray => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(sentimentWordsJsonArray);
-  });
-});
-
-async function getPositiveNegativeWords(titleSnippet) {
+router.get('/:snippet', (req, res) => {
   try {
-    var result = await sentimentWords.analyze(titleSnippet);
-    return result;
+    var sentimentWordsJsonArray = sentimentWords.analyze(req.params.snippet);
   } catch (err) {
     console.log(err);
   }
-}
+  res.setHeader('Content-Type', 'application/json');
+  res.send(sentimentWordsJsonArray);
+});
 
 module.exports.router = router;
-module.exports.getPositiveNegativeWords = getPositiveNegativeWords;

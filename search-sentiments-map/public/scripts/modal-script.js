@@ -84,8 +84,9 @@ function toggleDisplay(id) {
 }
 
 /** 
- * Displays the top results in a country for current search trend on modal
- * and show positive/negative words depending on the sign of the sentiment score.  
+ * Displays the top results in a country for the current search trend on modal
+ * and show positive words if the sign of the sentiment score is positive,
+ * and negative words if the sign is negative. 
  * @param {string} countryCode Two letter country code for selected country.
  */
 async function displayTopResultsForCurrentTrend(countryCode) {
@@ -105,50 +106,86 @@ async function displayTopResultsForCurrentTrend(countryCode) {
         countryData[0].interest + '</b><br>';
     resultElement.innerHTML += '<b>Average Sentiment Score: ' + 
         countryData[0].averageSentiment.toFixed(1) + '</b><br>';
-    
+
     // Get search results for the specified country.
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
-      await fetch('/sentiment-words/' + results[i].title + results[i].snippet)
+      let snippet = results[i].snippet;
+      await fetch('/sentiment-words/' + snippet)
           .then(resultsJsonArray => resultsJsonArray.json())
           .then(sentimentWordsResult => {
             // i + 1 shows the index for each search result.
             resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
                 results[i].link + '>' + results[i].htmlTitle + '</a><br>';
-            // Check to make sure that there is detection of positive and 
-            // negative words from the Node.js sentiment API.
-            if (sentimentWordsResult != null && 
-                sentimentWordsResult.positive.length != 0) {
-              var snippetArray = results[i].snippet.split(" ");
-              snippetArray.forEach((word) => {
-                // Replace quotations or other symbols that may be attached to 
-                // the word.  
-                let checkWordInArray = word.replace(/[^a-z0-9+]+/gi, '');
-                if (results[i].score > 0 && sentimentWordsResult.positive
-                    .includes(checkWordInArray)) {
-                  resultElement.innerHTML += '<span style=\'color: ' + 
-                      POSITIVE_COLOR + ';\'>' + word + ' </span>';
-                } else if (results[i].score < 0 && sentimentWordsResult.negative
-                    .includes(checkWordInArray)) {
-                  resultElement.innerHTML += '<span style=\'color: ' + 
-                      NEGATIVE_COLOR + ';\'>' + word + ' </span>';
-                } else {
-                  resultElement.innerHTML += word + ' ';
-                }
-              });
-              resultElement.innerHTML += '<br><i>Sentiment Score: ' + 
-                  results[i].score.toFixed(1) + '</i><br>';
-            } else {
-              resultElement.innerHTML += results[i].snippet + '<br>' + 
-                  '<i>Sentiment Score: ' + results[i].score.toFixed(1) + 
-                  '</i><br>';
+
+            // Check that positive and negative words are detected by the Node.js 
+            // sentiment API.
+            if (sentimentWordsResult != null) {
+              let positiveWords = sentimentWordsResult.positive;
+              let negativeWords = sentimentWordsResult.negative;
+              if (results[i].score > 0 && positiveWords.length !== 0) {
+                resultElement.innerHTML += 'Positive Words' + positiveWords;
+                console.log(i+1);
+                highlightWords(snippet, new Set(positiveWords), true, 
+                    resultElement);
+              } else if (results[i].score < 0 && negativeWords.length !== 0) {
+                console.log(i+1);
+                resultElement.innerHTML += 'Negative Words' + negativeWords;
+                resultElement.innerHTML += snippet;
+                highlightWords(snippet, new Set(negativeWords), false, 
+                    resultElement);
+              } else {
+                resultElement.innerHTML += snippet;
+              }
             }
+            resultElement.innerHTML += '<br><i>Sentiment Score: ' + 
+                  results[i].score.toFixed(1) + '</i><br>';
           });
     }
     resultElement.innerHTML += '<i>Last updated on ' + date + '</i>';
   }
 }
 
+/** 
+ * Highlights the positive words green if the sign of the sentiment score 
+ * is positive and negative words red if the sign is negative in the given
+ * snippet.
+ * @param {string} snippet Snippet to display in search results tab.
+ * @param {Set} wordsToHighlight Words to highlight a different color.
+ * @param {boolean} scoreIsPositive Boolean for whether or not the sentiment 
+ *     score is positive.
+ * @param {Object} resultElement Tab element to update with the search result 
+ *     snippet.
+ */
+function highlightWords(
+    snippet, wordsToHighlight, scoreIsPositive, resultElement) {
+  let startDisplayingSnippetIndex = 0;
+
+  wordsToHighlight.forEach((word) => {
+    let wordIndex = snippet.toLowerCase().indexOf(word);
+    if (wordIndex !== -1){
+      let positiveHighlight = '<span style="color: ' +
+            POSITIVE_COLOR + ';">' + snippet.substring(wordIndex, 
+            wordIndex + word.length) + '</span>';
+      let negativeHighlight = '<span style="color: ' +
+            NEGATIVE_COLOR + ';">' + snippet.substring(wordIndex, 
+            wordIndex + word.length) + '</span>';
+      if (scoreIsPositive) {
+        snippet = snippet.replace(new RegExp('\\b'+ word + '\\b', 'gi'), 
+            positiveHighlight);
+        
+      } else {
+        snippet = snippet.replace(new RegExp('\\b' + word + '\\b', 'gi'), 
+            negativeHighlight);
+      }
+      snippet = scoreIsPositive ? snippet.replace(new RegExp(
+          '\\b'+ word + '\\b', 'gi'), positiveHighlight) : 
+          snippet.replace(new RegExp('\b' + word + '\b', 'gi'), 
+          negativeHighlight);
+    }
+  });
+  resultElement.innerHTML += snippet;
+}
 /** 
  * Displays sentiment chart of search results for the current country on the modal.
  * @param {string} countryCode Two letter country code for selected country.
@@ -180,8 +217,8 @@ function displaySentimentChartForCurrentTrend(countryCode) {
 google.charts.load('45', {'packages':['corechart']});
 /** 
  * Draws a sentiment chart and adds it to the given element. 
- *  @param {Object} chartElement Tab element to update with the sentiment chart.
- *  @param {Object} results Results to use to update the sentiment chart.
+ * @param {Object} chartElement Tab element to update with the sentiment chart.
+ * @param {Object} results Results to use to update the sentiment chart.
  */
 function drawSentimentChart(chartElement, results) {
   let sentimentDataArray = [["Search Result", "Score", {role: "style"}]];
