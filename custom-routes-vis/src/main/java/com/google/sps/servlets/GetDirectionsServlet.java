@@ -127,7 +127,7 @@ public class GetDirectionsServlet extends HttpServlet {
         + "\"travelMode\": \"DRIVE\"," + "\"routingPreference\": \"TRAFFIC_AWARE\","
         + versionSpecificParams + "}";
 
-    try(OutputStream os = connection.getOutputStream()) {
+    try (OutputStream os = connection.getOutputStream()) {
       byte[] input = requestParamsJson.getBytes("utf-8");
       os.write(input, 0, input.length);			
     }
