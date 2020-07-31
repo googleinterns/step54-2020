@@ -20,8 +20,7 @@ describe('Search', function() {
 
       // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
-        worldData = [mockData];
-        return [worldData];
+        return [[mockData]];
       });      
     });
 
