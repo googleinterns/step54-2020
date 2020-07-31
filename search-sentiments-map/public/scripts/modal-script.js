@@ -113,7 +113,6 @@ async function displayTopResultsForCurrentTrend(countryCode) {
       await fetch('/sentiment-words/' + encodeURIComponent(snippet))
           .then(resultsJsonArray => resultsJsonArray.json())
           .then(sentimentWordsResult => {
-            console.log(i + ' ' + snippet);
             // i + 1 shows the index for each search result.
             resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
                 results[i].link + '>' + results[i].htmlTitle + '</a><br>';
