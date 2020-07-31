@@ -1,5 +1,5 @@
 This web application visualizes trending google search topics and their results geographically and performs sentiment analysis on the search results. 
-It is build with NodeJS and it utilizes the Google Maps Javascript API, Google Charts API, Google Custom Search API, and the NodeJS Google Trends API.
+It is built with NodeJS and it utilizes the Google Maps Javascript API, Google Custom Search API, Google Cloud Natural Language API, Google Charts API, the NodeJS Google Trends API and NodeJS sentiment module.
 
 Commands:
 
@@ -12,7 +12,7 @@ Commands:
 3. Deploy to "trending-search-sentiments.appspot.com" with
 `gcloud app deploy`
 
-Need to have project ID set before deploying or running: 
+Make sure you have set the project ID before deploying or running. To do so, run:
 `gcloud config set project PROJECT_ID` or `export GCLOUD_PROJECT=...`
 
 Need to have an .env file to run with custom search. File format:
@@ -27,7 +27,7 @@ To update the app engine's cron job:
 The cron job that updates trending search topics and their search results is currently set up to run every day at 11am and 11pm, New York time.
 Data is kept in the Datastore for up to 7 days.
 
-Countries available:
+Country data:
 
 The countries.geojosn file has outlines coordinates for each country. Northern Cyprus and Somaliland don't have country codes and therefore their IDs are marked as 'N/A' in countries.geojson. They are not present in the country-code.json file.
 
