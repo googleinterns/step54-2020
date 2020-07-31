@@ -18,16 +18,16 @@ describe('Search', function() {
         dataByCountry: 'dataByCountry',
       };
 
-      // Calls to the datastore are stubbed.
+      // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
         worldData = [mockData];
         return [worldData];
       });      
-    })
+    });
 
     afterEach(() => {
       sinon.restore();
-    })
+    });
 
     it('should retrieve the results from the datastore', async function() {
       let results =
@@ -56,7 +56,7 @@ describe('Search', function() {
       },
       {
         topic: 'oldTestTopic',
-        timestamp: 1593455070000,
+        timestamp: 1593455070000, // June 29, 2020. Older than 12 hours old.
         dataByCountry: [
           {
             country: 'AU',
@@ -69,36 +69,38 @@ describe('Search', function() {
 
       datastoreEntities = [];
 
-      // Calls to the datastore are stubbed.
-      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
-        return [mockData];
+      // Stub calls to the datastore.
+      sinon.stub(Datastore.prototype, 'runQuery').callsFake((query) => {
+        let dataToReturn  = 
+            mockData.filter(data => data.topic.toLowerCase() === query.filters[0].val);
+        return [dataToReturn];
       });
 
-      // Calls to the datastore are stubbed.
+      // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'key').callsFake(() => {
         return 'fakeKey';
       });
 
-      // Calls to the datastore are stubbed.
+      // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'save').callsFake((entity) => {
         datastoreEntities.push(entity);
       });
 
-      // Function is stubbed because it is tested separately.
+      // Stub the `getSearchResultsForCountriesForTopic` function for this
+      // test since it is tested separately.
       sinon.stub(search, 'getSearchResultsForCountriesForTopic').callsFake(
           (countries, topic) => {
             let data = [];
             countries.forEach(country => {
               data.push({country: country});
             })
-            datastoreEntities.push(data);
             return Promise.resolve(data);
           });
-    })
+    });
 
     afterEach(() => {
       sinon.restore();
-    })
+    });
 
     it('should retrieve search data if current data exists', async function() {
       let results =
@@ -107,7 +109,7 @@ describe('Search', function() {
       assert.deepEqual(results, mockData[0]);
     });
 
-    it('should fetch and retrieve search data if no current data exists',
+    it('should fetch data from the API, save it to the datastore and return it if no current data exists',
         async function() {
           let mockCountryData = [
             {
@@ -120,14 +122,24 @@ describe('Search', function() {
           let results =
               await search.retrieveUserSearchResultFromDatastore(
                   'oldTestTopic', ['AU', 'US']);
+
+          // Check correct data is returned.
           assert.equal(results.topic, 'oldTestTopic');
           assert.isAbove(results.timestamp, Date.now() - 60000);
           assert.deepEqual(results.dataByCountry, mockCountryData);
+
+          // Check data is correctly saved to datastore.
+          assert.equal(datastoreEntities[0].data.topic, 'oldTestTopic');
+          assert.isAbove(datastoreEntities[0].data.timestamp, Date.now() - 60000);
+          assert.deepEqual(datastoreEntities[0].data.dataByCountry, mockCountryData);
         });
 
-    it('should fetch and retrieve search data if some country data is missing',
+    it('should fetch missing data from the API, save it to the datastore and return all relevant data if some country data is missing',
         async function() {
           let mockCountryData = [
+            {
+              country: 'AU',
+            },
             {
               country: 'US',
             },
@@ -141,13 +153,20 @@ describe('Search', function() {
           let results =
               await search.retrieveUserSearchResultFromDatastore(
                   'testTopic', ['GB', 'KZ', 'US']);
-
+              
+          // Check correct data is returned.
           assert.equal(results.topic, 'testTopic');
           assert.equal(results.timestamp, mockData[0].timestamp);
-          assert.deepEqual(results.dataByCountry, mockCountryData);
+          // The results should only include the requested countries.
+          assert.deepEqual(results.dataByCountry, mockCountryData.slice(1,4));
+
+          // Check data is correctly saved to datastore.
+          assert.equal(datastoreEntities[0].topic, 'testTopic');
+          assert.equal(datastoreEntities[0].timestamp, mockData[0].timestamp);
+          assert.deepEqual(datastoreEntities[0].dataByCountry, mockCountryData);
         });
 
-    it('should fetch and retrieve search data if no data exists',
+    it('should fetch data from the API, save it to the datastore, and return it if no data exists',
         async function() {
           let mockCountryData = [
             {
@@ -161,9 +180,15 @@ describe('Search', function() {
               await search.retrieveUserSearchResultFromDatastore(
                   'newTestTopic', ['AU', 'US']);
 
+          // Check correct data is returned.
           assert.equal(results.topic, 'newTestTopic');
           assert.isAbove(results.timestamp, Date.now() - 60000);
           assert.deepEqual(results.dataByCountry, mockCountryData);
+
+          // Check data is correctly saved to datastore.
+          assert.equal(datastoreEntities[0].data.topic, 'newTestTopic');
+          assert.isAbove(datastoreEntities[0].data.timestamp, Date.now() - 60000);
+          assert.deepEqual(datastoreEntities[0].data.dataByCountry, mockCountryData);
         });
   });
 
@@ -172,65 +197,67 @@ describe('Search', function() {
     let getSearchResultsForCountriesForTopicStub;
     let sleepStub;
     let datastoreEntities;
-    let globalTrends;
+    let globalTrendsList;
 
     beforeEach(() => {
       datastoreEntities = [];
-      globalTrends = [
+      globalTrendsList = [
         {trendTopic: "trend1"},
         {trendTopic: "trend2"},
         {trendTopic: "trend3"},
       ];
 
-      // Function is stubbed because it is tested separately.
+      // Stub the `deleteAncientResults` function for this test since it is
+      // tested separately.
       deleteAncientResultsStub = 
           sinon.stub(search, 'deleteAncientResults')
               .resolves('Not interested in the output');
 
 
-      // Function is stubbed because it is tested separately.
+      // Stub the `getSearchResultsForCountriesForTopic` function for this
+      // test since it is tested separately.
       getSearchResultsForCountriesForTopicStub =
           sinon.stub(search, 'getSearchResultsForCountriesForTopic')
               .resolves('Not interested in the output');
 
-      // Sleep function is stubbed to avoid 1 minute pauses.
+      // Stub the `sleep` function for this test to avoid 1 minute pauses.
       sleepStub = 
           sinon.stub(search, 'sleep')
               .resolves('Not interested in the output');
 
-      // Calls to the datastore are stubbed.
+      // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
         trendsEntries = [{
-          globalTrends: globalTrends
+          globalTrends: globalTrendsList
         }];
         return [trendsEntries];
       });
 
-      // Calls to the datastore are stubbed.
+      // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'key').callsFake(() => {
         return 'fakeKey';
       });
 
-      // Calls to the datastore are stubbed.
+      // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'save').callsFake((entity) => {
         datastoreEntities.push(entity);
       });
-    })
+    });
 
     afterEach(() => {
       sinon.restore();
-    })
+    });
 
     it('should update search results for all global trends', async function() {
       await search.updateSearchResults();
       assert.equal(deleteAncientResultsStub.callCount, 1);
-      assert.equal(sleepStub.callCount, globalTrends.length);
+      assert.equal(sleepStub.callCount, globalTrendsList.length);
       for (let i = 0; i < datastoreEntities.length; i++) {
         assert.equal(datastoreEntities[i].key, 'fakeKey');
         assert.equal(datastoreEntities[i].data.topic,
-            globalTrends[i].trendTopic);
+            globalTrendsList[i].trendTopic);
         assert.equal(datastoreEntities[i].data.lowercaseTopic,
-            globalTrends[i].trendTopic.toLowerCase());
+            globalTrendsList[i].trendTopic.toLowerCase());
       }
     });
   });
@@ -239,7 +266,8 @@ describe('Search', function() {
     let mockSearchResultData;
 
     beforeEach(() => {
-      // Function is stubbed because it is tested separately.
+      // Stub the `formatCountryResults` function for this test since it is
+      // tested separately.
       sinon.stub(search, 'formatCountryResults').callsFake((searchResults) => {
         mockSearchResultData ={
           title: 'mockTitle',
@@ -249,7 +277,7 @@ describe('Search', function() {
           score: 100,
         };
 
-        let results = []
+        let results = [];
         searchResults.items.forEach(result => {
           results.push(mockSearchResultData);
         });
@@ -259,7 +287,8 @@ describe('Search', function() {
         });
       });
               
-      // Function is stubbed because it is tested separately.
+      // Stub the `getGlobalSearchInterests` function for this test since it is
+      // tested separately.
       sinon.stub(searchInterestsModule, 'getGlobalSearchInterests').resolves([
         {
           geoCode: 'AU',
@@ -271,7 +300,7 @@ describe('Search', function() {
         }
       ]);
 
-      // Sleep function is stubbed to avoid 1 minute pauses.
+      // Stub the `sleep` function for this test to avoid 1 minute pauses.
       sleepStub = 
           sinon.stub(search, 'sleep').resolves('Not interested in the output');
 
@@ -336,7 +365,8 @@ describe('Search', function() {
 
   describe('FormatCountryResults', function() {
     beforeEach(() => {
-      // Function is stubbed because it is tested separately.
+      // Stub the `getSentimentScore` function for this test since it is
+      // tested separately.
       let getSentimentScoreStub = sinon.stub(sentiment, 'getSentimentScore');
       getSentimentScoreStub.onCall(0).resolves(10);
       getSentimentScoreStub.onCall(1).resolves(20);
@@ -374,7 +404,7 @@ describe('Search', function() {
         snippet: 'item1Snippet',
         htmlTitle: 'item1HtmlTitle',
         link: 'item1Link',
-        score: 1000
+        score: 1000,
       };
 
       const formattedResult2 = {
@@ -382,7 +412,7 @@ describe('Search', function() {
         snippet: 'item2Snippet',
         htmlTitle: 'item2HtmlTitle',
         link: 'item2Link',
-        score: 2000
+        score: 2000,
       };
 
       const results = await search.formatCountryResults(searchParameter);
@@ -398,7 +428,9 @@ describe('Search', function() {
 
     beforeEach(() => {
       datastoreEntities = [
+        // June 29 2020. Older than the Threshold.
           {timestamp: 1593455070000},
+        // June 30 2020. Older than the Threshold.
           {timestamp: 1593541470000},
           {timestamp: Date.now()}
       ];
@@ -410,20 +442,20 @@ describe('Search', function() {
           datastore.key(['WorldDataByTopic', 2]);
       entitiesToDelete = [];
 
-      // Calls to the datastore are stubbed.
+      // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
         return [datastoreEntities];
       });
 
-      // Calls to the datastore are stubbed.
+      // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'delete').callsFake((entity) => {
         entitiesToDelete.push(entity);
       });
-    })
+    });
 
     afterEach(() => {
       sinon.restore();
-    })
+    });
 
     it('should delete old datastore entities', async function() {
       await search.deleteAncientResults();
