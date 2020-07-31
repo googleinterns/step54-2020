@@ -243,7 +243,7 @@ function createRateCard() {
  * @param {!Object} routeJson JSON object containing all information of the 
  *     target route.
  * @param {boolean} serviceEndpoint The service endpoint selected by the user. 
- *     Can be one of 'directions', 'compute-routes', or 'compute-routes-alpha'.
+ *     Can be 'directions', 'compute-routes', or 'compute-routes-alpha'.
  */
 function createRoutePolyline(routeNum, routeJson, serviceEndpoint) {
   let isDirectionsApi = false;

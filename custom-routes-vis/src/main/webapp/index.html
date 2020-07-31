@@ -46,24 +46,25 @@
           <div class="row">
             <label for="cost-per-minute" class="col-sm-5">Cost Per Minute:</label>
             <div class="col-sm-7">
-              <input type="number" id="cost-per-minute" class="form-control" placeholder="Required"></input>
-            </div> 
+              <input type="number" id="cost-per-minute" class="form-control"></input>
+            </div>
           </div>
           <div class="row">
             <label for="cost-per-km" class="col-sm-5">Cost Per km:</label>
             <div class="col-sm-7">
-              <input type="number" id="cost-per-km" class="form-control" placeholder="Required"></input>
+              <input type="number" id="cost-per-km" class="form-control"></input>
             </div>
           </div>
           <div class="row">
             <label for="include-tolls" class="col-sm-6">Include Tolls in Cost:</label>
             <div class="col-sm-6">
               <select id="include-tolls" class="form-control">
-                <option value="true" selected>True</option>
-                <option value="false">False</option>
+                <option value="true">True</option>
+                <option value="false" selected>False</option>
               </select>
             </div>
           </div>
+          <i>Note: At least one of cost_per_minute or cost_per_km must be specified.</i>
         </div>
       </div>
       <div class="col-sm-3">
