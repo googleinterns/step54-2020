@@ -2,7 +2,7 @@
 
 This web application visualizes trending google search topics and their results geographically and performs sentiment analysis on the search results. It is currently deployed at [trending-search-sentiments.appspot.com](trending-search-sentiments.appspot.com).
 
-It is built with NodeJS and it utilizes the Google Maps Javascript API, Google Custom Search API, Google Cloud Natural Language API, Google Charts API, the NodeJS Google Trends API and NodeJS sentiment module. It runs on Google App Engine and uses Datastore for data storage.
+It is built with Node.js and it utilizes the Google Maps Javascript API, Google Custom Search API, Google Cloud Natural Language API, Google Charts API, the Node.js Google Trends API and Node.js sentiment module. It runs on Google App Engine and uses Datastore for data storage.
 
 #### Commands to run / deploy:
 
@@ -29,17 +29,17 @@ To update the Datastore indices:
 To update the app engine's cron job:
 `gcloud app deploy cron.yaml`
 
-The cron job that updates trending search topics and their search results is currently set up to run every day at 11am and 11pm, New York time.
+The cron job that updates trending search topics and their search results is currently set up to run every day at 11am and 11pm, Eastern Time.
 Data is kept in the Datastore for up to 7 days.
 
 #### Country data files:
 
-The *countries.geojosn* file has outlines coordinates for each country. Northern Cyprus and Somaliland don't have country codes and therefore their IDs are marked as 'N/A' in countries.geojson. They are not present in the country-code.json file.
+The *countries.geojosn* file has outline coordinates for each country (179 countries in total). Northern Cyprus and Somaliland don't have country codes and therefore their IDs are marked as 'N/A' in countries.geojson. They are not present in the country-code.json file.
 
 The *country-code.json* file has 2-letter country codes and their names, ordered alphabetically by the codes. This is used get search results for each country.
 
 The *country-name.json* file also has 2-letter country codes and their names, but ordered alphabetically by the names. This is used to display the countries available for user searched topics.
 
-The *countries-with-trends.json* file includes all the countries that we can get trending topics for from the trends API.
+The *countries-with-trends.json* file includes all the countries that we can get trending topics for from the trends API (46 countries in total).
 
 Countries that show up as N/A on sentiment mode: Those who don't have search results.
