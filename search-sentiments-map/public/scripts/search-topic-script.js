@@ -18,12 +18,20 @@ const MAX_SELECTED_COUNTRIES = 3;
 let countryCodeList = [];
 let countryNameList = [];
 
-/**
- * Updates the current search topic for the given country and search topic.
- */
+/** Updates the current data on the map for the user input search topic. */
 function searchTopic() {
   let topic = document.getElementById('search-topic').value;
 
+  getIsWorldLevel() ?
+      searchWorldTopic(topic) : setStateInterestsData(topic);
+}
+
+/** 
+ * Updates the current data on the map for the user-selected countries and
+ * topic at world level.
+ * @param {string} topic The topic that the user entered.
+ */
+function searchWorldTopic(topic) {
   // Make sure there is at least 1 selected country and a non-empty topic.
   // Prompt user to input missing information.
   if (topic.length === 0 || countryCodeList.length === 0) {
@@ -48,6 +56,7 @@ function searchTopic() {
  */
 function countrySelectSetUp() {
   let dropdownContainer = document.getElementById('country-select-dropdown');
+  // Fetch the list of countries ordered alphabetically by their names.
   fetch("country-name.json").then(response => response.json())
       .then(json => {
     json.forEach(country => {

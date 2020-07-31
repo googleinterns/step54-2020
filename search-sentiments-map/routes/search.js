@@ -19,11 +19,13 @@ const express = require('express');
 let router = express.Router();
 
 const fetch = require('node-fetch'); // Used to access custom search.
+const sentiment = require('./sentiment.js')
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 const WORLD_DATA_KIND = 'WorldDataByTopic';
 
 const searchInterestsModule = require('./search-interests.js');
+// List of countries that is alphabetically ordered by 2-letter country codes.
 const countriesJson = require('./../public/country-code.json');
 global.Headers = fetch.Headers;
 
@@ -183,6 +185,8 @@ async function addNewCountryData(countriesData, worldDataEntity) {
  */
 async function updateSearchResults() {
   await search.deleteAncientResults();
+
+  // Create a list of 2-letter country codes from the JSON.
   let countries = countriesJson.map(country => country.id);
 
   const trends = await search.retrieveGlobalTrends();
@@ -193,7 +197,7 @@ async function updateSearchResults() {
         countries, topic);
     search.addWorldDataByTopicToDatastore(topic, countriesData);
 
-    // Note: when testing ,use i < 1 to test for only one trend, and comment 
+    // Note: When testing, use i < 1 to test for only one trend, and comment 
     // out `await new Promise` line to avoid 1 minute pauses.
     await search.sleep(PAUSE_ONE_MIN_MS);
   }
@@ -228,10 +232,10 @@ async function getSearchResultsForCountriesForTopic(countries, topic) {
     // Note: Use i < 3 countries when testing.
     for (let i = 0; i < countries.length; i++) {
       let countryCode = countries[i];
-      let interest = searchInterests.filter(interestsByCountry => 
-          interestsByCountry.geoCode === countryCode);
+      let interest = searchInterests.filter(countryInterest => 
+          countryInterest.geoCode === countryCode);
       let interestScore = interest.length === 0 ? 
-          SCORE_NO_RESULTS : interest[0].value[0];
+          NO_RESULTS_DEFAULT_SCORE : interest[0].value[0];
 
       // Use a limited number of queries per minute for the Custom Search API, 
       // and include a pause to prevent surpassing limit.
@@ -307,34 +311,16 @@ async function formatCountryResults(searchResultsJson) {
  * @return {Object} Formatted search result data in JSON form.
  */
 function formatSearchResult(searchResult) {
-  return search.getSentiment(searchResult)
-      .then(response => response.json())
+  return sentiment.getSentimentScore(searchResult.title + searchResult.snippet)
       .then((result) => {
         return {
           title: searchResult.title,
           snippet: searchResult.snippet,
           htmlTitle: searchResult.htmlTitle,
           link: searchResult.link,
-          score: SCORE_SCALE_MULTIPLIER * result.score,
+          score: SCORE_SCALE_MULTIPLIER * result,
         };
       });
-}
-
-/** 
- * Gets the sentiment score of a search result. 
- * @param {Object} searchResult Object for one search result.
- */
-function getSentiment(searchResult) {
-  return
-      fetch('https://trending-search-sentiments.ue.r.appspot.com/sentiment', {
-    method: 'POST',  // Send a request to the URL.
-    headers: new Headers({
-      'Content-Type': 'text/plain',
-    }),
-    body: searchResult.title + searchResult.snippet
-  }).catch(err => {
-    console.log(err);
-  });
 }
 
 /** Deletes stale search results. */
@@ -422,7 +408,6 @@ const search = {
   getCustomSearchResultsForCountry,
   formatCountryResults,
   formatSearchResult,
-  getSentiment,
   deleteAncientResults,
   addWorldDataByTopicToDatastore,
   sleep,
