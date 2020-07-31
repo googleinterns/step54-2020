@@ -27,7 +27,7 @@ const language = require('@google-cloud/language');
  */
 async function getSentimentScore(searchResultTitleSnippet) {
   try {
-    const client = new language.LanguageServiceClient();
+    const client = new language.LanguageServiceClient(); // mock LanguageServiceClient constructor
     const text = searchResultTitleSnippet;
 
     const document = {
@@ -36,7 +36,8 @@ async function getSentimentScore(searchResultTitleSnippet) {
     };
 
     // Detect the sentiment of the text.
-    const [result] = await client.analyzeSentiment({ document: document });
+    const [result] = await client.analyzeSentiment({ document: document }); // mock the client.analyzeSentiment
+    const sentiment = result.documentSentiment;
     return sentiment.score;
   } catch (err) {
     // Occurs when the language is not supported for document sentiment
@@ -48,5 +49,5 @@ async function getSentimentScore(searchResultTitleSnippet) {
 const sentiment = {
   getSentimentScore,
 }
-module.exports.search = sentiment;
+module.exports.sentiment = sentiment;
 module.exports.getSentimentScore = getSentimentScore;

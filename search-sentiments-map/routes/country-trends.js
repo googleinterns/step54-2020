@@ -42,11 +42,11 @@ router.get('/:timeRange/:country', (req, res) => {
  *     trends data for the specified country.
  */
 async function retrieveCountryTrends(country, timeRange) {
-  let timeRangeLimit = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * timeRange;
+  let timeRangeLimit = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * timeRange; 
   const query = datastore.createQuery('TrendsEntry').order('timestamp', {
-    descending: true,
-  }).filter('timestamp', '<', Date.now() - timeRangeLimit).limit(2);
-  const [trendsEntry] = await datastore.runQuery(query);
+    descending: true, // mock data from the datastore, 1. positive case (one with a few countries) 2. the data returned does not have the data that you want
+  }).filter('timestamp', '<', Date.now() - timeRangeLimit).limit(2); //3. put a random timeRange, mockData that's outside the the timeRange
+  const [trendsEntry] = await datastore.runQuery(query); //2. negative case, the data your mocking doesn't have anything
   const entry = (
       Date.now() - trendsEntry[0].timestamp > 
           RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?

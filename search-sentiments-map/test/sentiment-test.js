@@ -1,73 +1,52 @@
+const mocha = require('mocha');
 const chai = require('chai');
-const should = require('chai').should();
-const expect = require('chai').expect;
+const assert = chai.assert;
 const sinon = require('sinon');
 const sentiment = require('./../routes/sentiment').sentiment;
-
+const language = require('@google-cloud/language');
+const client = new language.LanguageServiceClient();
 describe('Sentiment', function() {
   describe('getSentimentScore', function() {
-    let deleteAncientResultsStub;
-    let retrieveGlobalTrendsStub;
-    let updateSearchResultsForTopicStub;
-
+    let mockSentimentScore;
+    let analyzeSentimentStub;
+    let mockAnalyzeSentimentResult;
+    
     beforeEach(() => {
-      deleteAncientResultsStub = 
-          sinon.stub(search, 'deleteAncientResults')
-              .resolves('Not interested in the output');
-      sleepStub = 
-          sinon.stub(search, 'sleep')
-              .resolves('Not interested in the output');
-      retrieveGlobalTrendsStub = 
-          sinon.stub(search, 'retrieveGlobalTrends')
-              .resolves([
-                {trendTopic: 'trend1'},
-                {trendTopic: 'trend2'},
-              ]);
-      getSearchResultsForCountriesForTopicStub =
-          sinon.stub(search, 'getSearchResultsForCountriesForTopic')
-              .resolves('Not interested in the output');
-      addWorldDataByTopicToDatastoreStub =
-          sinon.stub(search, 'addWorldDataByTopicToDatastore')
-              .resolves('Not interested in the output');
-    })
-
-    afterEach(() => {
-      sinon.restore();
-    })
-
-    it('should update search results for all global trends', async function() {
-      await search.updateSearchResults();
-      deleteAncientResultsStub.callCount.should.equal(1);
-      retrieveGlobalTrendsStub.callCount.should.equal(1);
-      getSearchResultsForCountriesForTopicStub.getCall(0).args[1].should.equal('trend1');
-      getSearchResultsForCountriesForTopicStub.getCall(1).args[1].should.equal('trend2');
-      getSearchResultsForCountriesForTopicStub.callCount.should.equal(2);
-      sleepStub.callCount.should.equal(2);
-    });
-  });
-
-  describe('RetrieveSearchResultFromDatastore', function() {
-    beforeEach(() => {
-      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
-        results = [{
-          topic: 'testTopic',
-          timestamp: 0,
-          dataByCountry: {},
-        }];
-        return [results];
+      mockScore = 0.8;
+      mockAnalyzeSentimentResult = {
+        'documentSentiment': {
+          'magnitude': 0.8,
+          'score': 0.8
+        },
+        'language': 'en',
+        'sentences': [
+          {
+            'text': {
+              'content': 'Enjoy your vacation!',
+              'beginOffset': 0
+            },
+            'sentiment': {
+              'magnitude': 0.8,
+              'score': 0.8
+            }
+          }
+        ]
+      };
+      // Function is stubbed because it is an API method.
+      sinon.stub(client, 'analyzeSentiment').callsFake(() => {
+        console.log(result.documentSentiment.score);
+        return mockAnalyzeSentimentResult;
       });
-    });
+    })
 
     afterEach(() => {
       sinon.restore();
-    });
+    })
 
-    it('should return latest datastore data', async function() {
-      const results = await search.retrieveSearchResultFromDatastore('testTopic');
-
-      results.topic.should.equal('testTopic');
-      results.timestamp.should.equal(0);
-      expect(results.dataByCountry).to.be.empty;
+    it('should get the sentiment score from analyzeSentiment', async function() {
+      let result =
+          await sentiment.getSentimentScore('Enjoy your vacation!');
+      assert.deepEqual(result, mockScore);
     });
   });
 });
