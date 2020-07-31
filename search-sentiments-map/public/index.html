@@ -20,7 +20,7 @@
     <script src="scripts/search-topic-script.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeg112BVJlrJDHxRoHpqNU3NVMNJu91wg"></script>
   </head>
-  <body onload="initMap(); updateGlobalTrendsAndDisplayFirst(); countrySelectSetUp(); loadCharts();">
+  <body onload="initMap(); updateGlobalTrendsAndDisplayFirst(); countrySelectSetUp(); setCharts();">
     <div class="modal fade" id="region-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -41,7 +41,7 @@
                   <a class="nav-link" href="#top-trends-tab" aria-controls="top-trends-tab" role="tab" data-toggle="tab">Top Trends</a>
                 </li>
                 <li role="presentation" class="nav-item">
-                    <a class="nav-link" id="popularity-timeline-link"href="#popularity-timeline-tab" aria-controls="popularity-timeline-tab" role="tab" data-toggle="tab">Popularity Timeline</a>
+                    <a class="nav-link" id="popularity-timeline-link" href="#popularity-timeline-tab" aria-controls="popularity-timeline-tab" role="tab" data-toggle="tab">Popularity Timeline</a>
                 </li>
               </ul>
               <div class="tab-content">

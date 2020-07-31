@@ -12,13 +12,13 @@
 // License for the specific language governing permissions and limitations under
 // the License.
  
-// The default score assigned to countries with no search results.
+// The colors assigned depending on if the sentiment score is positive or
+// negative.
 const POSITIVE_COLOR = 'green';
 const NEGATIVE_COLOR = 'red';
 // The country code for the country that the user has selected.
 let countryCode = '';
-// The cache for the popularity timeline data.
-let cachePopularityTimeline = {};
+let cachePopularityTimelineData = {};
  
 // Create trigger to resizeEnd event.     
 $(window).resize(function() {
@@ -28,7 +28,7 @@ $(window).resize(function() {
     }, 250);
 });
  
-// Redraw graph when window resize is completed. 
+// Reset charts when window resize is completed. 
 $(window).on('resizeEnd', function() {
   if (countryCode !== ''){
     google.charts.setOnLoadCallback(setSentimentChartForCurrentTrend);
@@ -59,10 +59,10 @@ function onClickRegion(e) {
 
 
 /**
- * Loads the chart only when the tab is clicked on in order to get a width from 
+ * Sets the charts only when the tab is clicked on in order to get a width from 
  * the parent containers.
  */
-function loadCharts() {
+function setCharts() {
     $('#sentiment-chart-link').on('shown.bs.tab', function(){
       setSentimentChartForCurrentTrend();
     });
@@ -125,7 +125,6 @@ async function displayTopResultsForCurrentTrend(countryCode) {
   let date = new Date(getCurrentSearchData().timestamp);
   let resultElement =  document.getElementById('search-results-tab');
   resultElement.innerHTML = '';
- 
   let countryData = getCurrentSearchData().dataByCountry
       .filter(data => data.country === countryCode);
  
@@ -190,12 +189,12 @@ function highlightWords(
   let startDisplayingSnippetIndex = 0;
   wordsToHighlight.forEach((word) => {
     // The sentiment node.js module always returns the positive or negative 
-    // words in lowercase, so we only change the snippet to lowercase.
+    // words in lowercase, so make only the snippet lowercase.
     let wordIndex = snippet.toLowerCase().indexOf(word);
     if (wordIndex !== -1){
       let highlight = '<span style="color: ' +
           (scoreIsPositive ? POSITIVE_COLOR : NEGATIVE_COLOR) +
-          ';">' + snippet.substring(wordIndex,  wordIndex + word.length) +
+          ';">' + snippet.substring(wordIndex, wordIndex + word.length) +
           '</span>';
       snippet = snippet.replace(new RegExp('\\b' + word + '\\b', 'gi'), highlight);
     }
@@ -223,25 +222,6 @@ function setPopularityTimeline() {
   });
 }	
 
-// function setPopularityTimeline() {
-//   const popularityTimelineElement = document.getElementById('popularity-timeline-tab');
-//   popularityTimelineElement.innerHTML = '';
-//   postTrendsToGetPopularityTimelineData(
-//       getCurrentSearchData().topic, countryCode, popularityTimelineElement)
-//       .then(timelineJSON => {
-//         if (timelineJSON.length === 0) {
-//             popularityTimelineElement.innerText = 
-//                 'Popularity Timeline is not available for the selected country.';
-//         } else {
-//           drawPopularityTimeline(
-//               timelineJSON.default.timelineData, popularityTimelineElement, 
-//               getCurrentSearchData().topic);
-//         }
-//       }).catch((err) => {
-//         console.log(err);
-//       });	 
-      
-// }
 /** 
  * Gets the popularity timeline data from the Google Trends API if it is not
  * stored in the local cache. Prevents making too many calls to the API if the 
@@ -252,10 +232,11 @@ function setPopularityTimeline() {
  * timeline is updated.
  * @return {Promise} The promise which resolves to the the timeline JSON data.
  */
-function postTrendsToGetPopularityTimelineData(topic, countryCode, popularityTimelineElement) {
-  // Check if counctry code and topic is in the cache already.
-  if (cachePopularityTimeline[topic]) {
-    return Promise.resolve(cachePopularityTimeline[topic][countryCode]);
+function postTrendsToGetPopularityTimelineData(
+    topic, countryCode, popularityTimelineElement) {
+  // Check if country code and topic is in the cache already.
+  if (cachePopularityTimelineData[topic]) {
+    return Promise.resolve(cachePopularityTimelineData[topic][countryCode]);
   }
   return fetch('/trends/', { 
     method: 'post',
@@ -270,12 +251,12 @@ function postTrendsToGetPopularityTimelineData(topic, countryCode, popularityTim
   })
   .then(interestData => interestData.json())
   .then(timelineJSON => {
-    if (!cachePopularityTimeline[topic]) {
-      cachePopularityTimeline[topic] = {};
+    if (!cachePopularityTimelineData[topic]) {
+      cachePopularityTimelineData[topic] = {};
     }
     // For each search topic, you cache the result of the fetch.
     // Example: {Sophie Turner: {US: timelineJSON}}
-    cachePopularityTimeline[topic][countryCode] = timelineJSON;
+    cachePopularityTimelineData[topic][countryCode] = timelineJSON;
     return timelineJSON;
   }).catch((err) => {
     console.log(err);
@@ -292,13 +273,13 @@ function postTrendsToGetPopularityTimelineData(topic, countryCode, popularityTim
  * @param {String} topic The search topic that the popularity timeline is based on.
  */
 function drawPopularityTimeline(timelineData, popularityTimelineElement, topic) {
-  var data = new google.visualization.DataTable();
+  let data = new google.visualization.DataTable();
   data.addColumn('string');
   data.addColumn('number');
   for (let i = 0; i < timelineData.length; i++) {
     data.addRows([[timelineData[i].formattedAxisTime, timelineData[i].value[0]]]);
   }
-  var options = {
+  let options = {
     title: 'Popularity of ' + topic,
     legend: {position: 'none'},
     hAxis: {
@@ -313,13 +294,12 @@ function drawPopularityTimeline(timelineData, popularityTimelineElement, topic) 
       1: {type: 'linear', color: '#111', opacity: .3},
     },
   };
-  var chart = new google.visualization.LineChart(popularityTimelineElement);
+  let chart = new google.visualization.LineChart(popularityTimelineElement);
   chart.draw(data, options);
 }
  
 /** 
  * Sets sentiment chart of search results for the current country on the modal.
- * @param {string} countryCode Two letter country code for selected country.
  */
 function setSentimentChartForCurrentTrend() {
   let countryData = getCurrentSearchData().dataByCountry
@@ -349,7 +329,7 @@ function setSentimentChartForCurrentTrend() {
  * @param {Object} results Results to use to update the sentiment chart.
  */
 function drawSentimentChart(chartElement, results) {
-  let sentimentDataArray = [["Search Result", "Score", {role: "style"}]];
+  let sentimentDataArray = [['Search Result', 'Score', {role: 'style'}]];
   for (let i = 0; i < results.length; i++) {
     let sentimentItem = [(i + 1).toString(), results[i].score];
     results[i].score >= 0 ? sentimentItem.push(POSITIVE_COLOR) : 
@@ -365,7 +345,7 @@ function drawSentimentChart(chartElement, results) {
     type: 'string',
     role: 'annotation',
   }, 2]);
- 
+  
   let options = {
     bar: {groupWidth: '55%'},
     legend: {position: 'none'},
