@@ -135,12 +135,12 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
       exploreLink: trend.title.exploreLink,
       articles: articlesFormatted,
     });
-  })
+  });
 
   return {
     country: countryCode,
     trends: trends,
-  }
+  };
 }
 
 /**
@@ -238,12 +238,12 @@ function getGlobalTrends(trendsByCountry) {
     trendCountsArr.push({
       topic: topic,
       count: count,
-    })
+    });
   }
   // Sort trends in descending order of their counts.
   trendCountsArr.sort((trend, otherTrend) => {
     return otherTrend.count - trend.count;
-  })
+  });
 
   let globalTrends = [];
   // Get the top 10 trends overall.
@@ -256,5 +256,11 @@ function getGlobalTrends(trendsByCountry) {
   return globalTrends;
 }
 
+const trends = {
+  updateDailyTrends,
+  constructCountryTrendsJson,
+  saveTrendsAndDeletePrevious,
+}
+module.exports.trends = trends;
+
 module.exports.router = router;
-module.exports.updateTrendsFunction = updateDailyTrends;
