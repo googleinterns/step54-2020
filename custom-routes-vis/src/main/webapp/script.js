@@ -352,11 +352,37 @@ function selectRouteDisplayDetails(
 
 /** Copies the given route token to the clipboard. */
 function copyTokenToClipBoard(token) {
+  // Note: navigator.clipboard is only supported by pages served over HTTPS.
+  if (!navigator.clipboard) {
+    fallbackCopyTokenToClipboard(token);
+    return;
+  }
   navigator.clipboard.writeText(token).then(function() {
-    console.log('Async: Copying to clipboard was successful!');
+    alert('Successfully copied to clipboard!');
   }, function(err) {
-    console.error('Async: Could not copy text: ', err);
+    alert('Could not copy to clipboard.');
+    console.error('Async: Could not copy token', err);
   });
+}
+
+/** Creates a textarea for the given token and copies it to clipboard. */
+function fallbackCopyTokenToClipboard(token) {
+  var textArea = document.createElement('textarea');
+  textArea.value = token;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    var successful = document.execCommand('copy');
+    var msg = successful ? 'successful' : 'unsuccessful';
+    alert('Copying route token was ' + msg);
+  } catch (err) {
+    alert('Could not copy to clipboard.');
+    console.error('Fallback: Could not copy token', err);
+  }
+
+  document.body.removeChild(textArea);
 }
 
 /**
