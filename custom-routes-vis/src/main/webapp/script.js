@@ -320,7 +320,7 @@ function createRouteFromCoordinates(
 
 /** 
  * Highlights the selected route and displays its formatted duration and 
- * distance in miles.
+ * distance in miles. Displays a copy-route-token button if applicable.
  * @param {num} routeNum The index of the selected route in the routes array.
  * @param {num} totalDurationSec The duration of the route in seconds.
  * @param {num} totalDistanceMeters The distance of the route in meters.
@@ -335,13 +335,28 @@ function selectRouteDisplayDetails(
   let routeInfoElement = document.getElementById('route-info');
   routeInfoElement.innerText = 'Selected Route Info:' +
       '\nDuration: ' + formatDuration(totalDurationSec) +
-      '\nDistance: ' + formatDistance(totalDistanceMeters);
+      '\nDistance: ' + formatDistance(totalDistanceMeters) + '\n';
 
   if (routeToken !== '') {
-    routeInfoElement.innerText += '\nRoute Token: check the developer console';
+    let copyBtn = document.createElement('button');
+    copyBtn.innerText = 'Copy Route Token';
+    copyBtn.addEventListener('click', function() {
+      copyTokenToClipBoard(routeToken);
+    });
+    routeInfoElement.appendChild(copyBtn);
+
     console.log('Route token:', routeToken);
     updateDeepLinkingUrl(routeToken);
   }
+}
+
+/** Copies the given route token to the clipboard. */
+function copyTokenToClipBoard(token) {
+  navigator.clipboard.writeText(token).then(function() {
+    console.log('Async: Copying to clipboard was successful!');
+  }, function(err) {
+    console.error('Async: Could not copy text: ', err);
+  });
 }
 
 /**
