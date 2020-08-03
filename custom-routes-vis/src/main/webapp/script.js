@@ -28,7 +28,8 @@ const MarkerNames = {
  * @enum {string}
  */
 const url_ids = {
-  IOS_URL_ID: 'ios-url', 
+  IOS_DEV_URL_ID: 'ios-dev-url', 
+  IOS_PRODUCTION_URL_ID: 'ios-production-url',
   V1_ANDROID_URL_ID: 'v1-android-url', 
   V2_ANDROID_URL_ID: 'v2-android-url',
 };
@@ -150,9 +151,9 @@ function showMarker(markerName) {
 }
 
 /**
- * Hides 'place marker' button and waits for user to select coordinate for
- * marker. Updates marker to be in correct location, and show 'delete marker'
- * button.
+ * Hides 'Submit Custom Coordinates' and'place marker' button and waits for user
+ * to select coordinate for marker. Updates marker to be in correct location,
+ * and show 'delete marker' button.
  * @param {string} markerName Name of corresponding marker in
  *     originDestinationMarkers array.
  */
@@ -191,16 +192,25 @@ function showMarkerWithCustomCoordinates(markerName) {
         .style.display === 'block') {
     document.getElementById('generate-routes').style.display = 'block';
   }
-  // Hide Submit Custom Coordinates and Place Marker buttons.
+  // Hide Custom Coordinates input area, Submit Custom Coordinates and Place
+  // Marker buttons.
+  document.getElementById(markerName + '-lat').style.display =
+      'none';
+  document.getElementById(markerName + '-lng').style.display =
+      'none';
   document.getElementById('show-' + markerName + '-custom-marker').style.display =
       'none';
   document.getElementById('show-' + markerName + '-marker').style.display =
       'none';
 }
 
+/**
+ * Makes sure there is a valid latitude and longitude inputted. Prompt user to
+ * input missing information if needed.
+ * @param {number} customLat The latitude input from the user.
+ * @param {number} customLng The longitude input from the user.
+ */
 function checkCustomCoordinatesInputIsValid(customLat, customLng) {
-  // Make sure there is a valid latitude and longitude inputted.
-  // Prompt user to input missing information.
   let valid = false;
   let modalText = '';
   if (isNaN(customLat) || isNaN(customLng)) {
@@ -219,7 +229,6 @@ function checkCustomCoordinatesInputIsValid(customLat, customLng) {
     $('#custom-coordinates-warning-modal').modal('show');
     return false;
   }
-  
 }
 /**
  * Hides specified marker and toggles buttons to show 'place marker' button.
@@ -241,6 +250,10 @@ function hideMarker(markerName) {
 
   originDestinationMarkers[markerIndex].setVisible(false);
   document.getElementById(markerName + '-coordinates').innerHTML = '';
+  document.getElementById(markerName + '-lat').style.display =
+      'block';
+  document.getElementById(markerName + '-lng').style.display =
+      'block';
   document.getElementById('show-' + markerName + '-custom-marker').style.display =
       'block';
   document.getElementById('show-' + markerName + '-marker').style.display =
@@ -430,12 +443,18 @@ function selectRouteDisplayDetails(
 function updateDeepLinkingUrl(routeToken) {
   var originPosition = originDestinationMarkers[0].position;
   var destinationPosition = originDestinationMarkers[1].position;
-  document.getElementById(url_ids.IOS_URL_ID).innerHTML =
+  document.getElementById(url_ids.IOS_DEV_URL_ID).innerHTML =
       '<a href=navsdkdemo://advanced?originLat=' + 
       originPosition.lat() + '&originLng=' + originPosition.lng() + 
       '&destLat=' + destinationPosition.lat() + 
       '&destLng=' + destinationPosition.lng() + 
-      '&routeToken=' + routeToken + '>' + 'IOS Test App' + '</a>';
+      '&routeToken=' + routeToken + '>' + 'iOS dev' + '</a>';
+  document.getElementById(url_ids.IOS_PRODUCTION_URL_ID).innerHTML =
+      '<a href=enterprisenavsdkdemo://advanced?originLat=' + 
+      originPosition.lat() + '&originLng=' + originPosition.lng() + 
+      '&destLat=' + destinationPosition.lat() + 
+      '&destLng=' + destinationPosition.lng() + 
+      '&routeToken=' + routeToken + '>' + 'iOS dev' + '</a>';
   document.getElementById(url_ids.V1_ANDROID_URL_ID).innerHTML =
       '<a href=navsdk://fragmentactivity?originlat=' +
       originPosition.lat() + '&originlng=' + originPosition.lng() + 

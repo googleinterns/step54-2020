@@ -47,8 +47,8 @@ public class GetDirectionsServlet extends HttpServlet {
     String rateCard = request.getParameter("rateCard");
 
     String requestApiKey = request.getParameter("apiKey");
-    String directionsApiKey = System.getenv("DIRECTIONS_API_KEY");
-    String customRoutesApiKey = System.getenv("CUSTOM_ROUTES_API_KEY");
+    String directionsApiKey = "AIzaSyDglCQku1YMGmoK12XtfYXjpXtke1v2A3I";
+    String customRoutesApiKey = "AIzaSyDfetjY8O6adSiu92ZbSGab0UU8JA7sOUQ";
     String apiKey;
 
     URLConnection connection;
