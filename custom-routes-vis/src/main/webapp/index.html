@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCKQFQPXICbli-dG9mQz0WRUZAyKPVfqIk&libraries=geometry"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCKQFQPXICbli-dG9mQz0WRUZAyKPVfqIk&libraries=geometry,places"></script>
     <script src="script.js"></script>
   </head>
   <body onload="initMapWithMarkers()">
@@ -23,6 +23,7 @@
       <div class="col-sm-2 offset-sm-1">
         <h5>Origin Coordinates:</h5>
         <div id='origin-coordinates'></div><br>
+        <input id="origin-address-input" type="text" placeholder="Enter a location">
         <button type="button" class="btn btn-success" onclick="showMarker('origin')" id="show-origin-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('origin')" id="hide-origin-marker">Delete Marker</button><br>
         <div id='ios-url'></div>
@@ -30,6 +31,7 @@
       <div class="col-sm-2">
         <h5>Destination Coordinates:</h5>
         <div id='destination-coordinates'></div><br>
+        <input id="destination-address-input" type="text" placeholder="Enter a location">
         <button type="button" class="btn btn-success" onclick="showMarker('destination')" id="show-destination-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('destination')" id="hide-destination-marker">Delete Marker</button><br>
         <div id='v1-android-url'></div><br>

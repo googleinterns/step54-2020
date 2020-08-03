@@ -55,6 +55,7 @@ function initMapWithMarkers() {
   // coordinates.
   createMarker('origin-coordinates', 'A', 'Origin', LATLNG);
   createMarker('destination-coordinates', 'B', 'Destination', LATLNG);
+  setupSearchBoxes();
 }
 
 /**
@@ -78,6 +79,55 @@ function createMarker(containerId, label, title, latLng) {
 
   marker.addListener('dragend', function(event) {
     updateCoordinates(event.latLng.lat(), event.latLng.lng(), containerId);
+    updateDeepLinkingUrl();
+    if (originDestinationMarkers.length === 2 
+        && originDestinationMarkers[0].getVisible() 
+        && originDestinationMarkers[1].getVisible()) {
+      generateRoutes();
+    }
+  });
+}
+
+function setupSearchBoxes() {
+  let originInput = document.getElementById('origin-address-input');
+  let destinationInput = document.getElementById('destination-address-input');
+  let originAutocomplete = new google.maps.places.Autocomplete(originInput);
+  let destinationAutocomplete = new google.maps.places.Autocomplete(destinationInput);
+  addAutocomplete(originAutocomplete, originDestinationMarkers[0], 'origin-coordinates', 'origin');
+  addAutocomplete(destinationAutocomplete, originDestinationMarkers[1], 'destination-coordinates', 'destination');
+}
+
+function addAutocomplete(autocomplete, marker, containerId, markerName) {
+  autocomplete.bindTo('bounds', map);
+  autocomplete.setFields(['geometry']);
+  autocomplete.addListener('place_changed', function() {
+    marker.setVisible(false);
+    let place = autocomplete.getPlace();
+    if (!place.geometry) {
+      // User entered the name of a Place that was not suggested and
+      // pressed the Enter key, or the Place Details request failed.
+      window.alert("No details available for input: '" + place.name + "'");
+      return;
+    }
+
+    // If the place has a geometry, then present it on a map.
+    map.setCenter(place.geometry.location);
+    marker.setPosition(place.geometry.location);
+    marker.setVisible(true);
+
+    document.getElementById('hide-' + markerName + '-marker').style.display =
+        'block';
+    document.getElementById('show-' + markerName + '-marker').style.display =
+        'none';
+    // Display generate routes button when both markers have been placed.
+    if (originDestinationMarkers.length === 2 
+        && originDestinationMarkers[0].getVisible() 
+        && originDestinationMarkers[1].getVisible()) {
+          document.getElementById('generate-routes').style.display = 'block';
+    }
+    console.log(place);
+    updateCoordinates(
+        place.geometry.location.lat(), place.geometry.location.lng(), containerId);
     updateDeepLinkingUrl();
     if (originDestinationMarkers.length === 2 
         && originDestinationMarkers[0].getVisible() 
