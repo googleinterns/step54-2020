@@ -127,7 +127,6 @@ async function displayTopResultsForCurrentTrend(countryCode) {
   resultElement.innerHTML = '';
   let countryData = getCurrentSearchData().dataByCountry
       .filter(data => data.country === countryCode);
- 
   // Handle case where there are no search results for the topic.
   if (countryData.length === 0 ||
       countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
@@ -137,7 +136,6 @@ async function displayTopResultsForCurrentTrend(countryCode) {
         countryData[0].interest + '</b><br>';
     resultElement.innerHTML += '<b>Average Sentiment Score: ' + 
         countryData[0].averageSentiment.toFixed(1) + '</b><br>';
- 
     // Get search results for the specified country.
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
@@ -148,7 +146,6 @@ async function displayTopResultsForCurrentTrend(countryCode) {
             // i + 1 shows the index for each search result.
             resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
                 results[i].link + '>' + results[i].htmlTitle + '</a><br>';
-
             // Check that positive and negative words are detected by the Node.js 
             // sentiment API.
             if (sentimentWordsResult != null) {
