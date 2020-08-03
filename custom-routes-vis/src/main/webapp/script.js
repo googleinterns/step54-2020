@@ -47,7 +47,7 @@ var map;
 function initMapWithMarkers() {
   let chicago = new google.maps.LatLng(41.850033, -87.6500523);
   let mapOptions = {
-    zoom: 7,
+    zoom: 3,
     center: chicago,
   }
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
@@ -100,7 +100,7 @@ function updateCoordinates(lat, lng, containerId) {
 }
 
 /**
- * Hides 'place marker' button and waits for user to select coordinate for
+ * Hides 'place marker' button and waits for user to select coordinates for
  * marker. Updates marker to be in correct location, and show 'delete marker'
  * button.
  * @param {string} markerName Name of corresponding marker in
@@ -151,13 +151,13 @@ function showMarker(markerName) {
 }
 
 /**
- * Hides 'Submit Custom Coordinates' and'place marker' button and waits for user
- * to select coordinate for marker. Updates marker to be in correct location,
- * and show 'delete marker' button.
+ * Hides 'Submit Custom Coordinates' and 'Place Marker' button and waits for user
+ * to input coordinates for the marker. Updates marker to be in correct location,
+ * and show 'Delete Marker' button.
  * @param {string} markerName Name of corresponding marker in
  *     originDestinationMarkers array.
  */
-function showMarkerWithCustomCoordinates(markerName) {
+function showCustomCoordinatesMarker(markerName) {
   let containerOfOtherMarkerName;
   let markerIndex;
   switch (markerName) {
@@ -448,13 +448,13 @@ function updateDeepLinkingUrl(routeToken) {
       originPosition.lat() + '&originLng=' + originPosition.lng() + 
       '&destLat=' + destinationPosition.lat() + 
       '&destLng=' + destinationPosition.lng() + 
-      '&routeToken=' + routeToken + '>' + 'iOS dev' + '</a>';
+      '&routeToken=' + routeToken + '>' + 'iOS Dev' + '</a>';
   document.getElementById(url_ids.IOS_PRODUCTION_URL_ID).innerHTML =
       '<a href=enterprisenavsdkdemo://advanced?originLat=' + 
       originPosition.lat() + '&originLng=' + originPosition.lng() + 
       '&destLat=' + destinationPosition.lat() + 
       '&destLng=' + destinationPosition.lng() + 
-      '&routeToken=' + routeToken + '>' + 'iOS dev' + '</a>';
+      '&routeToken=' + routeToken + '>' + 'iOS Production' + '</a>';
   document.getElementById(url_ids.V1_ANDROID_URL_ID).innerHTML =
       '<a href=navsdk://fragmentactivity?originlat=' +
       originPosition.lat() + '&originlng=' + originPosition.lng() + 
