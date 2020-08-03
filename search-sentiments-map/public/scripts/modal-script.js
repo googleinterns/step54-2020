@@ -11,7 +11,7 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations under
 // the License.
- 
+
 // The colors assigned depending on if the sentiment score is positive or
 // negative.
 const POSITIVE_COLOR = 'green';
@@ -20,12 +20,12 @@ const NEGATIVE_COLOR = 'red';
 let countryCode = '';
 let cachePopularityTimelineData = {};
  
-// Create trigger to resizeEnd event.     
+// Create trigger to `resizeEnd` event.     
 $(window).resize(function() {
-    if (this.resizeTO) clearTimeout(this.resizeTO);
-    this.resizeTO = setTimeout(function() {
-      $(this).trigger('resizeEnd');
-    }, 250);
+  if (this.resizeTO) clearTimeout(this.resizeTO);
+  this.resizeTO = setTimeout(function() {
+    $(this).trigger('resizeEnd');
+  }, 250);
 });
  
 // Reset charts when window resize is completed. 
@@ -50,26 +50,26 @@ function onClickRegion(e) {
  
   // Update Modal with information for relevant country.
   const countryName = e.feature.getProperty('name');
-  const countryId = e.feature.getId();
   countryCode = e.feature.getId();
   document.getElementById('modal-title').innerText = countryName;
-  displayTopResultsForCurrentTrend(countryId);
-  setCountryTrends(countryId);
+  displayTopResultsForCurrentTrend(countryCode);
+  setCountryTrends(countryCode);
+  setSentimentChartForCurrentTrend();
+  setPopularityTimeline();
 }
 
-
 /**
- * Sets the charts only when the tab is clicked on in order to get a width from 
+ * Sets the charts when the tab is clicked on in order to get a width from 
  * the parent containers.
  */
 function setCharts() {
-    $('#sentiment-chart-link').on('shown.bs.tab', function(){
-      setSentimentChartForCurrentTrend();
-    });
+  $('#sentiment-chart-link').on('shown.bs.tab', function(){
+    setSentimentChartForCurrentTrend();
+  });
 
-    $('#popularity-timeline-link').on('shown.bs.tab', function(){
-      setPopularityTimeline();
-    });
+  $('#popularity-timeline-link').on('shown.bs.tab', function(){
+    setPopularityTimeline();
+  });
 }
  
 /**
@@ -192,11 +192,11 @@ function highlightWords(
     // words in lowercase, so make only the snippet lowercase.
     let wordIndex = snippet.toLowerCase().indexOf(word);
     if (wordIndex !== -1){
-      let highlight = '<span style="color: ' +
+      let highlightHTML = '<span style="color: ' +
           (scoreIsPositive ? POSITIVE_COLOR : NEGATIVE_COLOR) +
           ';">' + snippet.substring(wordIndex, wordIndex + word.length) +
           '</span>';
-      snippet = snippet.replace(new RegExp('\\b' + word + '\\b', 'gi'), highlight);
+      snippet = snippet.replace(new RegExp('\\b' + word + '\\b', 'gi'), highlightHTML);
     }
   });
   resultElement.innerHTML += snippet;
@@ -216,7 +216,8 @@ function setPopularityTimeline() {
               'Popularity Timeline is not available for the selected country.';
         } else {
           drawPopularityTimeline(
-              timelineJSON.default.timelineData, popularityTimelineElement, 
+              timelineJSON.default.timelineData, 
+              popularityTimelineElement, 
               getCurrentSearchData().topic);
        }
   });
@@ -227,15 +228,14 @@ function setPopularityTimeline() {
  * stored in the local cache. Prevents making too many calls to the API if the 
  * user continuously resizes the window.
  * @param {string} topic The search topic that the popularity timeline is based on.
- * @param {string} countryCode Two letter country code for selected country.
- * @param {Object} popularityTimelineElement The element where the popularity 
- * timeline is updated.
  * @return {Promise} The promise which resolves to the the timeline JSON data.
  */
-function postTrendsToGetPopularityTimelineData(
-    topic, countryCode, popularityTimelineElement) {
+function postTrendsToGetPopularityTimelineData(topic) {
   // Check if country code and topic is in the cache already.
-  if (cachePopularityTimelineData[topic]) {
+  if (!cachePopularityTimelineData[topic]) {
+    cachePopularityTimelineData[topic] = {};
+  }
+  if (cachePopularityTimelineData[topic][countryCode]) {
     return Promise.resolve(cachePopularityTimelineData[topic][countryCode]);
   }
   return fetch('/trends/', { 
@@ -257,7 +257,7 @@ function postTrendsToGetPopularityTimelineData(
     // For each search topic, you cache the result of the fetch.
     // Example: {Sophie Turner: {US: timelineJSON}}
     cachePopularityTimelineData[topic][countryCode] = timelineJSON;
-    return timelineJSON;
+    return Promise.resolve(timelineJSON);
   }).catch((err) => {
     console.log(err);
   });	 
@@ -354,4 +354,3 @@ function drawSentimentChart(chartElement, results) {
   let chart = new google.visualization.ColumnChart(chartElement);
   chart.draw(view, options);
 }
-
