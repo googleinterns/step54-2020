@@ -91,28 +91,42 @@ function createMarker(containerId, label, title, latLng) {
  * Sets search box inputs to autocomplete addresses.
  */
 function setupSearchBoxes() {
-  let originInput = document.getElementById('origin-address-input');
-  let destinationInput = document.getElementById('destination-address-input');
-  let originAutocomplete = new google.maps.places.Autocomplete(originInput);
-  let destinationAutocomplete = new google.maps.places.Autocomplete(destinationInput);
-  addAutocomplete(originAutocomplete, originDestinationMarkers[0], 'origin-coordinates', 'origin');
-  addAutocomplete(destinationAutocomplete, originDestinationMarkers[1], 'destination-coordinates', 'destination');
+  let originInputBox =
+      document.getElementById('origin-address-input');
+  let destinationInputBox =
+      document.getElementById('destination-address-input');
+  let originAutocompleteElement =
+      new google.maps.places.Autocomplete(originInputBox);
+  let destinationAutocompleteElement =
+      new google.maps.places.Autocomplete(destinationInputBox);
+  addAutocompleteAddress(
+      originAutocompleteElement,
+      originDestinationMarkers[0],
+      'origin-coordinates',
+      'origin');
+  addAutocompleteAddress(
+      destinationAutocompleteElement,
+      originDestinationMarkers[1],
+      'destination-coordinates',
+      'destination');
 }
 
 /**
  * Autocompletes addresses and displays marker for that address.
- * @param {Object} autocomplete Autocomplete onject with address..
+ * @param {Object} autocompleteElement Autocomplete object with attached input
+ *     element.
  * @param {Object} marker Marker to set the location for.
  * @param {string} containerId ID of container to update coordinates in.
  * @param {string} markerName Name of the marker.
  */
-function addAutocomplete(autocomplete, marker, containerId, markerName) {
-  autocomplete.bindTo('bounds', map);
-  autocomplete.setFields(['geometry']);
+function addAutocompleteAddress(
+    autocompleteElement, marker, containerId, markerName) {
+  autocompleteElement.bindTo('bounds', map);
+  autocompleteElement.setFields(['geometry']);
 
-  autocomplete.addListener('place_changed', function() {
+  autocompleteElement.addListener('place_changed', function() {
     marker.setVisible(false);
-    let place = autocomplete.getPlace();
+    let place = autocompleteElement.getPlace();
     if (!place.geometry) {
       // User entered the name of a Place that was not suggested and
       // pressed the Enter key, or the Place Details request failed.
@@ -133,7 +147,7 @@ function addAutocomplete(autocomplete, marker, containerId, markerName) {
     if (originDestinationMarkers.length === 2 
         && originDestinationMarkers[0].getVisible() 
         && originDestinationMarkers[1].getVisible()) {
-          document.getElementById('generate-routes').style.display = 'block';
+      document.getElementById('generate-routes').style.display = 'block';
     }
     
     updateCoordinates(
