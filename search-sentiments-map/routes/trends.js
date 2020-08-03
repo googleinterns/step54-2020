@@ -256,5 +256,10 @@ function getGlobalTrends(trendsByCountry) {
   return globalTrends;
 }
 
+// Necessary for unit testing.
+const trends = {
+  getGlobalTrends,
+}
+module.exports.trends = trends;
 module.exports.router = router;
 module.exports.updateTrendsFunction = updateDailyTrends;
