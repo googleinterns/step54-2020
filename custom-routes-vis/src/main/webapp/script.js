@@ -87,6 +87,9 @@ function createMarker(containerId, label, title, latLng) {
   });
 }
 
+/**
+ * Sets search box inputs to autocomplete addresses.
+ */
 function setupSearchBoxes() {
   let originInput = document.getElementById('origin-address-input');
   let destinationInput = document.getElementById('destination-address-input');
@@ -96,9 +99,17 @@ function setupSearchBoxes() {
   addAutocomplete(destinationAutocomplete, originDestinationMarkers[1], 'destination-coordinates', 'destination');
 }
 
+/**
+ * Autocompletes addresses and displays marker for that address.
+ * @param {Object} autocomplete Autocomplete onject with address..
+ * @param {Object} marker Marker to set the location for.
+ * @param {string} containerId ID of container to update coordinates in.
+ * @param {string} markerName Name of the marker.
+ */
 function addAutocomplete(autocomplete, marker, containerId, markerName) {
   autocomplete.bindTo('bounds', map);
   autocomplete.setFields(['geometry']);
+
   autocomplete.addListener('place_changed', function() {
     marker.setVisible(false);
     let place = autocomplete.getPlace();
@@ -109,30 +120,26 @@ function addAutocomplete(autocomplete, marker, containerId, markerName) {
       return;
     }
 
-    // If the place has a geometry, then present it on a map.
+    // Update map with new marker location.
     map.setCenter(place.geometry.location);
     marker.setPosition(place.geometry.location);
     marker.setVisible(true);
 
+    // Update marker buttons.
     document.getElementById('hide-' + markerName + '-marker').style.display =
         'block';
     document.getElementById('show-' + markerName + '-marker').style.display =
         'none';
-    // Display generate routes button when both markers have been placed.
     if (originDestinationMarkers.length === 2 
         && originDestinationMarkers[0].getVisible() 
         && originDestinationMarkers[1].getVisible()) {
           document.getElementById('generate-routes').style.display = 'block';
     }
-    console.log(place);
+    
     updateCoordinates(
-        place.geometry.location.lat(), place.geometry.location.lng(), containerId);
-    updateDeepLinkingUrl();
-    if (originDestinationMarkers.length === 2 
-        && originDestinationMarkers[0].getVisible() 
-        && originDestinationMarkers[1].getVisible()) {
-      generateRoutes();
-    }
+        place.geometry.location.lat(),
+        place.geometry.location.lng(),
+        containerId);
   });
 }
 
