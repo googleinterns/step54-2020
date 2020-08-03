@@ -21,7 +21,7 @@ describe('Trends', function() {
       sinon.restore();
     })
 
-    it('should get the globalTrends from getGlobalTrends', function() {
+    it('should get the top globally trending topics', function() {
       let trendsByCountry = [
       {
         country: 'UA',
@@ -57,7 +57,7 @@ describe('Trends', function() {
       assert.deepEqual(result, mockResult);
     });
 
-    it('should get an empty array from getGlobalTrends', function() {
+    it('should get an empty array', function() {
       let trendsByCountry = [];
       let result = trends.getGlobalTrends(trendsByCountry);
       assert.deepEqual(result, mockEmpty);
