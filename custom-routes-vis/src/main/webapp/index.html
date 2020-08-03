@@ -15,6 +15,18 @@
     <div class="row">
       <div class="col-sm-10 offset-sm-1">
         <h1>Custom Routes Visualization</h1>
+        <div class="modal fade" id="custom-coordinates-warning-modal" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <span class="modal-title" id="custom-coordinates-warning-text"></span>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div id="map"></div>
         <br>
       </div>
@@ -22,6 +34,9 @@
     <div class="row">
       <div class="col-sm-2 offset-sm-1">
         <h5>Origin Coordinates:</h5>
+        <input type="number" id="origin-lat" placeholder="Enter latitude">
+        <input type="number" id="origin-lng" placeholder="Enter longitude">
+        <button type="button" class="btn btn-success" onclick="showMarkerWithCustomCoordinates('origin')" id="show-origin-custom-marker">Submit Custom Coordinates</button>
         <div id='origin-coordinates'></div><br>
         <button type="button" class="btn btn-success" onclick="showMarker('origin')" id="show-origin-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('origin')" id="hide-origin-marker">Delete Marker</button><br>
@@ -29,6 +44,9 @@
       </div>
       <div class="col-sm-2">
         <h5>Destination Coordinates:</h5>
+        <input type="number" id="destination-lat" placeholder="Enter latitude">
+        <input type="number" id="destination-lng" placeholder="Enter longitude">
+        <button type="button" class="btn btn-success" onclick="showMarkerWithCustomCoordinates('destination')" id="show-destination-custom-marker">Submit Custom Coordinates</button>
         <div id='destination-coordinates'></div><br>
         <button type="button" class="btn btn-success" onclick="showMarker('destination')" id="show-destination-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('destination')" id="hide-destination-marker">Delete Marker</button><br>

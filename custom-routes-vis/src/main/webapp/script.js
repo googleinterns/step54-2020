@@ -181,13 +181,90 @@ function showMarker(markerName) {
           document.getElementById('generate-routes').style.display = 'block';
         }
       });
-
+  document.getElementById(markerName + '-lat').style.display =
+      'none';
+  document.getElementById(markerName + '-lng').style.display =
+      'none';
+  document.getElementById('show-' + markerName + '-custom-marker').style.display =
+      'none';
   document.getElementById('show-' + markerName + '-marker').style.display =
       'none';
   document.getElementById(markerName + '-coordinates').innerHTML =
       'Click the map to select location!';
 }
 
+/**
+ * Hides 'place marker' button and waits for user to select coordinate for
+ * marker. Updates marker to be in correct location, and show 'delete marker'
+ * button.
+ * @param {string} markerName Name of corresponding marker in
+ *     originDestinationMarkers array.
+ */
+function showMarkerWithCustomCoordinates(markerName) {
+  let containerOfOtherMarkerName;
+  let markerIndex;
+  switch (markerName) {
+    case MarkerNames.ORIGIN:
+      containerOfOtherMarkerName =
+          'hide-' + MarkerNames.DESTINATION + '-marker';
+      markerIndex = 0;
+      break;
+    case MarkerNames.DESTINATION:
+      containerOfOtherMarkerName = 
+          'hide-' + MarkerNames.ORIGIN + '-marker';
+      markerIndex = 1;
+      break;
+  }
+  let customLat = parseFloat(document.getElementById(markerName + '-lat').value);
+  let customLng = parseFloat(document.getElementById(markerName + '-lng').value);
+  if(!checkCustomCoordinatesInputIsValid(customLat, customLng)){
+    return;
+  }
+  let customLatLng = new google.maps.LatLng({lat: customLat, lng: customLng}); 
+  originDestinationMarkers[markerIndex].setPosition(customLatLng);
+  originDestinationMarkers[markerIndex].setVisible(true);
+  console.log(originDestinationMarkers[0].getVisible());
+  updateCoordinates(customLatLng.lat(), customLatLng.lng(),
+      markerName + '-coordinates');
+  updateDeepLinkingUrl();
+  document.getElementById('hide-' + markerName + '-marker')
+      .style.display = 'block';
+
+  // Display generate routes button when both markers have been placed.
+  if (document.getElementById(containerOfOtherMarkerName)
+        .style.display === 'block') {
+    document.getElementById('generate-routes').style.display = 'block';
+  }
+  // Hide Submit Custom Coordinates and Place Marker buttons.
+  document.getElementById('show-' + markerName + '-custom-marker').style.display =
+      'none';
+  document.getElementById('show-' + markerName + '-marker').style.display =
+      'none';
+}
+
+function checkCustomCoordinatesInputIsValid(customLat, customLng) {
+  // Make sure there is a valid latitude and longitude inputted.
+  // Prompt user to input missing information.
+  let valid = false;
+  let modalText = '';
+  if (isNaN(customLat) || isNaN(customLng)) {
+    modalText = 'Make sure to input values for both latitude and longitude';
+  } else if (customLat < -90 || customLat > 90) {
+    modalText = 'Latitude input out of range.';
+  } else if (customLng < -180 || customLng > 180) {
+    modalText = 'Longitude input out of range.';
+  } else {
+    valid = true;
+  }
+  if (valid) {
+    return true; 
+  } else {
+    document.getElementById('custom-coordinates-warning-text').innerHTML = modalText;
+    $('#custom-coordinates-warning-modal').modal('show');
+    return false;
+  }
+  
+}
 /**
  * Hides specified marker and toggles buttons to show 'place marker' button.
  * @param {string} markerName Name of corresponding marker in
@@ -208,6 +285,8 @@ function hideMarker(markerName) {
 
   originDestinationMarkers[markerIndex].setVisible(false);
   document.getElementById(markerName + '-coordinates').innerHTML = '';
+  document.getElementById('show-' + markerName + '-custom-marker').style.display =
+      'block';
   document.getElementById('show-' + markerName + '-marker').style.display =
       'block';
   document.getElementById('hide-' + markerName + '-marker').style.display =
