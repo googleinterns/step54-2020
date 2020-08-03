@@ -4,60 +4,63 @@ const assert = chai.assert;
 const sinon = require('sinon');
 const trends = require('./../routes/trends').trends;
 
-describe('Sentiment', function() {
+describe('Trends', function() {
   describe('getGlobalTrends', function() {
-    let mockSentimentScore;
-    let analyzeSentimentStub;
-    let mockAnalyzeSentimentResult;
-    
+    let mockResult;
+    let mockEmpty;
     beforeEach(() => {
-      mockScore = 0.8;
-      mockAnalyzeSentimentResult = {
-        'documentSentiment': {
-          'magnitude': 0.8,
-          'score': 0.8
-        },
-        'language': 'en',
-        'sentences': [
-          {
-            'text': {
-              'content': 'Enjoy your vacation!',
-              'beginOffset': 0
-            },
-            'sentiment': {
-              'magnitude': 0.8,
-              'score': 0.8
-            }
-          }
-        ]
-      };
-      // Function is stubbed because it is an API method.
-      sinon.stub(client, 'analyzeSentiment').callsFake(() => {
-        console.log(result.documentSentiment.score);
-        return mockAnalyzeSentimentResult;
-      });
+      mockResult = [
+        {trendTopic: 'Donald Trump', count: 3},
+        {trendTopic: 'Coronavirus', count: 2},
+        {trendTopic: 'Dogs', count: 1}
+      ];
+      mockEmpty = [];
     })
 
     afterEach(() => {
       sinon.restore();
     })
 
-    it('should get the sentiment score from analyzeSentiment', async function() {
-      let result =
-          await trends.getGlobalTrends('Enjoy your vacation!');
-      trendsByCountry = [{
-      country: US,
-      trends: [{
-        topic: Donald Trump,
-        traffic: 200K+,
-        exploreLink: '/trends/explore?q=Donald+Trump&date=now+7-d&geo=US',
-        articles: [{title: title1, url: url1}, ...],
-      }],
-      }, {
-      country: UK,
-      trends: [..., ...],
-    }, ...],
-      assert.deepEqual(result, mockScore);
+    it('should get the globalTrends from getGlobalTrends', function() {
+      let trendsByCountry = [
+      {
+        country: 'UA',
+        trends: [{
+          topic: 'Donald Trump',
+        },
+        {
+          topic: 'Coronavirus',
+        }],
+      }, 
+      {
+        country: 'US',
+        trends: [{
+          topic: 'Donald Trump',
+        },
+        {
+          topic: 'Coronavirus',
+        }],
+      }, 
+      {
+        country: 'UK',
+        trends: [{
+          topic: 'Donald Trump',
+        }],
+      },
+      {
+        country: 'AR',
+        trends: [{
+          topic: 'Dogs',
+        }],
+      }];
+      let result = trends.getGlobalTrends(trendsByCountry);
+      assert.deepEqual(result, mockResult);
+    });
+
+    it('should get an empty array from getGlobalTrends', function() {
+      let trendsByCountry = [];
+      let result = trends.getGlobalTrends(trendsByCountry);
+      assert.deepEqual(result, mockEmpty);
     });
   });
 });
