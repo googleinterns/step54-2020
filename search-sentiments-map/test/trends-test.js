@@ -20,6 +20,24 @@ const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
 describe('Trends', function() {
+  describe('UpdateDailyTrends', function() {
+    let constructCountryTrendsJsonStub;
+    let saveTrendsAndDeletePreviousStub;
+
+    beforeEach(() => {
+      constructCountryTrendsJsonStub = 
+          sinon.stub(trends, 'constructCountryTrendsJson')
+              .resolves('Not interested in the output');
+      saveTrendsAndDeletePreviousStub = 
+          sinon.stub(trends, 'saveTrendsAndDeletePrevious')
+              .resolves('Not interested in the output');
+    })
+
+    afterEach(() => {
+      sinon.restore();
+    })
+  });
+
   describe('ConstructCountryTrendsJson', function() {
     it ('should return correctly formatted country trends', function() {
       let countryCode = 'US';

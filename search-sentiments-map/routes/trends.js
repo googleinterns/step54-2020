@@ -100,13 +100,13 @@ async function updateDailyTrends() {
       // Parse the JSON string and get the trending topics.
       trendingSearches = JSON.parse(dailyTrendsJsonString)
           .default.trendingSearchesDays[0].trendingSearches;
-      trendsByCountry.push(constructCountryTrendsJson(trendingSearches, country.id));
+      trendsByCountry.push(trends.constructCountryTrendsJson(trendingSearches, country.id));
     }).catch(err => {
       console.log(err);
     });
   }
 
-  saveTrendsAndDeletePrevious(trendsByCountry);
+  trends.saveTrendsAndDeletePrevious(trendsByCountry);
 }
 
 /** 
@@ -177,7 +177,7 @@ async function saveTrendsAndDeletePrevious(trendsByCountry) {
     data: {
       timestamp: Date.now(),
       trendsByCountry: trendsByCountry,
-      globalTrends: getGlobalTrends(trendsByCountry),
+      globalTrends: trends.getGlobalTrends(trendsByCountry),
     },
   };
 
@@ -260,6 +260,7 @@ const trends = {
   updateDailyTrends,
   constructCountryTrendsJson,
   saveTrendsAndDeletePrevious,
+  getGlobalTrends,
 }
 module.exports.trends = trends;
 
