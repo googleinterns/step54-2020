@@ -48,19 +48,22 @@ public class GetDirectionsServlet extends HttpServlet {
 
     String requestApiKey = request.getParameter("apiKey");
     String directionsApiKey = System.getenv("DIRECTIONS_API_KEY");
-    // Use the Directions API key if no API key is specified.
-    String apiKey = requestApiKey.isEmpty() ? directionsApiKey : requestApiKey;
+    String customRoutesApiKey = System.getenv("CUSTOM_ROUTES_API_KEY");
+    String apiKey;
 
     URLConnection connection;
 
     switch (endpoint) {
       case COMPUTE_ROUTES:
+        apiKey = requestApiKey.isEmpty() ? customRoutesApiKey : requestApiKey;
         connection = connectToRoutesApi(origin, destination, false, apiKey, "");
         break;
       case COMPUTE_ROUTES_ALPHA:
+        apiKey = requestApiKey.isEmpty() ? customRoutesApiKey : requestApiKey;
         connection = connectToRoutesApi(origin, destination, true, apiKey, rateCard);
         break;
       default:  // Default to use the Directions API.
+        apiKey = requestApiKey.isEmpty() ? directionsApiKey : requestApiKey;
         connection = connectToDirectionsApi(origin, destination, apiKey);
         break;
     }
@@ -96,25 +99,24 @@ public class GetDirectionsServlet extends HttpServlet {
   public URLConnection connectToRoutesApi(String origin, String destination, boolean shouldUseAlphaApi,
       String apiKey, String rateCard) throws IOException, MalformedURLException {
     URL routesUrl;
-    String rateCardString = "";
+    String versionSpecificParams;
     if (shouldUseAlphaApi) {
       routesUrl = new URL("https://routespreferred.googleapis.com/v1alpha:computeCustomRoutes");
-      rateCardString = "\"routeObjective\": {\"rateCard\": " + rateCard + "},";
+      versionSpecificParams = "\"routeObjective\": {\"rateCard\": " + rateCard + "},";
     } else {
       routesUrl = new URL("https://routespreferred.googleapis.com/v1:computeRoutes");
+      versionSpecificParams = "\"computeAlternativeRoutes\": true,";
     }
 
     HttpURLConnection connection = (HttpURLConnection) routesUrl.openConnection();
     connection.setRequestMethod("POST");
     connection.setRequestProperty("Content-Type", "application/json; utf-8");
+    connection.setRequestProperty("X-Goog-Api-Key", apiKey);
+    connection.setRequestProperty("X-Goog-FieldMask", "*");
     connection.setRequestProperty("Accept", "application/json");
     connection.setDoOutput(true);
 
-    // TODO(chenyuz): Check with the Routes Preferred team to make sure that the request JSON is
-    // correct.
-    // 1. The origin and destination waypoints are simplified here.
-    // 2. How do we add apiKey?
-    // 3. Are there other fields that we should add?
+    // The request body of the API call. Subject to change if more customization is needed.
     String requestParamsJson = "{"
         + "\"origin\": {\"location\":  {\"latLng\": "
         + "{\"latitude\": " + origin.split(",")[0]
@@ -122,10 +124,10 @@ public class GetDirectionsServlet extends HttpServlet {
         + "\"destination\": {\"location\":  {\"latLng\": "
         + "{\"latitude\": " + destination.split(",")[0]
         + ", \"longitude\": " + destination.split(",")[1] + "}}},"
-        + "\"travelMode\": \"DRIVE\"," + rateCardString
-        + "\"computeAlternativeRoutes\": true}";
+        + "\"travelMode\": \"DRIVE\"," + "\"routingPreference\": \"TRAFFIC_AWARE\","
+        + versionSpecificParams + "}";
 
-    try(OutputStream os = connection.getOutputStream()) {
+    try (OutputStream os = connection.getOutputStream()) {
       byte[] input = requestParamsJson.getBytes("utf-8");
       os.write(input, 0, input.length);			
     }
