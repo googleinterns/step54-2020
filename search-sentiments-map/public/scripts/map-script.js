@@ -141,10 +141,10 @@ function loadCountryData() {
   let dataVariableMax = Number.MIN_VALUE;  // Smallest positive number.
   let dataVariableMin = Number.MAX_VALUE;
   // Countries with the minimum and maximum scores for current topic. 
-  let countryMaxName = '';
-  let countryMaxId = '';
-  let countryMinName = '';
-  let countryMinId = '';
+  let maxScoreCountryName = '';
+  let maxScoreCountryId = '';
+  let minScoreCountryName = '';
+  let minScoreCountryId = '';
 
   map.data.forEach(row => {
     let countryData = getCurrentSearchData().dataByCountry
@@ -157,15 +157,15 @@ function loadCountryData() {
       if (dataVariable > dataVariableMax) {
         // Keep track of the maximum score and corresponding country.
         dataVariableMax = dataVariable;
-        countryMaxName = country;
-        countryMaxId = row.getId();
+        maxScoreCountryName = country;
+        maxScoreCountryId = row.getId();
       }
       if (dataVariable < dataVariableMin && 
           dataVariable !== NO_RESULTS_DEFAULT_SCORE) {
         // Keep track of the minimum score and corresponding country.
         dataVariableMin = dataVariable;
-        countryMinName = country;
-        countryMinId = row.getId();
+        minScoreCountryName = country;
+        minScoreCountryId = row.getId();
       }
     }
 
@@ -174,12 +174,15 @@ function loadCountryData() {
 
   document.getElementById('extrema-sentiment').innerHTML = 
       isSentimentMode ?
-          'Most Positive Country: <span class="modal-click" id="' +
-          countryMaxId + '">' + countryMaxName + 
-          '</span>, Most Negative Country: <span class="modal-click" id="' +
-          countryMinId + '">' + countryMinName + '</span>':
-          'Most Popular Country: <span class="modal-click" id="' +
-          countryMaxId + '">' + countryMaxName + '</span>' ;
+          'Most Positive Country: ' +
+          '<span class="modal-click" id="' + maxScoreCountryId + '">' +
+          maxScoreCountryName + '</span>' + 
+          ', Most Negative Country: ' +
+          '<span class="modal-click" id="' + minScoreCountryId + '">' +
+          minScoreCountryName + '</span>':
+          'Most Popular Country: ' +
+          '<span class="modal-click" id="' + maxScoreCountryId + '">' +
+          maxScoreCountryName + '</span>' ;
 
   $(".modal-click").click(function(){
     openModal(this.id, this.innerText);
