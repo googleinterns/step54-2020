@@ -33,6 +33,29 @@ const url_ids = {
   V1_ANDROID_URL_ID: 'v1-android-url', 
   V2_ANDROID_URL_ID: 'v2-android-url',
 };
+
+/**
+ * Container ids for HTML elements that allow users to display an origin marker.
+ * @enum {string}
+ */
+const originDisplayMarkerContainerIds = {
+  LAT_ID: 'origin-lat', 
+  LNG_ID: 'origin-lng',
+  SHOW_CUSTOM_MARKER_ID: 'show-origin-custom-marker', 
+  SHOW_MARKER_ID: 'show-origin-marker',
+};
+
+/**
+ * Container ids for HTML elements that allow users to display a destination marker.
+ * @enum {string}
+ */
+const destinationDisplayMarkerContainerIds = {
+  LAT_ID: 'destination-lat', 
+  LNG_ID: 'destination-lng',
+  SHOW_CUSTOM_MARKER_ID: 'show-destination-custom-marker', 
+  SHOW_MARKER_ID: 'show-destination-marker',
+};
+
 // Array holding origin and destination markers.
 let originDestinationMarkers = [];
 // Array holding routes displayed on the map.
@@ -109,16 +132,19 @@ function updateCoordinates(lat, lng, containerId) {
 function showMarker(markerName) {
   let containerOfOtherMarkerName;
   let markerIndex;
+  let displayMarkerContainerIds;
   switch (markerName) {
     case MarkerNames.ORIGIN:
       containerOfOtherMarkerName =
           'hide-' + MarkerNames.DESTINATION + '-marker';
       markerIndex = 0;
+      displayMarkerContainerIds = originDisplayMarkerContainerIds;
       break;
     case MarkerNames.DESTINATION:
       containerOfOtherMarkerName = 
           'hide-' + MarkerNames.ORIGIN + '-marker';
       markerIndex = 1;
+      displayMarkerContainerIds = destinationDisplayMarkerContainerIds;
       break;
   }
   let placeMarkerListener =
@@ -138,14 +164,9 @@ function showMarker(markerName) {
           document.getElementById('generate-routes').style.display = 'block';
         }
       });
-  document.getElementById(markerName + '-lat').style.display =
-      'none';
-  document.getElementById(markerName + '-lng').style.display =
-      'none';
-  document.getElementById('show-' + markerName + '-custom-marker').style.display =
-      'none';
-  document.getElementById('show-' + markerName + '-marker').style.display =
-      'none';
+  for (const key of Object.keys(displayMarkerContainerIds)) {
+    document.getElementById(displayMarkerContainerIds[key]).style.display = 'none';
+  }
   document.getElementById(markerName + '-coordinates').innerHTML =
       'Click the map to select location!';
 }
@@ -160,16 +181,19 @@ function showMarker(markerName) {
 function showCustomCoordinatesMarker(markerName) {
   let containerOfOtherMarkerName;
   let markerIndex;
+  let displayMarkerContainerIds;
   switch (markerName) {
     case MarkerNames.ORIGIN:
       containerOfOtherMarkerName =
           'hide-' + MarkerNames.DESTINATION + '-marker';
       markerIndex = 0;
+      displayMarkerContainerIds = originDisplayMarkerContainerIds;
       break;
     case MarkerNames.DESTINATION:
       containerOfOtherMarkerName = 
           'hide-' + MarkerNames.ORIGIN + '-marker';
       markerIndex = 1;
+      displayMarkerContainerIds = destinationDisplayMarkerContainerIds;
       break;
   }
   let customLat = parseFloat(document.getElementById(markerName + '-lat').value);
@@ -194,14 +218,9 @@ function showCustomCoordinatesMarker(markerName) {
   }
   // Hide Custom Coordinates input area, Submit Custom Coordinates and Place
   // Marker buttons.
-  document.getElementById(markerName + '-lat').style.display =
-      'none';
-  document.getElementById(markerName + '-lng').style.display =
-      'none';
-  document.getElementById('show-' + markerName + '-custom-marker').style.display =
-      'none';
-  document.getElementById('show-' + markerName + '-marker').style.display =
-      'none';
+  for (const key of Object.keys(displayMarkerContainerIds)) {
+    document.getElementById(displayMarkerContainerIds[key]).style.display = 'none';
+  }
 }
 
 /**
@@ -237,27 +256,24 @@ function checkCustomCoordinatesInputIsValid(customLat, customLng) {
  */
 function hideMarker(markerName) {
   clearRoutes();
-
   let markerIndex;
+  let displayMarkerContainerIds;
   switch (markerName) {
     case MarkerNames.ORIGIN:
       markerIndex = 0;
+      displayMarkerContainerIds = originDisplayMarkerContainerIds;
       break;
     case MarkerNames.DESTINATION:
       markerIndex = 1;
+      displayMarkerContainerIds = destinationDisplayMarkerContainerIds;
       break;
   }
 
   originDestinationMarkers[markerIndex].setVisible(false);
   document.getElementById(markerName + '-coordinates').innerHTML = '';
-  document.getElementById(markerName + '-lat').style.display =
-      'block';
-  document.getElementById(markerName + '-lng').style.display =
-      'block';
-  document.getElementById('show-' + markerName + '-custom-marker').style.display =
-      'block';
-  document.getElementById('show-' + markerName + '-marker').style.display =
-      'block';
+  for (const key of Object.keys(displayMarkerContainerIds)) {
+    document.getElementById(displayMarkerContainerIds[key]).style.display = 'block';
+  }
   document.getElementById('hide-' + markerName + '-marker').style.display =
       'none';
   document.getElementById('generate-routes').style.display = 'none';
