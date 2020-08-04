@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCKQFQPXICbli-dG9mQz0WRUZAyKPVfqIk&libraries=geometry"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCKQFQPXICbli-dG9mQz0WRUZAyKPVfqIk&libraries=geometry,places"></script>
     <script src="script.js"></script>
   </head>
   <body onload="initMapWithMarkers()">
@@ -22,14 +22,16 @@
     <div class="row">
       <div class="col-sm-2 offset-sm-1">
         <h5>Origin Coordinates:</h5>
-        <div id='origin-coordinates'></div><br>
+        <div id='origin-coordinates'></div>
+        <input id="origin-address-input" class="form-control" type="text" placeholder="Enter a location">
         <button type="button" class="btn btn-success" onclick="showMarker('origin')" id="show-origin-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('origin')" id="hide-origin-marker">Delete Marker</button><br>
         <div id='ios-url'></div>
       </div>
       <div class="col-sm-2">
         <h5>Destination Coordinates:</h5>
-        <div id='destination-coordinates'></div><br>
+        <div id='destination-coordinates'></div>
+        <input id="destination-address-input" class="form-control" type="text" placeholder="Enter a location">
         <button type="button" class="btn btn-success" onclick="showMarker('destination')" id="show-destination-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('destination')" id="hide-destination-marker">Delete Marker</button><br>
         <div id='v1-android-url'></div><br>
@@ -41,13 +43,13 @@
           <option value="compute-routes">ComputeRoutes API(V1)</option>
           <option value="compute-routes-alpha">ComputeCustomRoutes API(V1 alpha)</option>
         </select>
-        <input id="api-key" class="form-control" placeholder="API Key (Defaults to use Directions API Key)"></input>
+        <input id="api-key" class="form-control" placeholder="API Key (Optional, Default Key Exists)"></input>
         <div id="rate-card-data" class="hidden">
           <div class="row">
             <label for="cost-per-minute" class="col-sm-5">Cost Per Minute:</label>
             <div class="col-sm-7">
               <input type="number" id="cost-per-minute" class="form-control"></input>
-            </div> 
+            </div>
           </div>
           <div class="row">
             <label for="cost-per-km" class="col-sm-5">Cost Per km:</label>
@@ -59,15 +61,15 @@
             <label for="include-tolls" class="col-sm-6">Include Tolls in Cost:</label>
             <div class="col-sm-6">
               <select id="include-tolls" class="form-control">
-                <option value="true" selected>True</option>
-                <option value="false">False</option>
+                <option value="false" selected>False</option>
+                <option value="true">True</option>
               </select>
             </div>
           </div>
+          <i>Note: At least one of cost_per_minute or cost_per_km must be specified.</i>
         </div>
       </div>
       <div class="col-sm-3">
-        <div id="routes-options"></div>
         <button id="generate-routes" type="button" class="btn btn-primary hidden" onclick="generateRoutes()">Generate Routes</button><br>
         <div id="route-info"></div>
       </div>

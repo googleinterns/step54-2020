@@ -7,6 +7,8 @@ Commands to run:
 `npm start`
 3. Deploy to trending-search-sentiments.appspot.com with
 `gcloud app deploy`
+4. Run the tests with
+`npm test`
 
 To set project ID: 
 `gcloud config set project PROJECT_ID` or `export GCLOUD_PROJECT=...`

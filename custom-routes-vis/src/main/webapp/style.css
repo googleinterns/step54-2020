@@ -6,3 +6,13 @@
 .hidden {
   display: none;
 }
+
+input {
+  box-sizing: border-box;
+  padding: 0.2em; 
+  width: 100%;
+}
+
+button {
+  margin-top:10px;
+}
