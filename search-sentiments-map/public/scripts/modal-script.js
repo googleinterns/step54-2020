@@ -114,7 +114,7 @@ function setCountryTrends(countryCode) {
 function toggleDisplay(id) {
   document.getElementById(id).classList.toggle('hidden');
 }
- 
+
 /** 
  * Displays the top results in a country for the current search trend on modal
  * and show positive words if the sign of the sentiment score is positive,
@@ -127,6 +127,7 @@ async function displayTopResultsForCurrentTrend(countryCode) {
   resultElement.innerHTML = '';
   let countryData = getCurrentSearchData().dataByCountry
       .filter(data => data.country === countryCode);
+
   // Handle case where there are no search results for the topic.
   if (countryData.length === 0 ||
       countryData[0].averageSentiment === NO_RESULTS_DEFAULT_SCORE) {
@@ -136,6 +137,7 @@ async function displayTopResultsForCurrentTrend(countryCode) {
         countryData[0].interest + '</b><br>';
     resultElement.innerHTML += '<b>Average Sentiment Score: ' + 
         countryData[0].averageSentiment.toFixed(1) + '</b><br>';
+        
     // Get search results for the specified country.
     let results = countryData[0].results;
     for (let i = 0; i < results.length; i++) {
@@ -146,6 +148,7 @@ async function displayTopResultsForCurrentTrend(countryCode) {
             // i + 1 shows the index for each search result.
             resultElement.innerHTML += (i + 1).toString() + '. ' + '<a href=' + 
                 results[i].link + '>' + results[i].htmlTitle + '</a><br>';
+
             // Check that positive and negative words are detected by the Node.js 
             // sentiment API.
             if (sentimentWordsResult != null) {
@@ -206,7 +209,7 @@ function highlightWords(
 function setPopularityTimeline() {
   const popularityTimelineElement = document.getElementById('popularity-timeline-tab');
   popularityTimelineElement.innerHTML = '';
-  postTrendsToGetPopularityTimelineData(getCurrentSearchData().topic, countryCode)
+  postTrendsToGetPopularityTimelineData()
       .then(timelineJSON => {
         if (timelineJSON.default.timelineData.length === 0) {
           popularityTimelineElement.innerText = 
@@ -227,7 +230,8 @@ function setPopularityTimeline() {
  * @param {string} topic The search topic that the popularity timeline is based on.
  * @return {Promise} The promise which resolves to the the timeline JSON data.
  */
-function postTrendsToGetPopularityTimelineData(topic) {
+function postTrendsToGetPopularityTimelineData() {
+  let topic = getCurrentSearchData().topic;
   // Check if country code and topic is in the cache already.
   if (!cachePopularityTimelineData[topic]) {
     cachePopularityTimelineData[topic] = {};
@@ -294,7 +298,7 @@ function drawPopularityTimeline(timelineData, popularityTimelineElement, topic) 
   let chart = new google.visualization.LineChart(popularityTimelineElement);
   chart.draw(data, options);
 }
- 
+
 /** 
  * Sets sentiment chart of search results for the current country on the modal.
  */
@@ -319,7 +323,7 @@ function setSentimentChartForCurrentTrend() {
         '<i><br>';
   }
 }
- 
+
 /** 
  * Draws a sentiment chart and adds it to the given element. 
  * @param {Object} chartElement Tab element to update with the sentiment chart.
@@ -333,7 +337,7 @@ function drawSentimentChart(chartElement, results) {
         sentimentItem.push(NEGATIVE_COLOR);
     sentimentDataArray.push(sentimentItem);
   }
- 
+
   let sentimentDataTable = google.visualization.arrayToDataTable(sentimentDataArray);
   let view = new google.visualization.DataView(sentimentDataTable);
   view.setColumns([0, 1, {
@@ -342,7 +346,7 @@ function drawSentimentChart(chartElement, results) {
     type: 'string',
     role: 'annotation',
   }, 2]);
-  
+
   let options = {
     bar: {groupWidth: '55%'},
     legend: {position: 'none'},
