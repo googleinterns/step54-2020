@@ -27,16 +27,22 @@ function onClickRegion(e) {
   if (e.feature.getProperty('country_data') == null) {
     return;
   }
-  $('#region-info-modal').modal('show');
 
   // Update Modal with information for relevant country.
   const countryName = e.feature.getProperty('name');
   const countryId = e.feature.getId();
+  openModal(countryId, countryName);
+}
+
+function openModal(countryCode, countryName) {
+  $('#region-info-modal').modal('show');
+
+  // Update Modal with information for relevant country.
   document.getElementById('modal-title').innerText = countryName;
-  displayTopResultsForCurrentTrend(countryId);
-  setCountryTrends(countryId);
-  displaySentimentChartForCurrentTrend(countryId);
-  displayPopularityTimeline(countryId);
+  displayTopResultsForCurrentTrend(countryCode);
+  setCountryTrends(countryCode);
+  displaySentimentChartForCurrentTrend(countryCode);
+  displayPopularityTimeline(countryCode);
 }
 
 /**
