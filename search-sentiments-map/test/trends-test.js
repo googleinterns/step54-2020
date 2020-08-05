@@ -133,17 +133,18 @@ describe('Trends', function() {
       // Stub the API call to googleTrends.
       sinon.stub(googleTrends, 'dailyTrends').resolves(mockDailyTrendsData);
 
-      // Stub the `saveTrendsAndDeletePrevious` function.
-      sinon.stub(trends, 'saveTrendsAndDeletePrevious')
-          .callsFake((trendsByCountry) => {
-        datastoreEntities.push({
-          key: 'fakeKey',
-          data: {
-            timestamp: Date.now(),
-            trendsByCountry: trendsByCountry,
-            globalTrends: trends.getGlobalTrends(trendsByCountry),
-          },
-        });
+      // Stub the `deleteAncientTrend` function because it is tested separately.
+      sinon.stub(trends, 'deleteAncientTrend')
+          .resolves('Not interested in the output');
+
+      // Stub calls to the datastore.
+      sinon.stub(Datastore.prototype, 'key').callsFake(() => {
+        return 'fakeKey';
+      });
+
+      // Stub calls to the datastore.
+      sinon.stub(Datastore.prototype, 'save').callsFake((entity) => {
+        datastoreEntities.push(entity);
       });
     });
 

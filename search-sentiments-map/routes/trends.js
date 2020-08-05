@@ -108,7 +108,7 @@ async function updateDailyTrends() {
     });
   }
 
-  trends.saveTrendsAndDeletePrevious(trendsByCountry);
+  await trends.saveTrendsAndDeletePrevious(trendsByCountry);
 }
 
 /** 
@@ -264,6 +264,7 @@ const trends = {
   updateDailyTrends,
   constructCountryTrendsJson,
   saveTrendsAndDeletePrevious,
+  deleteAncientTrend,
   getGlobalTrends,
 }
 module.exports.trends = trends;
