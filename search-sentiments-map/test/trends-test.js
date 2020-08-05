@@ -21,7 +21,6 @@ const {Datastore} = require('@google-cloud/datastore');
 
 describe('Trends', function() {
   describe('RetrieveGlobalTrendsForTimeRange', function() {
-    const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
     const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
     const TIME_RANGE_1_HALF_MS = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 1.5;
     const TIME_RANGE_3_MS = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 3;
