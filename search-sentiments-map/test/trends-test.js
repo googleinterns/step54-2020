@@ -79,29 +79,11 @@ describe('Trends', function() {
     beforeEach(() => {
       datastoreEntities = [];
 
-      let mockTrendingSearches = [
-        {
-          'title': {
-            'query': 'topic1',
-            'exploreLink': 'exploreLink1',
-          },
-          'formattedTraffic': '200K+',
-          'articles': [
-            {
-              'title': 'article1',
-              'url': 'url1',
-            }, {
-              'title': 'article2',
-              'url': 'url2',
-            }
-          ],
-        }
-      ];
       let mockDailyTrendsData = JSON.stringify({
         'default': {
           'trendingSearchesDays': [
             {
-              'trendingSearches': mockTrendingSearches,
+              'trendingSearches': 'mockTrendingSearches',
             }
           ],
         },
@@ -111,31 +93,31 @@ describe('Trends', function() {
       for (let i = 0; i < countryJson.length; i++) {
         mockTrendsByCountry.push({
           country: countryJson[i].id,
-          trends: [
-            {
-              topic: 'topic1',
-              traffic: '200K+',
-              exploreLink: 'exploreLink1',
-              articles: [
-                {
-                  title: 'article1',
-                  url: 'url1',
-                }, {
-                  title: 'article2',
-                  url: 'url2',
-                }
-              ],
-            }
-          ],
+          trends: 'mockTrends',
         });
       }
 
       // Stub the API call to googleTrends.
       sinon.stub(googleTrends, 'dailyTrends').resolves(mockDailyTrendsData);
 
+      // Stub the `constructCountryTrendsJson` function because it is tested 
+      // separately.
+      sinon.stub(trends, 'constructCountryTrendsJson')
+          .callsFake((trendingSearches, countryCode) => {
+        return {
+          country: countryCode,
+          trends: 'mockTrends',
+        }
+      });
+
       // Stub the `deleteAncientTrend` function because it is tested separately.
       sinon.stub(trends, 'deleteAncientTrend')
           .resolves('Not interested in the output');
+
+      // Stub the `getGlobalTrends` function because it is tested separately.
+      sinon.stub(trends, 'getGlobalTrends').callsFake(() => {
+        return 'mockGlobalTrends';
+      });
 
       // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'key').callsFake(() => {
@@ -156,8 +138,8 @@ describe('Trends', function() {
       await trends.updateDailyTrends();
 
       assert.equal(datastoreEntities[0].key, 'fakeKey');
-      assert.deepEqual(datastoreEntities[0].data.globalTrends, 
-          [{trendTopic: 'topic1', count: countryJson.length}]);
+      assert.equal(
+          datastoreEntities[0].data.globalTrends, 'mockGlobalTrends');
       assert.deepEqual(
           datastoreEntities[0].data.trendsByCountry, mockTrendsByCountry);
     });
