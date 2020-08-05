@@ -22,17 +22,14 @@ const {Datastore} = require('@google-cloud/datastore');
 describe('Trends', function() {
   describe('RetrieveGlobalTrendsForTimeRange', function() {
     const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
-    const TIME_RANGE_1_HALF_MS = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 1.5;
+    const TIME_RANGE_3_HALVES_MS = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 1.5;
     const TIME_RANGE_3_MS = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 3;
-    let mockResult3;
-    let mockResult1half;
-    let mockTrendsEntries;
     let currentTime;
 
     beforeEach(() => {
       currentTime = Date.now();
-      mockTrendsEntries = [{
-        timestamp: currentTime - TIME_RANGE_1_HALF_MS,
+      let mockTrendsEntries = [{
+        timestamp: currentTime - TIME_RANGE_3_HALVES_MS,
         trendsByCountry: 'trendsByCountry1.5',
         globalTrends: 'globalTrends1.5',
       }, {
@@ -40,15 +37,6 @@ describe('Trends', function() {
         trendsByCountry: 'trendsByCountry3',
         globalTrends: 'globalTrends3',
       }];
-
-      mockResult1half = {
-        timestamp: currentTime - TIME_RANGE_1_HALF_MS,
-        globalTrends: 'globalTrends1.5',
-      };
-      mockResult3 = {
-        timestamp: currentTime - TIME_RANGE_3_MS,
-        globalTrends: 'globalTrends3',
-      }
 
       // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
@@ -63,18 +51,27 @@ describe('Trends', function() {
     it('should retrieve the most recent datastore entry beyond RETRIEVE_RESULTS_TIME_MS',
         async function() {
       let results = await trends.retrieveGlobalTrendsForTimeRange(0);
-      assert.deepEqual(results, mockResult1half);
+      
+      let mockResult3halves = {
+        timestamp: currentTime - TIME_RANGE_3_HALVES_MS,
+        globalTrends: 'globalTrends1.5',
+      };
+      assert.deepEqual(results, mockResult3halves);
     });
 
     it('should retrieve the most recent datastore entry given beyond the given time range', 
         async function() {
       let results = await trends.retrieveGlobalTrendsForTimeRange(2);
+
+      let mockResult3 = {
+        timestamp: currentTime - TIME_RANGE_3_MS,
+        globalTrends: 'globalTrends3',
+      }
       assert.deepEqual(results, mockResult3);
     });
   });
 
   describe('UpdateDailyTrends', function() {
-    let mockDailyTrendsData;
     let mockTrendsByCountry;
     let datastoreEntities;
     const countryJson = require('./../public/countries-with-trends.json');
@@ -100,7 +97,7 @@ describe('Trends', function() {
           ],
         }
       ];
-      mockDailyTrendsData = JSON.stringify({
+      let mockDailyTrendsData = JSON.stringify({
         'default': {
           'trendingSearchesDays': [
             {
