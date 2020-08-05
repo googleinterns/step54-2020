@@ -79,6 +79,7 @@ function initMapWithMarkers() {
   // coordinates.
   createMarker('origin-coordinates', 'A', 'Origin', LATLNG);
   createMarker('destination-coordinates', 'B', 'Destination', LATLNG);
+  setupSearchBoxes();
 }
 
 /**
@@ -107,6 +108,76 @@ function createMarker(containerId, label, title, latLng) {
         && originDestinationMarkers[1].getVisible()) {
       generateRoutes();
     }
+  });
+}
+
+/**
+ * Sets search box inputs to autocomplete addresses.
+ */
+function setupSearchBoxes() {
+  let originInputBox =
+      document.getElementById('origin-address-input');
+  let destinationInputBox =
+      document.getElementById('destination-address-input');
+  let originAutocompleteElement =
+      new google.maps.places.Autocomplete(originInputBox);
+  let destinationAutocompleteElement =
+      new google.maps.places.Autocomplete(destinationInputBox);
+  addAutocompleteAddress(
+      originAutocompleteElement,
+      originDestinationMarkers[0],
+      'origin-coordinates',
+      'origin');
+  addAutocompleteAddress(
+      destinationAutocompleteElement,
+      originDestinationMarkers[1],
+      'destination-coordinates',
+      'destination');
+}
+
+/**
+ * Autocompletes addresses and displays marker for that address.
+ * @param {Object} autocompleteElement Autocomplete object with attached input
+ *     element.
+ * @param {Object} marker Marker to set the location for.
+ * @param {string} containerId ID of container to update coordinates in.
+ * @param {string} markerName Name of the marker.
+ */
+function addAutocompleteAddress(
+    autocompleteElement, marker, containerId, markerName) {
+  autocompleteElement.bindTo('bounds', map);
+  autocompleteElement.setFields(['geometry']);
+
+  autocompleteElement.addListener('place_changed', function() {
+    marker.setVisible(false);
+    let place = autocompleteElement.getPlace();
+    if (!place.geometry) {
+      // User entered the name of a Place that was not suggested and
+      // pressed the Enter key, or the Place Details request failed.
+      window.alert("No details available for input: '" + place.name + "'");
+      return;
+    }
+
+    // Update map with new marker location.
+    map.setCenter(place.geometry.location);
+    marker.setPosition(place.geometry.location);
+    marker.setVisible(true);
+
+    // Update marker buttons.
+    document.getElementById('hide-' + markerName + '-marker').style.display =
+        'block';
+    document.getElementById('show-' + markerName + '-marker').style.display =
+        'none';
+    if (originDestinationMarkers.length === 2 
+        && originDestinationMarkers[0].getVisible() 
+        && originDestinationMarkers[1].getVisible()) {
+      document.getElementById('generate-routes').style.display = 'block';
+    }
+    
+    updateCoordinates(
+        place.geometry.location.lat(),
+        place.geometry.location.lng(),
+        containerId);
   });
 }
 
@@ -449,28 +520,29 @@ function selectRouteDisplayDetails(
  * @param {string} routeToken The route token of the currently selected route.
  */
 function updateDeepLinkingUrl(routeToken) {
+  console.log('in update deep linking url');
   var originPosition = originDestinationMarkers[0].position;
   var destinationPosition = originDestinationMarkers[1].position;
-  document.getElementById(url_ids.IOS_DEV_URL_ID).innerHTML =
+  document.getElementById(url_ids.IOS_URL_ID_DEV).innerHTML =
       '<a href=navsdkdemo://advanced?originLat=' + 
       originPosition.lat() + '&originLng=' + originPosition.lng() + 
       '&destLat=' + destinationPosition.lat() + 
       '&destLng=' + destinationPosition.lng() + 
       '&routeToken=' + routeToken + '>' + 'iOS Dev' + '</a>';
-  document.getElementById(url_ids.IOS_PRODUCTION_URL_ID).innerHTML =
+  document.getElementById(url_ids.IOS_URL_ID_PRODUCTION).innerHTML =
       '<a href=enterprisenavsdkdemo://advanced?originLat=' + 
       originPosition.lat() + '&originLng=' + originPosition.lng() + 
       '&destLat=' + destinationPosition.lat() + 
       '&destLng=' + destinationPosition.lng() + 
       '&routeToken=' + routeToken + '>' + 'iOS Production' + '</a>';
-  document.getElementById(url_ids.V1_ANDROID_URL_ID).innerHTML =
+  document.getElementById(url_ids.ANDROID_URL_ID_V1).innerHTML =
       '<a href=navsdk://fragmentactivity?originlat=' +
       originPosition.lat() + '&originlng=' + originPosition.lng() + 
       '&destinationlat=' + destinationPosition.lat() + 
       '&destinationlng=' + destinationPosition.lng() +
       '&precomputedroutetoken=' + routeToken + '>' + 
       'Android V1 Test App' + '</a>';
-  document.getElementById(url_ids.V2_ANDROID_URL_ID).innerHTML =
+  document.getElementById(url_ids.ANDROID_URL_ID_V2).innerHTML =
       '<a href=navsdk://supportnavmapfragmentactivity?originlat=' +
       originPosition.lat() + '&originlng=' + originPosition.lng() + 
       '&destinationlat=' + destinationPosition.lat() + 
