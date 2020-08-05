@@ -520,7 +520,6 @@ function selectRouteDisplayDetails(
  * @param {string} routeToken The route token of the currently selected route.
  */
 function updateDeepLinkingUrl(routeToken) {
-  console.log('in update deep linking url');
   var originPosition = originDestinationMarkers[0].position;
   var destinationPosition = originDestinationMarkers[1].position;
   document.getElementById(url_ids.IOS_URL_ID_DEV).innerHTML =
