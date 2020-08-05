@@ -16,26 +16,154 @@ const chai = require('chai');
 const assert = chai.assert;
 const sinon = require('sinon');
 const trends = require('./../routes/trends').trends;
+const googleTrends = require('google-trends-api');
 const {Datastore} = require('@google-cloud/datastore');
-const datastore = new Datastore();
 
 describe('Trends', function() {
-  describe('UpdateDailyTrends', function() {
-    let constructCountryTrendsJsonStub;
-    let saveTrendsAndDeletePreviousStub;
+  describe('RetrieveGlobalTrendsForTimeRange', function() {
+    const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
+    const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
+    const TIME_RANGE_1_HALF_MS = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 1.5;
+    const TIME_RANGE_3_MS = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 3;
+    let mockResult3;
+    let mockResult1half;
+    let mockTrendsEntries;
+    let currentTime;
 
     beforeEach(() => {
-      constructCountryTrendsJsonStub = 
-          sinon.stub(trends, 'constructCountryTrendsJson')
-              .resolves('Not interested in the output');
-      saveTrendsAndDeletePreviousStub = 
-          sinon.stub(trends, 'saveTrendsAndDeletePrevious')
-              .resolves('Not interested in the output');
-    })
+      currentTime = Date.now();
+      mockTrendsEntries = [{
+        timestamp: currentTime - TIME_RANGE_1_HALF_MS,
+        trendsByCountry: 'trendsByCountry1.5',
+        globalTrends: 'globalTrends1.5',
+      }, {
+        timestamp: currentTime - TIME_RANGE_3_MS,
+        trendsByCountry: 'trendsByCountry3',
+        globalTrends: 'globalTrends3',
+      }];
+
+      mockResult1half = {
+        timestamp: currentTime - TIME_RANGE_1_HALF_MS,
+        globalTrends: 'globalTrends1.5',
+      };
+      mockResult3 = {
+        timestamp: currentTime - TIME_RANGE_3_MS,
+        globalTrends: 'globalTrends3',
+      }
+
+      // Stub calls to the datastore.
+      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
+        return [mockTrendsEntries];
+      });
+    });
 
     afterEach(() => {
       sinon.restore();
-    })
+    });
+
+    it('should retrieve the most recent datastore entry beyond RETRIEVE_RESULTS_TIME_MS',
+        async function() {
+      let results = await trends.retrieveGlobalTrendsForTimeRange(0);
+      assert.deepEqual(results, mockResult1half);
+    });
+
+    it('should retrieve the most recent datastore entry given beyond the given time range', 
+        async function() {
+      let results = await trends.retrieveGlobalTrendsForTimeRange(2);
+      assert.deepEqual(results, mockResult3);
+    });
+  });
+
+  describe('UpdateDailyTrends', function() {
+    let mockDailyTrendsData;
+    let mockTrendsByCountry;
+    let datastoreEntities;
+    const countryJson = require('./../public/countries-with-trends.json');
+
+    beforeEach(() => {
+      datastoreEntities = [];
+
+      let mockTrendingSearches = [
+        {
+          'title': {
+            'query': 'topic1',
+            'exploreLink': 'exploreLink1',
+          },
+          'formattedTraffic': '200K+',
+          'articles': [
+            {
+              'title': 'article1',
+              'url': 'url1',
+            }, {
+              'title': 'article2',
+              'url': 'url2',
+            }
+          ],
+        }
+      ];
+      mockDailyTrendsData = JSON.stringify({
+        'default': {
+          'trendingSearchesDays': [
+            {
+              'trendingSearches': mockTrendingSearches,
+            }
+          ],
+        },
+      });
+
+      mockTrendsByCountry = [];
+      for (let i = 0; i < countryJson.length; i++) {
+        mockTrendsByCountry.push({
+          country: countryJson[i].id,
+          trends: [
+            {
+              topic: 'topic1',
+              traffic: '200K+',
+              exploreLink: 'exploreLink1',
+              articles: [
+                {
+                  title: 'article1',
+                  url: 'url1',
+                }, {
+                  title: 'article2',
+                  url: 'url2',
+                }
+              ],
+            }
+          ],
+        });
+      }
+
+      // Stub the API call to googleTrends.
+      sinon.stub(googleTrends, 'dailyTrends').resolves(mockDailyTrendsData);
+
+      // Stub the `saveTrendsAndDeletePrevious` function.
+      sinon.stub(trends, 'saveTrendsAndDeletePrevious')
+          .callsFake((trendsByCountry) => {
+        datastoreEntities.push({
+          key: 'fakeKey',
+          data: {
+            timestamp: Date.now(),
+            trendsByCountry: trendsByCountry,
+            globalTrends: trends.getGlobalTrends(trendsByCountry),
+          },
+        });
+      });
+    });
+
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    it('should get daily trends and save in datastore', async function() {
+      await trends.updateDailyTrends();
+
+      assert.equal(datastoreEntities[0].key, 'fakeKey');
+      assert.deepEqual(datastoreEntities[0].data.globalTrends, 
+          [{trendTopic: 'topic1', count: countryJson.length}]);
+      assert.deepEqual(
+          datastoreEntities[0].data.trendsByCountry, mockTrendsByCountry);
+    });
   });
 
   describe('ConstructCountryTrendsJson', function() {

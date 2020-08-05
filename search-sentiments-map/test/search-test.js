@@ -35,7 +35,7 @@ describe('Search', function() {
       // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
         return [[mockData]];
-      });      
+      });
     });
 
     afterEach(() => {
@@ -298,7 +298,7 @@ describe('Search', function() {
           results: results,
         });
       });
-              
+
       // Stub the `getGlobalSearchInterests` function for this test since it is
       // tested separately.
       sinon.stub(searchInterestsModule, 'getGlobalSearchInterests').resolves([

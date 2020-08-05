@@ -72,13 +72,14 @@ async function retrieveGlobalTrendsForTimeRange(timeRange) {
     descending: true,
   }).filter('timestamp', '<', Date.now() - timeRangeLimit).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
+
+  // Get the most recent trends with search results data retrieved.
+  let entry = (Date.now() - trendsEntry[0].timestamp > 
+      RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ? 
+      trendsEntry[0] : trendsEntry[1];
   return {
-    timestamp: trendsEntry[0].timestamp,
-    // Returns the most recent trends with search results data retrieved.
-    globalTrends: 
-        (Date.now() - trendsEntry[0].timestamp > 
-            RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
-                trendsEntry[0].globalTrends : trendsEntry[1].globalTrends,
+    timestamp: entry.timestamp,
+    globalTrends: entry.globalTrends,
   }
 }
 
@@ -100,7 +101,8 @@ async function updateDailyTrends() {
       // Parse the JSON string and get the trending topics.
       trendingSearches = JSON.parse(dailyTrendsJsonString)
           .default.trendingSearchesDays[0].trendingSearches;
-      trendsByCountry.push(trends.constructCountryTrendsJson(trendingSearches, country.id));
+      trendsByCountry.push(
+          trends.constructCountryTrendsJson(trendingSearches, country.id));
     }).catch(err => {
       console.log(err);
     });
@@ -169,7 +171,7 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
  *     and its trends.
  */
 async function saveTrendsAndDeletePrevious(trendsByCountry) {
-  await deleteAncientTrend();
+  await trends.deleteAncientTrend();
 
   const trendsEntryKey = datastore.key(TRENDS_DATA_KIND);
   const trendsEntry = {
@@ -246,8 +248,9 @@ function getGlobalTrends(trendsByCountry) {
   });
 
   let globalTrends = [];
-  // Get the top 10 trends overall.
-  for (let i = 0; i < 10; i++) {
+  let numTopTrends = trendCountsArr.length < 10 ? trendCountsArr.length : 10;
+  // Get the top trends overall.
+  for (let i = 0; i < numTopTrends; i++) {
     globalTrends.push({
       trendTopic: trendCountsArr[i].topic,
       count: trendCountsArr[i].count,
@@ -257,6 +260,7 @@ function getGlobalTrends(trendsByCountry) {
 }
 
 const trends = {
+  retrieveGlobalTrendsForTimeRange,
   updateDailyTrends,
   constructCountryTrendsJson,
   saveTrendsAndDeletePrevious,
