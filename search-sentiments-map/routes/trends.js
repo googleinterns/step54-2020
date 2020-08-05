@@ -169,7 +169,7 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
  *     and its trends.
  */
 async function saveTrendsAndDeletePrevious(trendsByCountry) {
-  await deleteAncientTrend();
+  await trends.deleteAncientTrend();
 
   const trendsEntryKey = datastore.key(TRENDS_DATA_KIND);
   const trendsEntry = {
@@ -256,5 +256,10 @@ function getGlobalTrends(trendsByCountry) {
   return globalTrends;
 }
 
+// Necessary for unit testing.
+const trends = {
+  deleteAncientTrend,
+}
+
 module.exports.router = router;
-module.exports.updateTrendsFunction = updateDailyTrends;
+module.exports.trends = trends;
