@@ -19,11 +19,14 @@ const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
 const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
+// Time interval between data updates.
+const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
 
 /** Renders the trends data of the country given by the request parameter. */
-router.get('/:country', (req, res) => {
+router.get('/:timeRange/:country', (req, res) => {
   let country = req.params.country;
-  retrieveCountryTrends(country).then(trends => {
+  let timeRange = parseInt(req.params.timeRange);
+  retrieveCountryTrends(country, timeRange).then(trends => {
     res.setHeader('Content-Type', 'application/json');
     res.send(trends);
   });
@@ -33,17 +36,21 @@ router.get('/:country', (req, res) => {
  * Gets the trends data (each trend including title, articles, and sentiment) 
  * from the Datastore for the specified country.
  * @param {!string} country The two-letter code for the country requested.
+ * @param {number} timeRange An integer representing how many time ranges 
+ *     previous to get data from.
  * @return {!Array<JSON>} An array of the trends; empty array if there is no
- * trends data for the specified country.
+ *     trends data for the specified country.
  */
-async function retrieveCountryTrends(country) {
+async function retrieveCountryTrends(country, timeRange) {
+  let timeRangeLimit = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * timeRange;
   const query = datastore.createQuery('TrendsEntry').order('timestamp', {
     descending: true,
-  }).limit(2);
+  }).filter('timestamp', '<', Date.now() - timeRangeLimit).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
-  const entry = 
-      (Date.now() - trendsEntry[0].timestamp > RETRIEVE_RESULTS_TIME_MS) ? 
-      trendsEntry[0] : trendsEntry[1];
+  const entry = (
+      Date.now() - trendsEntry[0].timestamp > 
+          RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
+              trendsEntry[0] : trendsEntry[1];
   const countryTrends = entry.trendsByCountry
       .filter(trends => trends.country === country);
   if (countryTrends.length === 0) {

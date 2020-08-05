@@ -16,7 +16,8 @@ const express = require('express');
 const app = express();
 const countryTrends = require('./routes/country-trends.js');
 const search = require('./routes/search.js');
-const sentiment = require('./routes/sentiment.js');
+const searchInterests = require('./routes/search-interests.js');
+const sentimentWords = require('./routes/sentiment-words.js');
 const trends = require('./routes/trends.js');
 const updateData = require('./routes/update-data.js');
 
@@ -31,7 +32,8 @@ app.get('/', (req, res) => {
 // client-side scripts.
 app.use('/country-trends', countryTrends.router);
 app.use('/search', search.router);
-app.use('/sentiment', sentiment.router);
+app.use('/search-interests', searchInterests.router);
+app.use('/sentiment-words', sentimentWords.router);
 app.use('/trends', trends.router);
 app.use('/update-data', updateData.router);
 

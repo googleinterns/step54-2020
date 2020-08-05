@@ -1,8 +1,10 @@
 # Trending Search Sentiment Map
 
-This web application visualizes trending google search topics and their results geographically and performs sentiment analysis on the search results. It is currently deployed at [trending-search-sentiments.appspot.com](trending-search-sentiments.appspot.com).
+This web application visualizes trending google search topics and their results geographically and performs sentiment analysis on the search results. 
+It is currently deployed at [trending-search-sentiments.appspot.com](trending-search-sentiments.appspot.com).
 
-It is built with Node.js and it utilizes the Google Maps Javascript API, Google Custom Search API, Google Cloud Natural Language API, Google Charts API, the Node.js Google Trends API and Node.js sentiment module. It runs on Google App Engine and uses Datastore for data storage.
+It is built with Node.js and it utilizes the Google Maps Javascript API, Google Custom Search API, Google Cloud Natural Language API, Google Charts API, the Node.js Google Trends API and Node.js sentiment module. 
+It runs on Google App Engine and uses Datastore for data storage.
 
 #### Commands to run / deploy:
 
@@ -14,6 +16,8 @@ It is built with Node.js and it utilizes the Google Maps Javascript API, Google 
 
 3. Deploy to "project-id.appspot.com" with
 `gcloud app deploy`
+4. Run the tests with
+`npm test`
 
 #### A few notes:
 
@@ -34,7 +38,8 @@ Data is kept in the Datastore for up to 7 days.
 
 #### Country data files:
 
-The *countries.geojosn* file has outline coordinates for each country (179 countries in total). Northern Cyprus and Somaliland don't have country codes and therefore their IDs are marked as 'N/A' in countries.geojson. They are not present in the country-code.json file.
+The *countries.geojosn* file has outline coordinates for each country (179 countries in total). 
+Northern Cyprus and Somaliland don't have country codes and therefore their IDs are marked as 'N/A' in countries.geojson. They are not present in the country-code.json file.
 
 The *country-code.json* file has 2-letter country codes and their names, ordered alphabetically by the codes. This is used get search results for each country.
 
