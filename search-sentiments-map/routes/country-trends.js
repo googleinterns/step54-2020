@@ -48,7 +48,8 @@ async function retrieveCountryTrends(country, timeRange) {
   }).filter('timestamp', '<', Date.now() - timeRangeLimit).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
   
-  // Check for the chance that Google Trends API breaks and stops providing data
+  // Check for the chance that Google Trends API breaks and stops providing
+  // data.
   if (trendsEntry.length === 0) {
     return [];
   }

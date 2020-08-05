@@ -31,8 +31,10 @@ describe('Country Trends', function() {
     let mockData;
     let trendsByCountryThreeHalvesTimeRange;
     let trendsByCountryThreeTimeRange;
-    let mockThreeHalvesTimeRangeResult;
-    let mockThreeTimeRangeResult;
+    let mockThreeHalvesTimeRangeUsResult;
+    let mockThreeTimeRangeUsResult;
+    let mockThreeHalvesTimeRangeUaResult;
+    let mockThreeTimeRangeUaResult;
     let mockEmptyResult;
     beforeEach(() => {
       currentTime = Date.now();
@@ -100,23 +102,38 @@ describe('Country Trends', function() {
         }],
       }];
       mockData = [{
-        timestamp: currentTime - THREE_HALVES_TIME_RANGE * CURRENT_DATA_TIME_RANGE_12_HOURS_MS,
+        timestamp: currentTime - THREE_HALVES_TIME_RANGE *
+            CURRENT_DATA_TIME_RANGE_12_HOURS_MS,
         trendsByCountry: trendsByCountryThreeHalvesTimeRange,
         globalTrends: [],
       },
       {
-        timestamp: currentTime - THREE_TIME_RANGE * CURRENT_DATA_TIME_RANGE_12_HOURS_MS,
+        timestamp: currentTime - THREE_TIME_RANGE *
+            CURRENT_DATA_TIME_RANGE_12_HOURS_MS,
         trendsByCountry: trendsByCountryThreeTimeRange,
         globalTrends: [],
       }];
 
-      mockThreeHalvesTimeRangeUsResult = [{topic: 'Live'}, {topic: 'Laugh'}];
-      mockThreeTimeRangeUsResult = [{topic: 'Donald Trump'}, {topic: 'Coronavirus'}];
+      mockThreeHalvesTimeRangeUsResult = [
+        {topic: 'Live'}, 
+        {topic: 'Laugh'}
+      ];
+      mockThreeTimeRangeUsResult = [
+        {topic: 'Donald Trump'}, 
+        {topic: 'Coronavirus'}
+      ];
 
-      mockThreeHalvesTimeRangeUaResult = [{topic: 'Love'}, {topic: 'Black Lives Matter'}];
-      mockThreeTimeRangeUaResult = [{topic: 'Hello World'}, {topic: 'Coronavirus'}];
+      mockThreeHalvesTimeRangeUaResult = [
+        {topic: 'Love'}, 
+        {topic: 'Black Lives Matter'}
+      ];
+      mockThreeTimeRangeUaResult = [
+        {topic: 'Hello World'}, 
+        {topic: 'Coronavirus'}
+      ];
 
       mockEmptyResult = [];
+
       // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
         return [mockData];
@@ -127,21 +144,24 @@ describe('Country Trends', function() {
       sinon.restore();
     });
 
-    it('should retrieve the most recent array of US and UA country trends from the datastore', async function() {
+    it('should retrieve the most recent array of US and UA country trends from the datastore beyond the time it takes to retrieve search results', 
+        async function() {
       let resultsUs = await countryTrends.retrieveCountryTrends('US', 0);
       let resultsUa = await countryTrends.retrieveCountryTrends('UA', 0);
       assert.deepEqual(resultsUs, mockThreeHalvesTimeRangeUsResult);
       assert.deepEqual(resultsUa, mockThreeHalvesTimeRangeUaResult);
     });
 
-    it('should retrieve the most recent array of US and UA country trends from the datastore beyond the given time range', async function() {
+    it('should retrieve the most recent array of US and UA country trends from the datastore beyond the given time range', 
+        async function() {
       let resultsUs = await countryTrends.retrieveCountryTrends('US', 2);
       let resultsUa = await countryTrends.retrieveCountryTrends('UA', 2);
       assert.deepEqual(resultsUs, mockThreeTimeRangeUsResult);
       assert.deepEqual(resultsUa, mockThreeTimeRangeUaResult);
     });
 
-    it('should get an empty array because there is no trends data available for AT', async function() {
+    it('should get an empty array because there is no trends data available for AT', 
+        async function() {
       let resultsAt = await countryTrends.retrieveCountryTrends('AT', 0);
       assert.deepEqual(resultsAt, mockEmptyResult);
     });
