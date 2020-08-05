@@ -51,27 +51,29 @@ describe('Trends', function() {
     it('should retrieve the most recent datastore entry beyond RETRIEVE_RESULTS_TIME_MS',
         async function() {
       let results = await trends.retrieveGlobalTrendsForTimeRange(0);
-      
       let mockResult3halves = {
         timestamp: currentTime - TIME_RANGE_3_HALVES_MS,
         globalTrends: 'globalTrends1.5',
       };
+
       assert.deepEqual(results, mockResult3halves);
     });
 
     it('should retrieve the most recent datastore entry given beyond the given time range', 
         async function() {
       let results = await trends.retrieveGlobalTrendsForTimeRange(2);
-
       let mockResult3 = {
         timestamp: currentTime - TIME_RANGE_3_MS,
         globalTrends: 'globalTrends3',
       }
+
       assert.deepEqual(results, mockResult3);
     });
   });
 
   describe('UpdateDailyTrends', function() {
+    let deleteAncientTrendsStub;
+    let getGlobalTrendsStub;
     let mockTrendsByCountry;
     let datastoreEntities;
     const countryJson = require('./../public/countries-with-trends.json');
@@ -111,13 +113,15 @@ describe('Trends', function() {
       });
 
       // Stub the `deleteAncientTrend` function because it is tested separately.
-      sinon.stub(trends, 'deleteAncientTrend')
-          .resolves('Not interested in the output');
+      deleteAncientTrendsStub = 
+          sinon.stub(trends, 'deleteAncientTrend')
+              .resolves('Not interested in the output');
 
       // Stub the `getGlobalTrends` function because it is tested separately.
-      sinon.stub(trends, 'getGlobalTrends').callsFake(() => {
-        return 'mockGlobalTrends';
-      });
+      getGlobalTrendsStub = 
+          sinon.stub(trends, 'getGlobalTrends').callsFake(() => {
+            return 'mockGlobalTrends';
+          });
 
       // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'key').callsFake(() => {
@@ -136,7 +140,8 @@ describe('Trends', function() {
 
     it('should get daily trends and save in datastore', async function() {
       await trends.updateDailyTrends();
-
+      assert.equal(deleteAncientTrendsStub.callCount, 1);
+      assert.equal(getGlobalTrendsStub.callCount, 1);
       assert.equal(datastoreEntities[0].key, 'fakeKey');
       assert.equal(
           datastoreEntities[0].data.globalTrends, 'mockGlobalTrends');
