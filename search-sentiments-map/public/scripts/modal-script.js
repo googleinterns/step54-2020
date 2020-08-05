@@ -49,11 +49,17 @@ function onClickRegion(e) {
   
   // Update Modal with information for relevant country.
   const countryName = e.feature.getProperty('name');
-  countryCode = e.feature.getId();
+  let countryId = e.feature.getId();
   openModal(countryId, countryName);
 }
 
-function openModal(countryName) {
+/**
+ * Displays the information modal for the given country information.
+ * @param {string} countryId Two letter country code.
+ * @param {string} countryName Name of country to open modal for.
+ */
+function openModal(countryId, countryName) {
+  countryCode = countryId;
   $('#region-info-modal').modal('show');
 
   // Update Modal with information for relevant country.

@@ -141,10 +141,10 @@ function loadCountryData() {
   let dataVariableMax = Number.MIN_VALUE;  // Smallest positive number.
   let dataVariableMin = Number.MAX_VALUE;
   // Countries with the minimum and maximum scores for current topic. 
-  let maxScoreCountryName = '';
   let maxScoreCountryId = '';
-  let minScoreCountryName = '';
+  let maxScoreCountryName = '';
   let minScoreCountryId = '';
+  let minScoreCountryName = '';
 
   map.data.forEach(row => {
     let countryData = getCurrentSearchData().dataByCountry
@@ -179,12 +179,12 @@ function loadCountryData() {
           maxScoreCountryName + '</span>' + 
           ', Most Negative Country: ' +
           '<span class="modal-click" id="' + minScoreCountryId + '">' +
-          minScoreCountryName + '</span>':
+          minScoreCountryName + '</span>' :
           'Most Popular Country: ' +
           '<span class="modal-click" id="' + maxScoreCountryId + '">' +
           maxScoreCountryName + '</span>' ;
 
-  $(".modal-click").click(function(){
+  $('.modal-click').click(function(){
     openModal(this.id, this.innerText);
   });
 }
