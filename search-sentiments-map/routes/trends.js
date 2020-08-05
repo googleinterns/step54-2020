@@ -246,7 +246,7 @@ function getGlobalTrends(trendsByCountry) {
   })
 
   let globalTrends = [];
-  let numTopTrends = trendCountsArr.length < 10 ? trendCountsArr.length : 10;
+  const numTopTrends = trendCountsArr.length < 10 ? trendCountsArr.length : 10;
 
   // Get the top trends overall.
   for (let i = 0; i < numTopTrends; i++) {
