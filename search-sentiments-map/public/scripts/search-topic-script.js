@@ -89,7 +89,7 @@ function countrySelectSetUp() {
     const dropdownButton = document.getElementById('country-dropdown-button');
     if (countryCodeList.length !== 0) {
       dropdownButton.innerHTML =
-          countryNameList.toString() + '<span class="caret"></span>';
+          countryNameList.join(', ') + '<span class="caret"></span>';
     } else {
       dropdownButton.innerHTML =
           'Countries to view results for(max 3)<span class="caret"></span>';
