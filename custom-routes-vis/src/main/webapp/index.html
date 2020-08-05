@@ -34,22 +34,22 @@
     <div class="row">
       <div class="col-sm-2 offset-sm-1">
         <h5>Origin Coordinates:</h5>
-        <input type="number" id="origin-lat" placeholder="Enter latitude">
-        <input type="number" id="origin-lng" placeholder="Enter longitude">
+        <input type="number" id="origin-lat-input" class="form-control" placeholder="Enter latitude">
+        <input type="number" id="origin-lng-input" class="form-control" placeholder="Enter longitude">
         <button type="button" class="btn btn-success" onclick="showCustomCoordinatesMarker('origin')" id="show-origin-custom-marker">Submit Custom Coordinates</button>
         <div id='origin-coordinates'></div><br>
-        <button type="button" class="btn btn-success" onclick="showMarker('origin')" id="show-origin-marker">Place Marker</button>
+        <button type="button" class="btn btn-primary" onclick="showMarker('origin')" id="show-origin-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('origin')" id="hide-origin-marker">Delete Marker</button><br>
         <div id='ios-dev-url'></div><br>
         <div id='ios-production-url'></div><br>
       </div>
       <div class="col-sm-2">
         <h5>Destination Coordinates:</h5>
-        <input type="number" id="destination-lat" placeholder="Enter latitude">
-        <input type="number" id="destination-lng" placeholder="Enter longitude">
+        <input type="number" id="destination-lat-input" class="form-control" placeholder="Enter latitude">
+        <input type="number" id="destination-lng-input" class="form-control" placeholder="Enter longitude">
         <button type="button" class="btn btn-success" onclick="showCustomCoordinatesMarker('destination')" id="show-destination-custom-marker">Submit Custom Coordinates</button>
         <div id='destination-coordinates'></div><br>
-        <button type="button" class="btn btn-success" onclick="showMarker('destination')" id="show-destination-marker">Place Marker</button>
+        <button type="button" class="btn btn-primary" onclick="showMarker('destination')" id="show-destination-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('destination')" id="hide-destination-marker">Delete Marker</button><br>
         <div id='v1-android-url'></div><br>
         <div id='v2-android-url'></div><br>

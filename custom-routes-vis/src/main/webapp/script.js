@@ -28,10 +28,10 @@ const MarkerNames = {
  * @enum {string}
  */
 const url_ids = {
-  IOS_DEV_URL_ID: 'ios-dev-url', 
-  IOS_PRODUCTION_URL_ID: 'ios-production-url',
-  V1_ANDROID_URL_ID: 'v1-android-url', 
-  V2_ANDROID_URL_ID: 'v2-android-url',
+  IOS_URL_ID_DEV: 'ios-dev-url', 
+  IOS_URL_ID_PRODUCTION: 'ios-production-url',
+  ANDROID_URL_ID_V1: 'v1-android-url', 
+  ANDROID_URL_ID_V2: 'v2-android-url',
 };
 
 /**
@@ -39,8 +39,8 @@ const url_ids = {
  * @enum {string}
  */
 const originDisplayMarkerContainerIds = {
-  LAT_ID: 'origin-lat', 
-  LNG_ID: 'origin-lng',
+  LAT_ID: 'origin-lat-input', 
+  LNG_ID: 'origin-lng-input',
   SHOW_CUSTOM_MARKER_ID: 'show-origin-custom-marker', 
   SHOW_MARKER_ID: 'show-origin-marker',
 };
@@ -50,8 +50,8 @@ const originDisplayMarkerContainerIds = {
  * @enum {string}
  */
 const destinationDisplayMarkerContainerIds = {
-  LAT_ID: 'destination-lat', 
-  LNG_ID: 'destination-lng',
+  LAT_ID: 'destination-lat-input', 
+  LNG_ID: 'destination-lng-input',
   SHOW_CUSTOM_MARKER_ID: 'show-destination-custom-marker', 
   SHOW_MARKER_ID: 'show-destination-marker',
 };
@@ -70,7 +70,7 @@ var map;
 function initMapWithMarkers() {
   let chicago = new google.maps.LatLng(41.850033, -87.6500523);
   let mapOptions = {
-    zoom: 3,
+    zoom: 7,
     center: chicago,
   }
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
@@ -159,14 +159,13 @@ function showMarker(markerName) {
             .style.display = 'block';
 
         // Display generate routes container when both markers have been placed.
-        if (document.getElementById(containerOfOtherMarkerName)
-                .style.display === 'block') {
+        if (document.getElementById(containerOfOtherMarkerName).style.display ===
+            'block') {
           document.getElementById('generate-routes').style.display = 'block';
         }
       });
-  for (const key of Object.keys(displayMarkerContainerIds)) {
-    document.getElementById(displayMarkerContainerIds[key]).style.display = 'none';
-  }
+  // Hide Place Marker buttons.
+  document.getElementById('show-' + markerName + '-marker').style.display = 'none';
   document.getElementById(markerName + '-coordinates').innerHTML =
       'Click the map to select location!';
 }
@@ -174,7 +173,7 @@ function showMarker(markerName) {
 /**
  * Hides 'Submit Custom Coordinates' and 'Place Marker' button and waits for user
  * to input coordinates for the marker. Updates marker to be in correct location,
- * and show 'Delete Marker' button.
+ * and shows 'Delete Marker' button.
  * @param {string} markerName Name of corresponding marker in
  *     originDestinationMarkers array.
  */
@@ -196,40 +195,37 @@ function showCustomCoordinatesMarker(markerName) {
       displayMarkerContainerIds = destinationDisplayMarkerContainerIds;
       break;
   }
-  let customLat = parseFloat(document.getElementById(markerName + '-lat').value);
-  let customLng = parseFloat(document.getElementById(markerName + '-lng').value);
-  if(!checkCustomCoordinatesInputIsValid(customLat, customLng)){
+  let customLat = parseFloat(document.getElementById(markerName + '-lat-input').value);
+  let customLng = parseFloat(document.getElementById(markerName + '-lng-input').value);
+  if(!checkValidCustomCoordinatesInput(customLat, customLng)){
     return;
   }
-  let customLatLng = new google.maps.LatLng({lat: customLat, lng: customLng}); 
+  let customLatLng = new google.maps.LatLng({lat: customLat, lng: customLng});
+  map.setCenter(customLatLng);
   originDestinationMarkers[markerIndex].setPosition(customLatLng);
   originDestinationMarkers[markerIndex].setVisible(true);
-  console.log(originDestinationMarkers[0].getVisible());
   updateCoordinates(customLatLng.lat(), customLatLng.lng(),
       markerName + '-coordinates');
-  updateDeepLinkingUrl();
   document.getElementById('hide-' + markerName + '-marker')
       .style.display = 'block';
 
-  // Display generate routes button when both markers have been placed.
-  if (document.getElementById(containerOfOtherMarkerName)
-        .style.display === 'block') {
+  // Display 'Generate Routes' button when both markers have been placed.
+  if (document.getElementById(containerOfOtherMarkerName).style.display ===
+      'block') {
     document.getElementById('generate-routes').style.display = 'block';
   }
-  // Hide Custom Coordinates input area, Submit Custom Coordinates and Place
-  // Marker buttons.
-  for (const key of Object.keys(displayMarkerContainerIds)) {
-    document.getElementById(displayMarkerContainerIds[key]).style.display = 'none';
-  }
+  // Hide Place Marker buttons.
+  document.getElementById('show-' + markerName + '-marker').style.display = 'none';
 }
 
 /**
- * Makes sure there is a valid latitude and longitude inputted. Prompt user to
+ * Checks that a valid latitude and longitude have been entered. Prompt user to
  * input missing information if needed.
  * @param {number} customLat The latitude input from the user.
  * @param {number} customLng The longitude input from the user.
+ * @returns {boolean} True if the the coordinates are valid. False otherwise.
  */
-function checkCustomCoordinatesInputIsValid(customLat, customLng) {
+function checkValidCustomCoordinatesInput(customLat, customLng) {
   let valid = false;
   let modalText = '';
   if (isNaN(customLat) || isNaN(customLng)) {
@@ -239,15 +235,11 @@ function checkCustomCoordinatesInputIsValid(customLat, customLng) {
   } else if (customLng < -180 || customLng > 180) {
     modalText = 'Longitude input out of range.';
   } else {
-    valid = true;
+    return true;
   }
-  if (valid) {
-    return true; 
-  } else {
-    document.getElementById('custom-coordinates-warning-text').innerHTML = modalText;
-    $('#custom-coordinates-warning-modal').modal('show');
-    return false;
-  }
+  document.getElementById('custom-coordinates-warning-text').innerHTML = modalText;
+  $('#custom-coordinates-warning-modal').modal('show');
+  return false;
 }
 /**
  * Hides specified marker and toggles buttons to show 'place marker' button.
