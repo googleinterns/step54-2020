@@ -56,6 +56,8 @@ const destinationDisplayMarkerContainerIds = {
   SHOW_MARKER_ID: 'show-destination-marker',
 };
 
+// 'Generate Routes' buttom element ID.
+const GENERATE_ROUTES_ID = 'generate-routes';
 // Array holding origin and destination markers.
 let originDestinationMarkers = [];
 // Array holding routes displayed on the map.
@@ -103,8 +105,8 @@ function createMarker(containerId, label, title, latLng) {
 
   marker.addListener('dragend', function(event) {
     updateCoordinates(event.latLng.lat(), event.latLng.lng(), containerId);
-    if (originDestinationMarkers.length === 2 
-        && originDestinationMarkers[0].getVisible() 
+    if (originDestinationMarkers.length === 2
+        && originDestinationMarkers[0].getVisible()
         && originDestinationMarkers[1].getVisible()) {
       generateRoutes();
     }
@@ -162,6 +164,7 @@ function addAutocompleteAddress(
     map.setCenter(place.geometry.location);
     marker.setPosition(place.geometry.location);
     marker.setVisible(true);
+    clearRoutes();
 
     // Update marker buttons.
     document.getElementById('hide-' + markerName + '-marker').style.display =
@@ -171,7 +174,7 @@ function addAutocompleteAddress(
     if (originDestinationMarkers.length === 2 
         && originDestinationMarkers[0].getVisible() 
         && originDestinationMarkers[1].getVisible()) {
-      document.getElementById('generate-routes').style.display = 'block';
+      document.getElementById(GENERATE_ROUTES_ID).style.display = 'block';
     }
     
     updateCoordinates(
@@ -201,6 +204,7 @@ function updateCoordinates(lat, lng, containerId) {
  *     originDestinationMarkers array.
  */
 function showMarker(markerName) {
+  clearRoutes();
   let containerOfOtherMarkerName;
   let markerIndex;
   let displayMarkerContainerIds;
@@ -232,11 +236,11 @@ function showMarker(markerName) {
         // Display generate routes container when both markers have been placed.
         if (document.getElementById(containerOfOtherMarkerName).style.display ===
             'block') {
-          document.getElementById('generate-routes').style.display = 'block';
+          document.getElementById(GENERATE_ROUTES_ID).style.display = 'block';
         }
       });
   // Hide Place Marker buttons.
-  document.getElementById('show-' + markerName + '-marker').style.display = 'none';
+  document.getElementById(displayMarkerContainerIds.SHOW_MARKER_ID).style.display = 'none';
   document.getElementById(markerName + '-coordinates').innerHTML =
       'Click the map to select location!';
 }
@@ -266,8 +270,8 @@ function showCustomCoordinatesMarker(markerName) {
       displayMarkerContainerIds = destinationDisplayMarkerContainerIds;
       break;
   }
-  let customLat = parseFloat(document.getElementById(markerName + '-lat-input').value);
-  let customLng = parseFloat(document.getElementById(markerName + '-lng-input').value);
+  let customLat = parseFloat(document.getElementById(displayMarkerContainerIds.LAT_ID).value);
+  let customLng = parseFloat(document.getElementById(displayMarkerContainerIds.LNG_ID).value);
   if(!checkValidCustomCoordinatesInput(customLat, customLng)){
     return;
   }
@@ -279,14 +283,16 @@ function showCustomCoordinatesMarker(markerName) {
       markerName + '-coordinates');
   document.getElementById('hide-' + markerName + '-marker')
       .style.display = 'block';
+  clearRoutes();
 
-  // Display 'Generate Routes' button when both markers have been placed.
+  // Display 'Generate Routes' button when both markers have been placed if it
+  // has not been displayed yet.
   if (document.getElementById(containerOfOtherMarkerName).style.display ===
       'block') {
-    document.getElementById('generate-routes').style.display = 'block';
+    document.getElementById(GENERATE_ROUTES_ID).style.display = 'block';
   }
   // Hide Place Marker buttons.
-  document.getElementById('show-' + markerName + '-marker').style.display = 'none';
+  document.getElementById(displayMarkerContainerIds.SHOW_MARKER_ID).style.display = 'none';
 }
 
 /**
@@ -339,7 +345,7 @@ function hideMarker(markerName) {
   }
   document.getElementById('hide-' + markerName + '-marker').style.display =
       'none';
-  document.getElementById('generate-routes').style.display = 'none';
+  document.getElementById(GENERATE_ROUTES_ID).style.display = 'none';
   document.getElementById('route-info').innerText = '';
 
   // Hide the deep linking URLs.
@@ -364,6 +370,7 @@ function clearRoutes() {
 function generateRoutes() {
   clearRoutes();
 
+  console.log('get here bro');
   // Get coordinates of origin and destination.
   let startLatLng = originDestinationMarkers[0].getPosition();
   let endLatLng = originDestinationMarkers[1].getPosition();
