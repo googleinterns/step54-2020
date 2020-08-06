@@ -497,7 +497,7 @@ function createRouteFromCoordinates(
 
 /** 
  * Highlights the selected route and displays its formatted duration and 
- * distance in miles.
+ * distance in miles. Displays a 'Copy Route Token' button if applicable.
  * @param {num} routeNum The index of the selected route in the routes array.
  * @param {num} totalDurationSec The duration of the route in seconds.
  * @param {num} totalDistanceMeters The distance of the route in meters.
@@ -512,13 +512,60 @@ function selectRouteDisplayDetails(
   let routeInfoElement = document.getElementById('route-info');
   routeInfoElement.innerText = 'Selected Route Info:' +
       '\nDuration: ' + formatDuration(totalDurationSec) +
-      '\nDistance: ' + formatDistance(totalDistanceMeters);
+      '\nDistance: ' + formatDistance(totalDistanceMeters) + '\n';
 
   if (routeToken !== '') {
-    routeInfoElement.innerText += '\nRoute Token: check the developer console';
+    let copyButton = document.createElement('button');
+    copyButton.innerText = 'Copy Route Token';
+    copyButton.addEventListener('click', function() {
+      copyTokenToClipBoard(routeToken);
+    });
+    routeInfoElement.appendChild(copyButton);
+
     console.log('Route token:', routeToken);
     updateDeepLinkingUrl(routeToken);
   }
+}
+
+/**
+ * Copies the given route token to the clipboard. 
+ * @param {string} token The route token to be copied.
+ */
+function copyTokenToClipBoard(token) {
+  // Note: navigator.clipboard is only supported by pages served over HTTPS.
+  if (!navigator.clipboard) {
+    fallbackCopyTokenToClipboard(token);
+    return;
+  }
+  navigator.clipboard.writeText(token).then(function() {
+    alert('Successfully copied to clipboard!');
+  }, function(err) {
+    alert('Could not copy to clipboard.');
+    console.error('Async: Could not copy token', err);
+  });
+}
+
+/** 
+ * Creates a textarea for the given token and copies it to clipboard. 
+ * @param {string} token The route token to be copied.
+ */
+function fallbackCopyTokenToClipboard(token) {
+  let textArea = document.createElement('textarea');
+  textArea.value = token;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    let copyCommandStatus = document.execCommand('copy');
+    let message = copyCommandStatus ? 'successful' : 'unsuccessful';
+    alert('Copying route token was ' + message);
+  } catch (err) {
+    alert('Could not copy to clipboard.');
+    console.error('Fallback: Could not copy token', err);
+  }
+
+  document.body.removeChild(textArea);
 }
 
 /**
