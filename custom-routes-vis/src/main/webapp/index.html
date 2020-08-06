@@ -15,6 +15,18 @@
     <div class="row">
       <div class="col-sm-10 offset-sm-1">
         <h1>Custom Routes Visualization</h1>
+        <div class="modal fade" id="custom-coordinates-warning-modal" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <span class="modal-title" id="custom-coordinates-warning-text"></span>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div id="map"></div>
         <br>
       </div>
@@ -22,17 +34,24 @@
     <div class="row">
       <div class="col-sm-2 offset-sm-1">
         <h5>Origin Coordinates:</h5>
-        <div id='origin-coordinates'></div>
+        <div id='origin-coordinates'></div><br>
         <input id="origin-address-input" class="form-control" type="text" placeholder="Enter a location">
-        <button type="button" class="btn btn-success" onclick="showMarker('origin')" id="show-origin-marker">Place Marker</button>
+        <input type="number" id="origin-lat-input" class="form-control" placeholder="Enter latitude">
+        <input type="number" id="origin-lng-input" class="form-control" placeholder="Enter longitude">
+        <button type="button" class="btn btn-success" onclick="showCustomCoordinatesMarker('origin')" id="show-origin-custom-marker">Submit Custom Coordinates</button>
+        <button type="button" class="btn btn-primary" onclick="showMarker('origin')" id="show-origin-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('origin')" id="hide-origin-marker">Delete Marker</button><br>
-        <div id='ios-url'></div>
+        <div id='ios-dev-url'></div><br>
+        <div id='ios-production-url'></div><br>
       </div>
       <div class="col-sm-2">
         <h5>Destination Coordinates:</h5>
-        <div id='destination-coordinates'></div>
+        <div id='destination-coordinates'></div><br>
         <input id="destination-address-input" class="form-control" type="text" placeholder="Enter a location">
-        <button type="button" class="btn btn-success" onclick="showMarker('destination')" id="show-destination-marker">Place Marker</button>
+        <input type="number" id="destination-lat-input" class="form-control" placeholder="Enter latitude">
+        <input type="number" id="destination-lng-input" class="form-control" placeholder="Enter longitude">
+        <button type="button" class="btn btn-success" onclick="showCustomCoordinatesMarker('destination')" id="show-destination-custom-marker">Submit Custom Coordinates</button>
+        <button type="button" class="btn btn-primary" onclick="showMarker('destination')" id="show-destination-marker">Place Marker</button>
         <button type="button" class="btn btn-danger hidden" onclick="hideMarker('destination')" id="hide-destination-marker">Delete Marker</button><br>
         <div id='v1-android-url'></div><br>
         <div id='v2-android-url'></div><br>
