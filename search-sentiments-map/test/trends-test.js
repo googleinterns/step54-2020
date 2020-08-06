@@ -167,7 +167,7 @@ describe('Trends', function() {
             }, {
               title: 'Example Topic 1 Article 2 Title',
               url: 'https://example_topic_1_article_2',
-            },
+            }
           ],
         }, {
           title: {
@@ -182,7 +182,7 @@ describe('Trends', function() {
             }, {
               title: 'Example Topic 2 Article 2 Title',
               url: 'https://example_topic_2_article_2',
-            },
+            }
           ],
         }
       ];
@@ -201,7 +201,7 @@ describe('Trends', function() {
               }, {
                 title: 'Example Topic 1 Article 2 Title',
                 url: 'https://example_topic_1_article_2',
-              },
+              }
             ],
           }, {
             topic: 'Example Topic 2',
@@ -214,7 +214,7 @@ describe('Trends', function() {
               }, {
                 title: 'Example Topic 2 Article 2 Title',
                 url: 'https://example_topic_2_article_2',
-              },
+              }
             ],
           }
         ],
