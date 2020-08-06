@@ -105,6 +105,8 @@ describe('Country Trends', function() {
         trendsByCountry: trendsByCountryThreeTimeRange,
         globalTrends: [],
       }];
+
+      // Stub calls to the datastore.
       runQueryStub = sinon.stub(Datastore.prototype, 'runQuery');
     });
 
