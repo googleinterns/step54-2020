@@ -20,7 +20,7 @@ const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
 
 describe('Trends', function() {
-  describe('DeleteAncientTrend', function() {
+  describe('deleteAncientTrend', function() {
     const STALE_DATA_THRESHOLD_7_DAYS_MS = 7 * 24 * 60 * 60000;
     afterEach(() => {
       sinon.restore();
@@ -87,6 +87,56 @@ describe('Trends', function() {
       // Verify that the first entity is not older than the threshold.
       assert.isAtMost(CURRENT_TIME - datastoreEntitiesBelowThreshold[0].timestamp,
           STALE_DATA_THRESHOLD_7_DAYS_MS);
+    });
+  });
+
+  describe('getGlobalTrends', function() {
+    it('should get the top globally trending topics', function() {
+      let trendsByCountry = [
+      {
+        country: 'UA',
+        trends: [{
+          topic: 'Donald Trump',
+        },
+        {
+          topic: 'Coronavirus',
+        }],
+      }, 
+      {
+        country: 'US',
+        trends: [{
+          topic: 'Donald Trump',
+        },
+        {
+          topic: 'Coronavirus',
+        }],
+      }, 
+      {
+        country: 'UK',
+        trends: [{
+          topic: 'Donald Trump',
+        }],
+      },
+      {
+        country: 'AR',
+        trends: [{
+          topic: 'Dogs',
+        }],
+      }];
+      let result = trends.getGlobalTrends(trendsByCountry);
+      let mockResult = [
+        {trendTopic: 'Donald Trump', count: 3},
+        {trendTopic: 'Coronavirus', count: 2},
+        {trendTopic: 'Dogs', count: 1}
+      ];
+      assert.deepEqual(result, mockResult);
+    });
+
+    it('should get an empty array', function() {
+      let trendsByCountry = [];
+      let result = trends.getGlobalTrends(trendsByCountry);
+      let mockEmpty = [];
+      assert.deepEqual(result, mockEmpty);
     });
   });
 });
