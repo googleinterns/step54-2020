@@ -28,10 +28,36 @@ const MarkerNames = {
  * @enum {string}
  */
 const url_ids = {
-  IOS_URL_ID: 'ios-url', 
-  V1_ANDROID_URL_ID: 'v1-android-url', 
-  V2_ANDROID_URL_ID: 'v2-android-url',
+  IOS_URL_ID_DEV: 'ios-dev-url', 
+  IOS_URL_ID_PRODUCTION: 'ios-production-url',
+  ANDROID_URL_ID_V1: 'v1-android-url', 
+  ANDROID_URL_ID_V2: 'v2-android-url',
 };
+
+/**
+ * Container ids for HTML elements that allow users to display an origin marker.
+ * @enum {string}
+ */
+const originDisplayMarkerContainerIds = {
+  LAT_ID: 'origin-lat-input', 
+  LNG_ID: 'origin-lng-input',
+  SHOW_CUSTOM_MARKER_ID: 'show-origin-custom-marker', 
+  SHOW_MARKER_ID: 'show-origin-marker',
+};
+
+/**
+ * Container ids for HTML elements that allow users to display a destination marker.
+ * @enum {string}
+ */
+const destinationDisplayMarkerContainerIds = {
+  LAT_ID: 'destination-lat-input', 
+  LNG_ID: 'destination-lng-input',
+  SHOW_CUSTOM_MARKER_ID: 'show-destination-custom-marker', 
+  SHOW_MARKER_ID: 'show-destination-marker',
+};
+
+// 'Generate Routes' buttom element ID.
+const GENERATE_ROUTES_ID = 'generate-routes';
 // Array holding origin and destination markers.
 let originDestinationMarkers = [];
 // Array holding routes displayed on the map.
@@ -79,8 +105,8 @@ function createMarker(containerId, label, title, latLng) {
 
   marker.addListener('dragend', function(event) {
     updateCoordinates(event.latLng.lat(), event.latLng.lng(), containerId);
-    if (originDestinationMarkers.length === 2 
-        && originDestinationMarkers[0].getVisible() 
+    if (originDestinationMarkers.length === 2
+        && originDestinationMarkers[0].getVisible()
         && originDestinationMarkers[1].getVisible()) {
       generateRoutes();
     }
@@ -138,6 +164,7 @@ function addAutocompleteAddress(
     map.setCenter(place.geometry.location);
     marker.setPosition(place.geometry.location);
     marker.setVisible(true);
+    clearRoutes();
 
     // Update marker buttons.
     document.getElementById('hide-' + markerName + '-marker').style.display =
@@ -147,7 +174,7 @@ function addAutocompleteAddress(
     if (originDestinationMarkers.length === 2 
         && originDestinationMarkers[0].getVisible() 
         && originDestinationMarkers[1].getVisible()) {
-      document.getElementById('generate-routes').style.display = 'block';
+      document.getElementById(GENERATE_ROUTES_ID).style.display = 'block';
     }
     
     updateCoordinates(
@@ -170,25 +197,29 @@ function updateCoordinates(lat, lng, containerId) {
 }
 
 /**
- * Hides 'place marker' button and waits for user to select coordinate for
+ * Hides 'place marker' button and waits for user to select coordinates for
  * marker. Updates marker to be in correct location, and show 'delete marker'
  * button.
  * @param {string} markerName Name of corresponding marker in
  *     originDestinationMarkers array.
  */
 function showMarker(markerName) {
+  clearRoutes();
   let containerOfOtherMarkerName;
   let markerIndex;
+  let displayMarkerContainerIds;
   switch (markerName) {
     case MarkerNames.ORIGIN:
       containerOfOtherMarkerName =
           'hide-' + MarkerNames.DESTINATION + '-marker';
       markerIndex = 0;
+      displayMarkerContainerIds = originDisplayMarkerContainerIds;
       break;
     case MarkerNames.DESTINATION:
       containerOfOtherMarkerName = 
           'hide-' + MarkerNames.ORIGIN + '-marker';
       markerIndex = 1;
+      displayMarkerContainerIds = destinationDisplayMarkerContainerIds;
       break;
   }
   let placeMarkerListener =
@@ -203,18 +234,90 @@ function showMarker(markerName) {
             .style.display = 'block';
 
         // Display generate routes container when both markers have been placed.
-        if (document.getElementById(containerOfOtherMarkerName)
-                .style.display === 'block') {
-          document.getElementById('generate-routes').style.display = 'block';
+        if (document.getElementById(containerOfOtherMarkerName).style.display ===
+            'block') {
+          document.getElementById(GENERATE_ROUTES_ID).style.display = 'block';
         }
       });
-
-  document.getElementById('show-' + markerName + '-marker').style.display =
-      'none';
+  // Hide Place Marker buttons.
+  document.getElementById(displayMarkerContainerIds.SHOW_MARKER_ID).style.display = 'none';
   document.getElementById(markerName + '-coordinates').innerHTML =
       'Click the map to select location!';
 }
 
+/**
+ * Hides 'Submit Custom Coordinates' and 'Place Marker' button and waits for user
+ * to input coordinates for the marker. Updates marker to be in correct location,
+ * and shows 'Delete Marker' button.
+ * @param {string} markerName Name of corresponding marker in
+ *     originDestinationMarkers array.
+ */
+function showCustomCoordinatesMarker(markerName) {
+  let containerOfOtherMarkerName;
+  let markerIndex;
+  let displayMarkerContainerIds;
+  switch (markerName) {
+    case MarkerNames.ORIGIN:
+      containerOfOtherMarkerName =
+          'hide-' + MarkerNames.DESTINATION + '-marker';
+      markerIndex = 0;
+      displayMarkerContainerIds = originDisplayMarkerContainerIds;
+      break;
+    case MarkerNames.DESTINATION:
+      containerOfOtherMarkerName = 
+          'hide-' + MarkerNames.ORIGIN + '-marker';
+      markerIndex = 1;
+      displayMarkerContainerIds = destinationDisplayMarkerContainerIds;
+      break;
+  }
+  let customLat = parseFloat(document.getElementById(displayMarkerContainerIds.LAT_ID).value);
+  let customLng = parseFloat(document.getElementById(displayMarkerContainerIds.LNG_ID).value);
+  if(!checkValidCustomCoordinatesInput(customLat, customLng)){
+    return;
+  }
+  let customLatLng = new google.maps.LatLng({lat: customLat, lng: customLng});
+  map.setCenter(customLatLng);
+  originDestinationMarkers[markerIndex].setPosition(customLatLng);
+  originDestinationMarkers[markerIndex].setVisible(true);
+  updateCoordinates(customLatLng.lat(), customLatLng.lng(),
+      markerName + '-coordinates');
+  document.getElementById('hide-' + markerName + '-marker')
+      .style.display = 'block';
+  clearRoutes();
+
+  // Display 'Generate Routes' button when both markers have been placed if it
+  // has not been displayed yet.
+  if (document.getElementById(containerOfOtherMarkerName).style.display ===
+      'block') {
+    document.getElementById(GENERATE_ROUTES_ID).style.display = 'block';
+  }
+  // Hide Place Marker buttons.
+  document.getElementById(displayMarkerContainerIds.SHOW_MARKER_ID).style.display = 'none';
+}
+
+/**
+ * Checks that a valid latitude and longitude have been entered. Prompt user to
+ * input missing information if needed.
+ * @param {number} customLat The latitude input from the user.
+ * @param {number} customLng The longitude input from the user.
+ * @returns {boolean} True if the the coordinates are valid. False otherwise.
+ */
+function checkValidCustomCoordinatesInput(customLat, customLng) {
+  let valid = false;
+  let modalText = '';
+  if (isNaN(customLat) || isNaN(customLng)) {
+    modalText = 'Make sure to input values for both latitude and longitude';
+  } else if (customLat < -90 || customLat > 90) {
+    modalText = 'Latitude input out of range.';
+  } else if (customLng < -180 || customLng > 180) {
+    modalText = 'Longitude input out of range.';
+  } else {
+    return true;
+  }
+  document.getElementById('custom-coordinates-warning-text').innerHTML = modalText;
+  $('#custom-coordinates-warning-modal').modal('show');
+  return false;
+}
 /**
  * Hides specified marker and toggles buttons to show 'place marker' button.
  * @param {string} markerName Name of corresponding marker in
@@ -222,24 +325,27 @@ function showMarker(markerName) {
  */
 function hideMarker(markerName) {
   clearRoutes();
-
   let markerIndex;
+  let displayMarkerContainerIds;
   switch (markerName) {
     case MarkerNames.ORIGIN:
       markerIndex = 0;
+      displayMarkerContainerIds = originDisplayMarkerContainerIds;
       break;
     case MarkerNames.DESTINATION:
       markerIndex = 1;
+      displayMarkerContainerIds = destinationDisplayMarkerContainerIds;
       break;
   }
 
   originDestinationMarkers[markerIndex].setVisible(false);
   document.getElementById(markerName + '-coordinates').innerHTML = '';
-  document.getElementById('show-' + markerName + '-marker').style.display =
-      'block';
+  for (const key of Object.keys(displayMarkerContainerIds)) {
+    document.getElementById(displayMarkerContainerIds[key]).style.display = 'block';
+  }
   document.getElementById('hide-' + markerName + '-marker').style.display =
       'none';
-  document.getElementById('generate-routes').style.display = 'none';
+  document.getElementById(GENERATE_ROUTES_ID).style.display = 'none';
   document.getElementById('route-info').innerText = '';
 
   // Hide the deep linking URLs.
@@ -467,22 +573,28 @@ function fallbackCopyTokenToClipboard(token) {
  * @param {string} routeToken The route token of the currently selected route.
  */
 function updateDeepLinkingUrl(routeToken) {
-  let originPosition = originDestinationMarkers[0].position;
-  let destinationPosition = originDestinationMarkers[1].position;
-  document.getElementById(url_ids.IOS_URL_ID).innerHTML =
+  var originPosition = originDestinationMarkers[0].position;
+  var destinationPosition = originDestinationMarkers[1].position;
+  document.getElementById(url_ids.IOS_URL_ID_DEV).innerHTML =
       '<a href=navsdkdemo://advanced?originLat=' + 
       originPosition.lat() + '&originLng=' + originPosition.lng() + 
       '&destLat=' + destinationPosition.lat() + 
       '&destLng=' + destinationPosition.lng() + 
-      '&routeToken=' + routeToken + '>' + 'IOS Test App' + '</a>';
-  document.getElementById(url_ids.V1_ANDROID_URL_ID).innerHTML =
+      '&routeToken=' + routeToken + '>' + 'iOS Dev' + '</a>';
+  document.getElementById(url_ids.IOS_URL_ID_PRODUCTION).innerHTML =
+      '<a href=enterprisenavsdkdemo://advanced?originLat=' + 
+      originPosition.lat() + '&originLng=' + originPosition.lng() + 
+      '&destLat=' + destinationPosition.lat() + 
+      '&destLng=' + destinationPosition.lng() + 
+      '&routeToken=' + routeToken + '>' + 'iOS Production' + '</a>';
+  document.getElementById(url_ids.ANDROID_URL_ID_V1).innerHTML =
       '<a href=navsdk://fragmentactivity?originlat=' +
       originPosition.lat() + '&originlng=' + originPosition.lng() + 
       '&destinationlat=' + destinationPosition.lat() + 
       '&destinationlng=' + destinationPosition.lng() +
       '&precomputedroutetoken=' + routeToken + '>' + 
       'Android V1 Test App' + '</a>';
-  document.getElementById(url_ids.V2_ANDROID_URL_ID).innerHTML =
+  document.getElementById(url_ids.ANDROID_URL_ID_V2).innerHTML =
       '<a href=navsdk://supportnavmapfragmentactivity?originlat=' +
       originPosition.lat() + '&originlng=' + originPosition.lng() + 
       '&destinationlat=' + destinationPosition.lat() + 
