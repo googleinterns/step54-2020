@@ -22,18 +22,16 @@ const {Datastore} = require('@google-cloud/datastore');
 describe('Trends', function() {
   describe('RetrieveGlobalTrendsForTimeRange', function() {
     const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
-    const TIME_RANGE_3_HALVES_MS = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 1.5;
-    const TIME_RANGE_3_MS = CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 3;
     let currentTime;
 
     beforeEach(() => {
       currentTime = Date.now();
       let mockTrendsEntries = [{
-        timestamp: currentTime - TIME_RANGE_3_HALVES_MS,
+        timestamp: currentTime - CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 1.5,
         trendsByCountry: 'trendsByCountry1.5',
         globalTrends: 'globalTrends1.5',
       }, {
-        timestamp: currentTime - TIME_RANGE_3_MS,
+        timestamp: currentTime - CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 3,
         trendsByCountry: 'trendsByCountry3',
         globalTrends: 'globalTrends3',
       }];
@@ -52,7 +50,7 @@ describe('Trends', function() {
         async function() {
       let results = await trends.retrieveGlobalTrendsForTimeRange(0);
       let mockResult3halves = {
-        timestamp: currentTime - TIME_RANGE_3_HALVES_MS,
+        timestamp: currentTime - CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 1.5,
         globalTrends: 'globalTrends1.5',
       };
 
@@ -63,7 +61,7 @@ describe('Trends', function() {
         async function() {
       let results = await trends.retrieveGlobalTrendsForTimeRange(2);
       let mockResult3 = {
-        timestamp: currentTime - TIME_RANGE_3_MS,
+        timestamp: currentTime - CURRENT_DATA_TIME_RANGE_12_HOURS_MS * 3,
         globalTrends: 'globalTrends3',
       }
 
@@ -127,8 +125,6 @@ describe('Trends', function() {
       sinon.stub(Datastore.prototype, 'key').callsFake(() => {
         return 'fakeKey';
       });
-
-      // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'save').callsFake((entity) => {
         datastoreEntities.push(entity);
       });
