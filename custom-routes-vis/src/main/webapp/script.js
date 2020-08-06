@@ -28,10 +28,36 @@ const MarkerNames = {
  * @enum {string}
  */
 const url_ids = {
-  IOS_URL_ID: 'ios-url', 
-  V1_ANDROID_URL_ID: 'v1-android-url', 
-  V2_ANDROID_URL_ID: 'v2-android-url',
+  IOS_URL_ID_DEV: 'ios-dev-url', 
+  IOS_URL_ID_PRODUCTION: 'ios-production-url',
+  ANDROID_URL_ID_V1: 'v1-android-url', 
+  ANDROID_URL_ID_V2: 'v2-android-url',
 };
+
+/**
+ * Container ids for HTML elements that allow users to display an origin marker.
+ * @enum {string}
+ */
+const originDisplayMarkerContainerIds = {
+  LAT_ID: 'origin-lat-input', 
+  LNG_ID: 'origin-lng-input',
+  SHOW_CUSTOM_MARKER_ID: 'show-origin-custom-marker', 
+  SHOW_MARKER_ID: 'show-origin-marker',
+};
+
+/**
+ * Container ids for HTML elements that allow users to display a destination marker.
+ * @enum {string}
+ */
+const destinationDisplayMarkerContainerIds = {
+  LAT_ID: 'destination-lat-input', 
+  LNG_ID: 'destination-lng-input',
+  SHOW_CUSTOM_MARKER_ID: 'show-destination-custom-marker', 
+  SHOW_MARKER_ID: 'show-destination-marker',
+};
+
+// 'Generate Routes' buttom element ID.
+const GENERATE_ROUTES_ID = 'generate-routes';
 // Array holding origin and destination markers.
 let originDestinationMarkers = [];
 // Array holding routes displayed on the map.
@@ -55,6 +81,7 @@ function initMapWithMarkers() {
   // coordinates.
   createMarker('origin-coordinates', 'A', 'Origin', LATLNG);
   createMarker('destination-coordinates', 'B', 'Destination', LATLNG);
+  setupSearchBoxes();
 }
 
 /**
@@ -78,12 +105,82 @@ function createMarker(containerId, label, title, latLng) {
 
   marker.addListener('dragend', function(event) {
     updateCoordinates(event.latLng.lat(), event.latLng.lng(), containerId);
-    updateDeepLinkingUrl();
-    if (originDestinationMarkers.length === 2 
-        && originDestinationMarkers[0].getVisible() 
+    if (originDestinationMarkers.length === 2
+        && originDestinationMarkers[0].getVisible()
         && originDestinationMarkers[1].getVisible()) {
       generateRoutes();
     }
+  });
+}
+
+/**
+ * Sets search box inputs to autocomplete addresses.
+ */
+function setupSearchBoxes() {
+  let originInputBox =
+      document.getElementById('origin-address-input');
+  let destinationInputBox =
+      document.getElementById('destination-address-input');
+  let originAutocompleteElement =
+      new google.maps.places.Autocomplete(originInputBox);
+  let destinationAutocompleteElement =
+      new google.maps.places.Autocomplete(destinationInputBox);
+  addAutocompleteAddress(
+      originAutocompleteElement,
+      originDestinationMarkers[0],
+      'origin-coordinates',
+      'origin');
+  addAutocompleteAddress(
+      destinationAutocompleteElement,
+      originDestinationMarkers[1],
+      'destination-coordinates',
+      'destination');
+}
+
+/**
+ * Autocompletes addresses and displays marker for that address.
+ * @param {Object} autocompleteElement Autocomplete object with attached input
+ *     element.
+ * @param {Object} marker Marker to set the location for.
+ * @param {string} containerId ID of container to update coordinates in.
+ * @param {string} markerName Name of the marker.
+ */
+function addAutocompleteAddress(
+    autocompleteElement, marker, containerId, markerName) {
+  autocompleteElement.bindTo('bounds', map);
+  autocompleteElement.setFields(['geometry']);
+
+  autocompleteElement.addListener('place_changed', function() {
+    marker.setVisible(false);
+    let place = autocompleteElement.getPlace();
+    if (!place.geometry) {
+      // User entered the name of a Place that was not suggested and
+      // pressed the Enter key, or the Place Details request failed.
+      window.alert("No details available for input: '" + place.name + "'");
+      return;
+    }
+
+    // Update map with new marker location.
+    map.setCenter(place.geometry.location);
+    marker.setPosition(place.geometry.location);
+    marker.setVisible(true);
+    clearRoutes();
+
+    // Update marker buttons.
+    document.getElementById('hide-' + markerName + '-marker').style.display =
+        'block';
+    document.getElementById('show-' + markerName + '-marker').style.display =
+        'none';
+    if (originDestinationMarkers.length === 2 
+        && originDestinationMarkers[0].getVisible() 
+        && originDestinationMarkers[1].getVisible()) {
+      document.getElementById(GENERATE_ROUTES_ID).style.display = 'block';
+    }
+    
+    updateCoordinates(
+        place.geometry.location.lat(),
+        place.geometry.location.lng(),
+        containerId);
   });
 }
 
@@ -100,68 +197,29 @@ function updateCoordinates(lat, lng, containerId) {
 }
 
 /**
- * Updates the deep linking url to various test apps on the page.
- */
-function updateDeepLinkingUrl() {
-  var originPosition = originDestinationMarkers[0].position;
-  var destinationPosition = originDestinationMarkers[1].position;
-  if (document.getElementById('origin-coordinates').innerHTML !== '' && 
-      document.getElementById('destination-coordinates').innerHTML !== '') {
-    document.getElementById(url_ids.IOS_URL_ID).innerHTML =
-        '<a href=navsdkdemo://advanced?originLat=' +
-        originDestinationMarkers[0].position.lat() + '&originLng=' +
-        originDestinationMarkers[0].position.lng() + '&destLat=' +
-        originDestinationMarkers[1].position.lat() + '&destLng=' +
-        // TODO(ntarn): Update Route Token if we get access to Routes Preferred
-        // API.
-        originDestinationMarkers[1].position.lng() + '&routeToken=TOKEN>' +
-        'IOS Test App' + '</a>';
-    document.getElementById(url_ids.V1_ANDROID_URL_ID).innerHTML =
-        '<a href=navsdk://fragmentactivity?originlat=' +
-        originDestinationMarkers[0].position.lat() + '&originlng=' +
-        originDestinationMarkers[0].position.lng() + '&destinationlat=' +
-        originDestinationMarkers[1].position.lat() + '&destinationlng=' +
-        // TODO(ntarn): Update Route Token if we get access to Routes Preferred
-        // API.
-        originDestinationMarkers[1].position.lng() +
-        '&precomputedroutetoken=TOKEN>' + 'Android V1 Test App' + '</a>';
-    document.getElementById(url_ids.V2_ANDROID_URL_ID).innerHTML =
-        '<a href=navsdk://supportnavmapfragmentactivity?originlat=' +
-        originDestinationMarkers[0].position.lat() + '&originlng=' +
-        originDestinationMarkers[0].position.lng() + '&destinationlat=' +
-        originDestinationMarkers[1].position.lat() + '&destinationlng=' + 
-        // TODO(ntarn): Update Route Token if we get access to Routes Preferred
-        // API.
-        originDestinationMarkers[1].position.lng() +
-        '&precomputedroutetoken=TOKEN>' + 'Android V2 Test App' + '</a>';
-  } else if (document.getElementById('origin-coordinates').innerHTML === '' ||
-      document.getElementById('destination-coordinates').innerHTML === '') {
-    for (const id in url_ids) {
-      document.getElementById(url_ids[id]).innerHTML = '';
-    }
-  }
-}
-
-/**
- * Hides 'place marker' button and waits for user to select coordinate for
+ * Hides 'place marker' button and waits for user to select coordinates for
  * marker. Updates marker to be in correct location, and show 'delete marker'
  * button.
  * @param {string} markerName Name of corresponding marker in
  *     originDestinationMarkers array.
  */
 function showMarker(markerName) {
+  clearRoutes();
   let containerOfOtherMarkerName;
   let markerIndex;
+  let displayMarkerContainerIds;
   switch (markerName) {
     case MarkerNames.ORIGIN:
       containerOfOtherMarkerName =
           'hide-' + MarkerNames.DESTINATION + '-marker';
       markerIndex = 0;
+      displayMarkerContainerIds = originDisplayMarkerContainerIds;
       break;
     case MarkerNames.DESTINATION:
       containerOfOtherMarkerName = 
           'hide-' + MarkerNames.ORIGIN + '-marker';
       markerIndex = 1;
+      displayMarkerContainerIds = destinationDisplayMarkerContainerIds;
       break;
   }
   let placeMarkerListener =
@@ -171,23 +229,95 @@ function showMarker(markerName) {
         originDestinationMarkers[markerIndex].setVisible(true);
         updateCoordinates(event.latLng.lat(), event.latLng.lng(),
             markerName + '-coordinates');
-        updateDeepLinkingUrl();
+
         document.getElementById('hide-' + markerName + '-marker')
             .style.display = 'block';
 
-        // Display generate routes button when both markers have been placed.
-        if (document.getElementById(containerOfOtherMarkerName)
-                .style.display === 'block') {
-          document.getElementById('generate-routes').style.display = 'block';
+        // Display generate routes container when both markers have been placed.
+        if (document.getElementById(containerOfOtherMarkerName).style.display ===
+            'block') {
+          document.getElementById(GENERATE_ROUTES_ID).style.display = 'block';
         }
       });
-
-  document.getElementById('show-' + markerName + '-marker').style.display =
-      'none';
+  // Hide Place Marker buttons.
+  document.getElementById(displayMarkerContainerIds.SHOW_MARKER_ID).style.display = 'none';
   document.getElementById(markerName + '-coordinates').innerHTML =
       'Click the map to select location!';
 }
 
+/**
+ * Hides 'Submit Custom Coordinates' and 'Place Marker' button and waits for user
+ * to input coordinates for the marker. Updates marker to be in correct location,
+ * and shows 'Delete Marker' button.
+ * @param {string} markerName Name of corresponding marker in
+ *     originDestinationMarkers array.
+ */
+function showCustomCoordinatesMarker(markerName) {
+  let containerOfOtherMarkerName;
+  let markerIndex;
+  let displayMarkerContainerIds;
+  switch (markerName) {
+    case MarkerNames.ORIGIN:
+      containerOfOtherMarkerName =
+          'hide-' + MarkerNames.DESTINATION + '-marker';
+      markerIndex = 0;
+      displayMarkerContainerIds = originDisplayMarkerContainerIds;
+      break;
+    case MarkerNames.DESTINATION:
+      containerOfOtherMarkerName = 
+          'hide-' + MarkerNames.ORIGIN + '-marker';
+      markerIndex = 1;
+      displayMarkerContainerIds = destinationDisplayMarkerContainerIds;
+      break;
+  }
+  let customLat = parseFloat(document.getElementById(displayMarkerContainerIds.LAT_ID).value);
+  let customLng = parseFloat(document.getElementById(displayMarkerContainerIds.LNG_ID).value);
+  if(!checkValidCustomCoordinatesInput(customLat, customLng)){
+    return;
+  }
+  let customLatLng = new google.maps.LatLng({lat: customLat, lng: customLng});
+  map.setCenter(customLatLng);
+  originDestinationMarkers[markerIndex].setPosition(customLatLng);
+  originDestinationMarkers[markerIndex].setVisible(true);
+  updateCoordinates(customLatLng.lat(), customLatLng.lng(),
+      markerName + '-coordinates');
+  document.getElementById('hide-' + markerName + '-marker')
+      .style.display = 'block';
+  clearRoutes();
+
+  // Display 'Generate Routes' button when both markers have been placed if it
+  // has not been displayed yet.
+  if (document.getElementById(containerOfOtherMarkerName).style.display ===
+      'block') {
+    document.getElementById(GENERATE_ROUTES_ID).style.display = 'block';
+  }
+  // Hide Place Marker buttons.
+  document.getElementById(displayMarkerContainerIds.SHOW_MARKER_ID).style.display = 'none';
+}
+
+/**
+ * Checks that a valid latitude and longitude have been entered. Prompt user to
+ * input missing information if needed.
+ * @param {number} customLat The latitude input from the user.
+ * @param {number} customLng The longitude input from the user.
+ * @returns {boolean} True if the the coordinates are valid. False otherwise.
+ */
+function checkValidCustomCoordinatesInput(customLat, customLng) {
+  let valid = false;
+  let modalText = '';
+  if (isNaN(customLat) || isNaN(customLng)) {
+    modalText = 'Make sure to input values for both latitude and longitude';
+  } else if (customLat < -90 || customLat > 90) {
+    modalText = 'Latitude input out of range.';
+  } else if (customLng < -180 || customLng > 180) {
+    modalText = 'Longitude input out of range.';
+  } else {
+    return true;
+  }
+  document.getElementById('custom-coordinates-warning-text').innerHTML = modalText;
+  $('#custom-coordinates-warning-modal').modal('show');
+  return false;
+}
 /**
  * Hides specified marker and toggles buttons to show 'place marker' button.
  * @param {string} markerName Name of corresponding marker in
@@ -195,25 +325,33 @@ function showMarker(markerName) {
  */
 function hideMarker(markerName) {
   clearRoutes();
-
   let markerIndex;
+  let displayMarkerContainerIds;
   switch (markerName) {
     case MarkerNames.ORIGIN:
       markerIndex = 0;
+      displayMarkerContainerIds = originDisplayMarkerContainerIds;
       break;
     case MarkerNames.DESTINATION:
       markerIndex = 1;
+      displayMarkerContainerIds = destinationDisplayMarkerContainerIds;
       break;
   }
 
   originDestinationMarkers[markerIndex].setVisible(false);
   document.getElementById(markerName + '-coordinates').innerHTML = '';
-  document.getElementById('show-' + markerName + '-marker').style.display =
-      'block';
+  for (const key of Object.keys(displayMarkerContainerIds)) {
+    document.getElementById(displayMarkerContainerIds[key]).style.display = 'block';
+  }
   document.getElementById('hide-' + markerName + '-marker').style.display =
       'none';
-  document.getElementById('generate-routes').style.display = 'none';
-  updateDeepLinkingUrl();
+  document.getElementById(GENERATE_ROUTES_ID).style.display = 'none';
+  document.getElementById('route-info').innerText = '';
+
+  // Hide the deep linking URLs.
+  for (const id in url_ids) {
+    document.getElementById(url_ids[id]).innerHTML = '';
+  }
 }
 
 /** Removes all routes from the DOM. */
@@ -246,36 +384,61 @@ function generateRoutes() {
       '&endpoint=' + serviceEndpoint + '&apiKey=' + apiKey + '&rateCard=' +
       JSON.stringify(createRateCard()))
       .then(response => response.json()).then(directions => {
-        // Log the response status from the Directions API.
-        // TODO(chenyuz): Find equivalence for Routes Preferred API.
-        console.log(directions.status);
-
         let routes = directions.routes;
         console.log('num routes:', routes.length);
 
         for (let routeNum = 0; routeNum < routes.length; routeNum++) {
-          createRoutePolyline(routeNum, routes[routeNum], 
-              serviceEndpoint === 'directions');
+          createRoutePolyline(routeNum, routes[routeNum], serviceEndpoint);
         }
       });
 }
 
 /**
+ * Creates formatted rate card object based on form input.
+ * @returns {Object} Rate Card JSON Object.
+ */
+function createRateCard() {
+  let costPerMin = parseFloat(document.getElementById('cost-per-minute').value);
+  let costPerKm = parseFloat(document.getElementById('cost-per-km').value);
+  let includeTolls = ('true' === document.getElementById('include-tolls').value);
+
+  let rateCard = {'include_tolls': includeTolls};
+  if (!isNaN(costPerMin)) {
+    rateCard['cost_per_minute'] = {'value': costPerMin};
+  }
+  if (!isNaN(costPerKm)) {
+    rateCard['cost_per_km'] = {'value': costPerKm};
+  }
+
+  return rateCard;
+}
+
+/**
  * Creates a polyline for a route on the map.
  * @param {num} routeNum The index of the route in the order that it is returned
- * from the selected API.
- * @param {!Object} routeJson JSON object containing all information of the target
- * route.
- * @param {boolean} isDirectionsApi Whether the route is obtained by the Directions
- * API; if false, assume it is obtained by the Routes Preferred API.
+ *     from the selected API.
+ * @param {!Object} routeJson JSON object containing all information of the 
+ *     target route.
+ * @param {boolean} serviceEndpoint The service endpoint selected by the user. 
+ *     Can be 'directions', 'compute-routes', or 'compute-routes-alpha'.
  */
-function createRoutePolyline(routeNum, routeJson, isDirectionsApi) {
+function createRoutePolyline(routeNum, routeJson, serviceEndpoint) {
+  let isDirectionsApi = false;
+  let routeToken = '';
+  if (serviceEndpoint === 'directions') {
+    isDirectionsApi = true;
+  } else if (serviceEndpoint === 'compute-routes-alpha') {
+    routeToken = routeJson.token;
+    routeJson = routeJson.route;
+  }
+
   let encodedPolyline = isDirectionsApi ? 
       routeJson.overview_polyline.points : routeJson.polyline.encodedPolyline;
   let routeCoordinates = google.maps.geometry.encoding.decodePath(encodedPolyline);
 
   // Total duration of route in seconds.
-  let totalDurationSec = isDirectionsApi ? 0 : routeJson.duration;
+  let totalDurationSec = isDirectionsApi ? 
+      0 : routeJson.duration.slice(0, routeJson.duration.length - 1);
   // Total distance of route in meters.
   let totalDistanceMeters = isDirectionsApi ? 0 : routeJson.distanceMeters;
   // Note: Routes Preferred has duration and distanceMeters attributes for each
@@ -292,7 +455,7 @@ function createRoutePolyline(routeNum, routeJson, isDirectionsApi) {
   }
 
   createRouteFromCoordinates(routeCoordinates, routeNum, totalDurationSec,
-      totalDistanceMeters);
+      totalDistanceMeters, routeToken);
 }
 
 /**
@@ -301,12 +464,15 @@ function createRoutePolyline(routeNum, routeJson, isDirectionsApi) {
  * @param {num} routeNum The index of the selected route in the routes array.
  * @param {num} totalDurationSec The duration of the route in seconds.
  * @param {num} totalDistanceMeters The distance of the route in meters.
+ * @param {string} routeToken The route token returned from the Custom Routes
+ * Alpha API.
  */
 function createRouteFromCoordinates(
     routeCoordinates, 
     routeNum, 
     totalDurationSec, 
-    totalDistanceMeters) {
+    totalDistanceMeters,
+    routeToken) {
   let route = new google.maps.Polyline({
     path: routeCoordinates,
     geodesic: true,
@@ -319,23 +485,26 @@ function createRouteFromCoordinates(
 
   // Select the first route as default.
   if (routeNum === 0) {
-    selectRouteDisplayDetails(0, totalDurationSec, totalDistanceMeters);
+    selectRouteDisplayDetails(
+        0, totalDurationSec, totalDistanceMeters, routeToken);
   }
 
   route.addListener('click', function(event) {
-    selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMeters);
+    selectRouteDisplayDetails(
+        routeNum, totalDurationSec, totalDistanceMeters, routeToken);
   });
 }
 
 /** 
  * Highlights the selected route and displays its formatted duration and 
- * distance in miles.
+ * distance in miles. Displays a 'Copy Route Token' button if applicable.
  * @param {num} routeNum The index of the selected route in the routes array.
  * @param {num} totalDurationSec The duration of the route in seconds.
  * @param {num} totalDistanceMeters The distance of the route in meters.
- * TODO(chenyuz): Add in the route token returned from the Routes Preferred API.
+ * @param {string} routeToken The route token of the currently selected route.
  */
-function selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMeters) {
+function selectRouteDisplayDetails(
+    routeNum, totalDurationSec, totalDistanceMeters, routeToken) {
   displayedRoutes[selectedRouteNum].setOptions({ strokeOpacity: 0.3, })
   selectedRouteNum = routeNum;
   displayedRoutes[routeNum].setOptions({ strokeOpacity: 1.0, });
@@ -343,37 +512,95 @@ function selectRouteDisplayDetails(routeNum, totalDurationSec, totalDistanceMete
   let routeInfoElement = document.getElementById('route-info');
   routeInfoElement.innerText = 'Selected Route Info:' +
       '\nDuration: ' + formatDuration(totalDurationSec) +
-      '\nDistance: ' + formatDistance(totalDistanceMeters) +
-      '\nRoute Token: ';
-}
+      '\nDistance: ' + formatDistance(totalDistanceMeters) + '\n';
 
-/** Shows or hides rate-card-data div when service endpoint changed. */
-function changeServiceEndpoint() {
-  let serviceEndpoint = document.getElementById('service-endpoint').value;
+  if (routeToken !== '') {
+    let copyButton = document.createElement('button');
+    copyButton.innerText = 'Copy Route Token';
+    copyButton.addEventListener('click', function() {
+      copyTokenToClipBoard(routeToken);
+    });
+    routeInfoElement.appendChild(copyButton);
 
-  // Only display rate card div if compute custom routes is selected.
-  document.getElementById('rate-card-data').style.display = 
-      (serviceEndpoint === 'compute-routes-alpha') ? 'block' : 'none';
+    console.log('Route token:', routeToken);
+    updateDeepLinkingUrl(routeToken);
+  }
 }
 
 /**
- * Creates formatted rate card object based on form input.
- * @returns {Object} Rate Card JSON Object.
+ * Copies the given route token to the clipboard. 
+ * @param {string} token The route token to be copied.
  */
-function createRateCard() {
-  let costPerMin = parseFloat(document.getElementById('cost-per-minute').value);
-  let costPerKm = parseFloat(document.getElementById('cost-per-km').value);
-  let includeTolls = ('true' === document.getElementById('include-tolls').value);
-
-  let rateCard = {'includeTolls': includeTolls};
-  if (!isNaN(costPerMin)) {
-    rateCard['costPerMinute'] = {'value': costPerMin};
+function copyTokenToClipBoard(token) {
+  // Note: navigator.clipboard is only supported by pages served over HTTPS.
+  if (!navigator.clipboard) {
+    fallbackCopyTokenToClipboard(token);
+    return;
   }
-  if (!isNaN(costPerKm)) {
-    rateCard['costPerKm'] = {'value': costPerKm};
+  navigator.clipboard.writeText(token).then(function() {
+    alert('Successfully copied to clipboard!');
+  }, function(err) {
+    alert('Could not copy to clipboard.');
+    console.error('Async: Could not copy token', err);
+  });
+}
+
+/** 
+ * Creates a textarea for the given token and copies it to clipboard. 
+ * @param {string} token The route token to be copied.
+ */
+function fallbackCopyTokenToClipboard(token) {
+  let textArea = document.createElement('textarea');
+  textArea.value = token;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    let copyCommandStatus = document.execCommand('copy');
+    let message = copyCommandStatus ? 'successful' : 'unsuccessful';
+    alert('Copying route token was ' + message);
+  } catch (err) {
+    alert('Could not copy to clipboard.');
+    console.error('Fallback: Could not copy token', err);
   }
 
-  return rateCard;
+  document.body.removeChild(textArea);
+}
+
+/**
+ * Updates the deep linking url to various test apps on the page.
+ * @param {string} routeToken The route token of the currently selected route.
+ */
+function updateDeepLinkingUrl(routeToken) {
+  var originPosition = originDestinationMarkers[0].position;
+  var destinationPosition = originDestinationMarkers[1].position;
+  document.getElementById(url_ids.IOS_URL_ID_DEV).innerHTML =
+      '<a href=navsdkdemo://advanced?originLat=' + 
+      originPosition.lat() + '&originLng=' + originPosition.lng() + 
+      '&destLat=' + destinationPosition.lat() + 
+      '&destLng=' + destinationPosition.lng() + 
+      '&routeToken=' + routeToken + '>' + 'iOS Dev' + '</a>';
+  document.getElementById(url_ids.IOS_URL_ID_PRODUCTION).innerHTML =
+      '<a href=enterprisenavsdkdemo://advanced?originLat=' + 
+      originPosition.lat() + '&originLng=' + originPosition.lng() + 
+      '&destLat=' + destinationPosition.lat() + 
+      '&destLng=' + destinationPosition.lng() + 
+      '&routeToken=' + routeToken + '>' + 'iOS Production' + '</a>';
+  document.getElementById(url_ids.ANDROID_URL_ID_V1).innerHTML =
+      '<a href=navsdk://fragmentactivity?originlat=' +
+      originPosition.lat() + '&originlng=' + originPosition.lng() + 
+      '&destinationlat=' + destinationPosition.lat() + 
+      '&destinationlng=' + destinationPosition.lng() +
+      '&precomputedroutetoken=' + routeToken + '>' + 
+      'Android V1 Test App' + '</a>';
+  document.getElementById(url_ids.ANDROID_URL_ID_V2).innerHTML =
+      '<a href=navsdk://supportnavmapfragmentactivity?originlat=' +
+      originPosition.lat() + '&originlng=' + originPosition.lng() + 
+      '&destinationlat=' + destinationPosition.lat() + 
+      '&destinationlng=' + destinationPosition.lng() +
+      '&precomputedroutetoken=' + routeToken + '>' + 
+      'Android V2 Test App' + '</a>';
 }
 
 /** 
@@ -402,4 +629,13 @@ function formatDuration(durationSec) {
  */
 function formatDistance(distanceMeters) {
   return (distanceMeters * 0.0006213712).toFixed(4) + ' miles';
+}
+
+/** Shows or hides rate-card-data div when service endpoint changed. */
+function changeServiceEndpoint() {
+  let serviceEndpoint = document.getElementById('service-endpoint').value;
+
+  // Only display rate card div if compute custom routes is selected.
+  document.getElementById('rate-card-data').style.display = 
+      (serviceEndpoint === 'compute-routes-alpha') ? 'block' : 'none';
 }
