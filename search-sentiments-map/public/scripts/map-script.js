@@ -141,8 +141,10 @@ function loadCountryData() {
   let dataVariableMax = Number.MIN_VALUE;  // Smallest positive number.
   let dataVariableMin = Number.MAX_VALUE;
   // Countries with the minimum and maximum scores for current topic. 
-  let countryMax = '';
-  let countryMin = '';
+  let maxScoreCountryId = '';
+  let maxScoreCountryName = '';
+  let minScoreCountryId = '';
+  let minScoreCountryName = '';
 
   map.data.forEach(row => {
     let countryData = getCurrentSearchData().dataByCountry
@@ -155,24 +157,36 @@ function loadCountryData() {
       if (dataVariable > dataVariableMax) {
         // Keep track of the maximum score and corresponding country.
         dataVariableMax = dataVariable;
-        countryMax = country;
+        maxScoreCountryName = country;
+        maxScoreCountryId = row.getId();
       }
       if (dataVariable < dataVariableMin && 
           dataVariable !== NO_RESULTS_DEFAULT_SCORE) {
         // Keep track of the minimum score and corresponding country.
         dataVariableMin = dataVariable;
-        countryMin = country;
+        minScoreCountryName = country;
+        minScoreCountryId = row.getId();
       }
     }
 
     row.setProperty('country_data', dataVariable);
   });
 
-  document.getElementById('extrema-sentiment').innerText = 
+  document.getElementById('extrema-sentiment').innerHTML = 
       isSentimentMode ?
-          'Most Positive Country: ' + countryMax + 
-              ', Most Negative Country: ' + countryMin :
-          'Most Popular Country: ' + countryMax;
+          'Most Positive Country: ' +
+          '<span class="modal-click" id="' + maxScoreCountryId + '">' +
+          maxScoreCountryName + '</span>' + 
+          ', Most Negative Country: ' +
+          '<span class="modal-click" id="' + minScoreCountryId + '">' +
+          minScoreCountryName + '</span>' :
+          'Most Popular Country: ' +
+          '<span class="modal-click" id="' + maxScoreCountryId + '">' +
+          maxScoreCountryName + '</span>' ;
+
+  $('.modal-click').click(function(){
+    openModal(this.id, this.innerText);
+  });
 }
 
 /** Loads the search interest data for US states on the map. */
