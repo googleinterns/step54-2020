@@ -12,7 +12,6 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-const mocha = require('mocha');
 const chai = require('chai');
 const assert = chai.assert;
 const sinon = require('sinon');
@@ -23,7 +22,6 @@ const fetch = require('node-fetch'); // Used to access custom search.
 
 describe('Country Trends', function() {
   describe('retrieveCountryTrends', function() {
-    const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
     const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
     const THREE_HALVES_TIME_RANGE = 1.5;
     const THREE_TIME_RANGE = 3;
@@ -31,11 +29,6 @@ describe('Country Trends', function() {
     let mockData;
     let trendsByCountryThreeHalvesTimeRange;
     let trendsByCountryThreeTimeRange;
-    let mockThreeHalvesTimeRangeUsResult;
-    let mockThreeTimeRangeUsResult;
-    let mockThreeHalvesTimeRangeUaResult;
-    let mockThreeTimeRangeUaResult;
-    let mockEmptyResult;
     beforeEach(() => {
       currentTime = Date.now();
       trendsByCountryThreeHalvesTimeRange = [
@@ -113,31 +106,6 @@ describe('Country Trends', function() {
         trendsByCountry: trendsByCountryThreeTimeRange,
         globalTrends: [],
       }];
-
-      mockThreeHalvesTimeRangeUsResult = [
-        {topic: 'Live'}, 
-        {topic: 'Laugh'}
-      ];
-      mockThreeTimeRangeUsResult = [
-        {topic: 'Donald Trump'}, 
-        {topic: 'Coronavirus'}
-      ];
-
-      mockThreeHalvesTimeRangeUaResult = [
-        {topic: 'Love'}, 
-        {topic: 'Black Lives Matter'}
-      ];
-      mockThreeTimeRangeUaResult = [
-        {topic: 'Hello World'}, 
-        {topic: 'Coronavirus'}
-      ];
-
-      mockEmptyResult = [];
-
-      // Stub calls to the datastore.
-      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
-        return [mockData];
-      });      
     });
 
     afterEach(() => {
@@ -146,42 +114,62 @@ describe('Country Trends', function() {
 
     it('should retrieve the most recent array of US and UA country trends from the datastore beyond the time it takes to retrieve search results', 
         async function() {
+      // Stub calls to the datastore.
+      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
+        return [mockData];
+      });    
       let resultsUs = await countryTrends.retrieveCountryTrends('US', 0);
       let resultsUa = await countryTrends.retrieveCountryTrends('UA', 0);
+      let mockThreeHalvesTimeRangeUsResult = [
+        {topic: 'Live'}, 
+        {topic: 'Laugh'}
+      ];
+      let mockThreeHalvesTimeRangeUaResult = [
+        {topic: 'Love'}, 
+        {topic: 'Black Lives Matter'}
+      ];
       assert.deepEqual(resultsUs, mockThreeHalvesTimeRangeUsResult);
       assert.deepEqual(resultsUa, mockThreeHalvesTimeRangeUaResult);
     });
 
     it('should retrieve the most recent array of US and UA country trends from the datastore beyond the given time range', 
         async function() {
+      // Stub calls to the datastore.
+      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
+        return [mockData];
+      }); 
       let resultsUs = await countryTrends.retrieveCountryTrends('US', 2);
       let resultsUa = await countryTrends.retrieveCountryTrends('UA', 2);
+      let mockThreeTimeRangeUsResult = [
+        {topic: 'Donald Trump'}, 
+        {topic: 'Coronavirus'}
+      ];
+      let mockThreeTimeRangeUaResult = [
+        {topic: 'Hello World'}, 
+        {topic: 'Coronavirus'}
+      ];
       assert.deepEqual(resultsUs, mockThreeTimeRangeUsResult);
       assert.deepEqual(resultsUa, mockThreeTimeRangeUaResult);
     });
 
     it('should get an empty array because there is no trends data available for AT', 
         async function() {
+      // Stub calls to the datastore.
+      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
+        return [mockData];
+      }); 
       let resultsAt = await countryTrends.retrieveCountryTrends('AT', 0);
+      let mockEmptyResult = [];
       assert.deepEqual(resultsAt, mockEmptyResult);
     });
-  });
 
-  describe('retrieveCountryTrendsNoDataInDatastore', function() {
-    let mockEmpty;
-    beforeEach(() => {
-      mockEmpty = [];
+    it('should return an empty array when there are no trends in the datastore', 
+        async function() {
+      let mockEmpty = [];
       // Stub calls to the datastore.
       sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
         return [mockEmpty];
-      });      
-    });
-
-    afterEach(() => {
-      sinon.restore();
-    });
-
-    it('should get an empty array', async function() {
+      }); 
       let result = await countryTrends.retrieveCountryTrends('US', 0);
       assert.deepEqual(result, mockEmpty);
     });
