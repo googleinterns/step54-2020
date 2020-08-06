@@ -61,6 +61,7 @@ function onClickRegion(e) {
 function openModal(countryId, countryName) {
   countryCode = countryId;
   $('#region-info-modal').modal('show');
+  $('#region-info-modal').find('[href="#search-results-tab"]').tab('show');
 
   // Update Modal with information for relevant country.
   document.getElementById('modal-title').innerText = countryName;
@@ -363,6 +364,8 @@ function drawSentimentChart(chartElement, results) {
     bar: {groupWidth: '55%'},
     legend: {position: 'none'},
     hAxis: {title: 'Search Results Index'},
+    title: 'Sentimet Score Bar Chart',
+    vAxis: {title: 'Seantiment Score'},
   };
   let chart = new google.visualization.ColumnChart(chartElement);
   chart.draw(view, options);
