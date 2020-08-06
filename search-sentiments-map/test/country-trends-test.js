@@ -17,8 +17,6 @@ const assert = chai.assert;
 const sinon = require('sinon');
 const countryTrends = require('./../routes/country-trends').countryTrends;
 const {Datastore} = require('@google-cloud/datastore');
-const datastore = new Datastore();
-const fetch = require('node-fetch'); // Used to access custom search.
 
 describe('Country Trends', function() {
   describe('retrieveCountryTrends', function() {
