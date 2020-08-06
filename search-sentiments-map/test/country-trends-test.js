@@ -27,6 +27,7 @@ describe('Country Trends', function() {
     let mockData;
     let trendsByCountryThreeHalvesTimeRange;
     let trendsByCountryThreeTimeRange;
+    let runQueryStub;
     beforeEach(() => {
       currentTime = Date.now();
       trendsByCountryThreeHalvesTimeRange = [
@@ -104,6 +105,7 @@ describe('Country Trends', function() {
         trendsByCountry: trendsByCountryThreeTimeRange,
         globalTrends: [],
       }];
+      runQueryStub = sinon.stub(Datastore.prototype, 'runQuery');
     });
 
     afterEach(() => {
@@ -112,10 +114,7 @@ describe('Country Trends', function() {
 
     it('should retrieve the most recent array of US and UA country trends from the datastore beyond the time it takes to retrieve search results', 
         async function() {
-      // Stub calls to the datastore.
-      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
-        return [mockData];
-      });    
+      runQueryStub.returns([mockData]);
       let resultsUs = await countryTrends.retrieveCountryTrends('US', 0);
       let resultsUa = await countryTrends.retrieveCountryTrends('UA', 0);
       let mockThreeHalvesTimeRangeUsResult = [
@@ -132,10 +131,7 @@ describe('Country Trends', function() {
 
     it('should retrieve the most recent array of US and UA country trends from the datastore beyond the given time range', 
         async function() {
-      // Stub calls to the datastore.
-      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
-        return [mockData];
-      }); 
+      runQueryStub.returns([mockData]);
       let resultsUs = await countryTrends.retrieveCountryTrends('US', 2);
       let resultsUa = await countryTrends.retrieveCountryTrends('UA', 2);
       let mockThreeTimeRangeUsResult = [
@@ -152,10 +148,7 @@ describe('Country Trends', function() {
 
     it('should get an empty array because there is no trends data available for AT', 
         async function() {
-      // Stub calls to the datastore.
-      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
-        return [mockData];
-      }); 
+      runQueryStub.returns([mockData]);
       let resultsAt = await countryTrends.retrieveCountryTrends('AT', 0);
       let mockEmptyResult = [];
       assert.deepEqual(resultsAt, mockEmptyResult);
@@ -164,10 +157,7 @@ describe('Country Trends', function() {
     it('should return an empty array when there are no trends in the datastore', 
         async function() {
       let mockEmpty = [];
-      // Stub calls to the datastore.
-      sinon.stub(Datastore.prototype, 'runQuery').callsFake(() => {
-        return [mockEmpty];
-      }); 
+      runQueryStub.returns([mockEmpty]);
       let result = await countryTrends.retrieveCountryTrends('US', 0);
       assert.deepEqual(result, mockEmpty);
     });
