@@ -29,6 +29,7 @@ const ONE_DAY_MS = 24 * 60 * 60000;
 const RETRIEVE_RESULTS_TIME_MS = 70 * 60000;
 // Time interval between data updates.
 const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
+const MAX_TRENDS_DISPLAYED = 10;
 
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
@@ -246,7 +247,8 @@ function getGlobalTrends(trendsByCountry) {
   })
 
   let globalTrends = [];
-  const numTopTrends = trendCountsArr.length < 10 ? trendCountsArr.length : 10;
+  const numTopTrends = trendCountsArr.length < MAX_TRENDS_DISPLAYED ?
+      trendCountsArr.length : MAX_TRENDS_DISPLAYED;
 
   // Get the top trends overall.
   for (let i = 0; i < numTopTrends; i++) {

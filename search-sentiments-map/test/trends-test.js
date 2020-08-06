@@ -20,21 +20,6 @@ const trends = require('./../routes/trends').trends;
 
 describe('Trends', function() {
   describe('getGlobalTrends', function() {
-    let mockResult;
-    let mockEmpty;
-    beforeEach(() => {
-      mockResult = [
-        {trendTopic: 'Donald Trump', count: 3},
-        {trendTopic: 'Coronavirus', count: 2},
-        {trendTopic: 'Dogs', count: 1}
-      ];
-      mockEmpty = [];
-    })
-
-    afterEach(() => {
-      sinon.restore();
-    })
-
     it('should get the top globally trending topics', function() {
       let trendsByCountry = [
       {
@@ -68,12 +53,18 @@ describe('Trends', function() {
         }],
       }];
       let result = trends.getGlobalTrends(trendsByCountry);
+      let mockResult = [
+        {trendTopic: 'Donald Trump', count: 3},
+        {trendTopic: 'Coronavirus', count: 2},
+        {trendTopic: 'Dogs', count: 1}
+      ];
       assert.deepEqual(result, mockResult);
     });
 
     it('should get an empty array', function() {
       let trendsByCountry = [];
       let result = trends.getGlobalTrends(trendsByCountry);
+      let mockEmpty = [];
       assert.deepEqual(result, mockEmpty);
     });
   });
