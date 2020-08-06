@@ -31,8 +31,8 @@ $(window).resize(function() {
 // Reset charts when window resize is completed. 
 $(window).on('resizeEnd', function() {
   if (countryCode !== ''){
-    google.charts.setOnLoadCallback(setSentimentChartForCurrentTrend);
-    google.charts.setOnLoadCallback(setPopularityTimeline); 
+    setSentimentChartForCurrentTrend();
+    setPopularityTimeline();
   }
 });
 
