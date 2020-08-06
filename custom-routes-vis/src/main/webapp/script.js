@@ -370,7 +370,6 @@ function clearRoutes() {
 function generateRoutes() {
   clearRoutes();
 
-  console.log('get here bro');
   // Get coordinates of origin and destination.
   let startLatLng = originDestinationMarkers[0].getPosition();
   let endLatLng = originDestinationMarkers[1].getPosition();
