@@ -26,7 +26,7 @@ const CURRENT_DATA_TIME_RANGE_12_HOURS_MS = 12 * 60 * 60000;
 router.get('/:timeRange/:country', (req, res) => {
   let country = req.params.country;
   let timeRange = parseInt(req.params.timeRange);
-  retrieveCountryTrends(country, timeRange).then(trends => {
+  countryTrends.retrieveCountryTrends(country, timeRange).then(trends => {
     res.setHeader('Content-Type', 'application/json');
     res.send(trends);
   });
@@ -48,6 +48,11 @@ async function retrieveCountryTrends(country, timeRange) {
   }).filter('timestamp', '<', Date.now() - timeRangeLimit).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
 
+  // Handle case where Google Trends API breaks and stops providing
+  // data.
+  if (trendsEntry.length === 0) {
+    return [];
+  }
   const entry = (
       Date.now() - trendsEntry[0].timestamp > 
           RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
@@ -60,4 +65,10 @@ async function retrieveCountryTrends(country, timeRange) {
   return countryTrends[0].trends;
 }
 
+// Necessary for unit testing.
+const countryTrends = {
+  retrieveCountryTrends,
+}
+
+module.exports.countryTrends = countryTrends;
 module.exports.router = router;

@@ -109,7 +109,7 @@ async function updateDailyTrends() {
     });
   }
 
-  await trends.saveTrendsAndDeletePrevious(trendsByCountry);
+  await saveTrendsAndDeletePrevious(trendsByCountry);
 }
 
 /** 
@@ -248,6 +248,7 @@ function getGlobalTrends(trendsByCountry) {
   let globalTrends = [];
   let numTopTrends = trendCountsArr.length < MAX_TRENDS_DISPLAYED ?
       trendCountsArr.length : MAX_TRENDS_DISPLAYED;
+
   // Get the top trends overall.
   for (let i = 0; i < numTopTrends; i++) {
     globalTrends.push({
@@ -258,11 +259,11 @@ function getGlobalTrends(trendsByCountry) {
   return globalTrends;
 }
 
+// Necessary for unit testing.
 const trends = {
   retrieveGlobalTrendsForTimeRange,
   updateDailyTrends,
   constructCountryTrendsJson,
-  saveTrendsAndDeletePrevious,
   deleteAncientTrend,
   getGlobalTrends,
 }
