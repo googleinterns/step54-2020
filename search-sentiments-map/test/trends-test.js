@@ -18,6 +18,7 @@ const sinon = require('sinon');
 const trends = require('./../routes/trends').trends;
 const googleTrends = require('google-trends-api');
 const {Datastore} = require('@google-cloud/datastore');
+const datastore = new Datastore();
 
 describe('Trends', function() {
   describe('RetrieveGlobalTrendsForTimeRange', function() {
