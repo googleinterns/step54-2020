@@ -328,9 +328,6 @@ async function deleteAncientResults() {
   const query = datastore.createQuery(WORLD_DATA_KIND).order('timestamp');
   const [searchResults] = await datastore.runQuery(query);
 
-  // TODO(carmenbenitez): Delete comment on for each when finished with this
-  // function.
-  // Note: We can't use forEach with await.
   // Loop through sorted data beginnning with oldest results, delete if older
   // than a week. Stop when reach results from within a week.
   for (let i = 0; i < searchResults.length; i++) {
