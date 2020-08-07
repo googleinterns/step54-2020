@@ -14,14 +14,14 @@
 
 const express = require('express');
 const router = express.Router();  // Using Router to divide the app into modules.
-const trends = require('./trends.js');
+const trends = require('./trends.js').trends;
 const search = require('./search.js').search;
 
 // Router that updates trends data.
 // Scheduled to run at minute 0 past every 12th hour (11am and 11pm every day).
 router.get('/', async (req, res) => {
   console.log('Updating Search Results Data.');
-  await trends.updateTrendsFunction();
+  await trends.updateDailyTrends();
   search.updateSearchResults();
 });
 

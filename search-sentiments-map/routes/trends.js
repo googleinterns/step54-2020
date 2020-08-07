@@ -73,13 +73,14 @@ async function retrieveGlobalTrendsForTimeRange(timeRange) {
     descending: true,
   }).filter('timestamp', '<', Date.now() - timeRangeLimit).limit(2);
   const [trendsEntry] = await datastore.runQuery(query);
+
+  // Get the most recent trends with search results data retrieved.
+  let entry = (Date.now() - trendsEntry[0].timestamp > 
+      RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ? 
+      trendsEntry[0] : trendsEntry[1];
   return {
-    timestamp: trendsEntry[0].timestamp,
-    // Returns the most recent trends with search results data retrieved.
-    globalTrends: 
-        (Date.now() - trendsEntry[0].timestamp > 
-            RETRIEVE_RESULTS_TIME_MS + timeRangeLimit) ?
-                trendsEntry[0].globalTrends : trendsEntry[1].globalTrends,
+    timestamp: entry.timestamp,
+    globalTrends: entry.globalTrends,
   }
 }
 
@@ -101,13 +102,14 @@ async function updateDailyTrends() {
       // Parse the JSON string and get the trending topics.
       trendingSearches = JSON.parse(dailyTrendsJsonString)
           .default.trendingSearchesDays[0].trendingSearches;
-      trendsByCountry.push(constructCountryTrendsJson(trendingSearches, country.id));
+      trendsByCountry.push(
+          trends.constructCountryTrendsJson(trendingSearches, country.id));
     }).catch(err => {
       console.log(err);
     });
   }
 
-  saveTrendsAndDeletePrevious(trendsByCountry);
+  await saveTrendsAndDeletePrevious(trendsByCountry);
 }
 
 /** 
@@ -136,12 +138,12 @@ function constructCountryTrendsJson(trendingSearches, countryCode) {
       exploreLink: trend.title.exploreLink,
       articles: articlesFormatted,
     });
-  })
+  });
 
   return {
     country: countryCode,
     trends: trends,
-  }
+  };
 }
 
 /**
@@ -178,7 +180,7 @@ async function saveTrendsAndDeletePrevious(trendsByCountry) {
     data: {
       timestamp: Date.now(),
       trendsByCountry: trendsByCountry,
-      globalTrends: getGlobalTrends(trendsByCountry),
+      globalTrends: trends.getGlobalTrends(trendsByCountry),
     },
   };
 
@@ -230,24 +232,21 @@ function getGlobalTrends(trendsByCountry) {
     });
   });
 
-  // TODO(chenyuz): Could we use only one data structure here? 
-  // One option is to install the npm SortedMap module.
-
   // Convert the counts to an array to allow sorting.
   let trendCountsArr = [];
   for (let [topic, count] of trendCountsMap) {
     trendCountsArr.push({
       topic: topic,
       count: count,
-    })
+    });
   }
   // Sort trends in descending order of their counts.
   trendCountsArr.sort((trend, otherTrend) => {
     return otherTrend.count - trend.count;
-  })
+  });
 
   let globalTrends = [];
-  const numTopTrends = trendCountsArr.length < MAX_TRENDS_DISPLAYED ?
+  let numTopTrends = trendCountsArr.length < MAX_TRENDS_DISPLAYED ?
       trendCountsArr.length : MAX_TRENDS_DISPLAYED;
 
   // Get the top trends overall.
@@ -262,8 +261,12 @@ function getGlobalTrends(trendsByCountry) {
 
 // Necessary for unit testing.
 const trends = {
+  retrieveGlobalTrendsForTimeRange,
+  updateDailyTrends,
+  constructCountryTrendsJson,
   deleteAncientTrend,
   getGlobalTrends,
 }
 module.exports.trends = trends;
+
 module.exports.router = router;
